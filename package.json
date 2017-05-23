@@ -7,14 +7,20 @@
     "@types/node": "^7.0.22",
     "@types/react": "^15.0.24",
     "@types/react-dom": "^15.5.0",
+    "body-parser": "^1.17.2",
+    "compression": "^1.6.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.3",
     "react": "^15.5.4",
     "react-dom": "^15.5.4"
   },
   "devDependencies": {
+    "nodemon": "^1.11.0",
     "react-scripts-ts": "2.0.1"
   },
   "scripts": {
     "start": "react-scripts-ts start",
+    "backend": "nodemon server/server.js",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject"
