@@ -1,9 +1,20 @@
-This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
+ChoicEats
+===============
 
-Below you will find some information on how to perform common tasks.<br>
-You can find the most recent version of this guide [here](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md).
+Two terminals:
 
-## Table of Contents
+First, compile and start the server
+```
+yarn build-server
+node server/build/dist/server.js
+```
+
+Second, start up the client
+```
+yarn start
+```
+
+## Table of Contents ( Create React App Stuff)
 
 - [Updating to New Releases](#updating-to-new-releases)
 - [Sending Feedback](#sending-feedback)
