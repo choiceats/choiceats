@@ -21,17 +21,17 @@ const recipeQuery = gql`
 `;
 
 interface Recipe {
-  author: String,
-  ingredients: String,
-  instructions: String,
-  name: String
+  author: String;
+  ingredients: String;
+  instructions: String;
+  name: String;
 }
 
 interface RecipesProps {
   data?: {
-    loading: string,
-    error: string,
-    recipes: Recipe[]
+    loading: string;
+    error: string;
+    recipes: Recipe[];
   }
 }
 
