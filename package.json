@@ -3,34 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@types/jest": "^19.2.3",
-    "@types/node": "^7.0.22",
-    "@types/react": "^15.0.24",
-    "@types/react-dom": "^15.5.0",
-    "body-parser": "^1.17.2",
-    "compression": "^1.6.2",
-    "cookie-parser": "^1.4.3",
-    "express": "^4.15.3",
-    "express-graphql": "^0.6.5",
-    "graphql": "^0.9.6",
-    "graphql-server-express": "^0.7.2",
-    "graphql-tools": "^0.11.0",
-    "pg": "^6.2.2",
     "react": "^15.5.4",
     "react-apollo": "^1.2.0",
     "react-dom": "^15.5.4"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0",
-    "react-scripts-ts": "2.0.1",
-    "typescript": "^2.3.3"
+    "react-scripts": "1.0.6"
   },
   "scripts": {
-    "start": "react-scripts-ts start",
-    "build-server": "tsc --p server/tsconfig.json",
-    "backend": "nodemon server/build/server.js",
-    "build": "react-scripts-ts build",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
   }
 }
