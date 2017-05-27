@@ -1,8 +1,12 @@
 // @flow
 import React, { Component } from 'react';
 import { gql, graphql } from 'react-apollo';
+import type { RecipeListProps } from './types';
+
 
 class RecipeList extends Component {
+  props: RecipeListProps;
+
   render () {
     const { data } = this.props;
     if (!data) return <div></div>;

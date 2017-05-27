@@ -1,11 +1,13 @@
-export interface Recipe {
+// @flow
+
+export type Recipe = {
   author: String;
   ingredients: String;
   instructions: String;
   name: String;
 }
 
-export interface RecipeListProps {
+export type RecipeListProps = {
   data?: {
     loading: string;
     error: string;
