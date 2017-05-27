@@ -1,36 +1,36 @@
 // @flow
-import React, { Component } from 'react';
-import { gql, graphql } from 'react-apollo';
-import styled from 'styled-components';
+import React, { Component } from 'react'
+import { gql, graphql } from 'react-apollo'
+import styled from 'styled-components'
 
-import type { RecipeListProps } from './types';
+import type { RecipeListProps } from './types'
 
-import { Recipe } from './Recipe';
+import { Recipe } from './Recipe'
 
 class RecipeList extends Component {
   props: RecipeListProps;
 
   render () {
-    const { data } = this.props;
-    if (!data) return <div></div>;
+    const { data } = this.props
+    if (!data) return <Loading>loading</Loading>
 
-    const { recipes, loading } = data;
+    const { recipes, loading } = data
     if (loading) {
-      return <div>loading</div>;
+      return <Loading>loading</Loading>
     }
 
     if (recipes) {
       return <List>
-        { recipes.map(recipe => <Recipe recipe={recipe} /> ) }
-      </List>;
-    }
-    else {
+        { recipes.map(recipe => <Recipe recipe={recipe} />) }
+      </List>
+    } else {
       return <Error>Couldn't find recipies</Error>
     }
   }
 }
 
-const List = styled.div``;
+const List = styled.div``
+
 const Loading = styled.div`
   width: 100%;
   font-size: 36px;
@@ -39,14 +39,12 @@ const Loading = styled.div`
   padding: 20px 40px;
   border: 1px solid #224466;
   background-color: salmon;
-`;
-
+`
 const Error = styled.div`
   padding: 20px 40px;
   border: 1px solid #224466;
   background-color: salmon;
 `
-
 
 const recipeQuery = gql`
   query RecipeQuery {
@@ -57,8 +55,7 @@ const recipeQuery = gql`
       name
     }
   }
-`;
+`
 
-
-const ConnectedRecipes = graphql(recipeQuery)(RecipeList);
-export { ConnectedRecipes };
+const ConnectedRecipes = graphql(recipeQuery)(RecipeList)
+export { ConnectedRecipes }

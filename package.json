@@ -9,8 +9,11 @@
     "styled-components": "^2.0.0"
   },
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint-plugin-flowtype": "^2.33.0",
     "flow-bin": "^0.47.0",
-    "react-scripts": "1.0.6"
+    "react-scripts": "1.0.6",
+    "standard": "^10.0.2"
   },
   "scripts": {
     "flow": "flow",
@@ -18,5 +21,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "standard": {
+    "plugins": [ "flowtype" ],
+    "parser": "babel-eslint"
   }
 }
