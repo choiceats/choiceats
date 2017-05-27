@@ -1,8 +1,11 @@
 // @flow
 import React, { Component } from 'react';
 import { gql, graphql } from 'react-apollo';
+import styled from 'styled-components';
+
 import type { RecipeListProps } from './types';
 
+import { Recipe } from './Recipe';
 
 class RecipeList extends Component {
   props: RecipeListProps;
@@ -17,17 +20,33 @@ class RecipeList extends Component {
     }
 
     if (recipes) {
-      return (
-        <ul>
-          {recipes.map(recipe => <li><strong>{recipe.name}</strong><br />{recipe.ingredients}</li>) }
-        </ul>
-      );
+      return <List>
+        { recipes.map(recipe => <Recipe recipe={recipe} /> ) }
+      </List>;
     }
     else {
-      return <div>Couldn't find recipies</div>
+      return <Error>Couldn't find recipies</Error>
     }
   }
 }
+
+const List = styled.div``;
+const Loading = styled.div`
+  width: 100%;
+  font-size: 36px;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px 40px;
+  border: 1px solid #224466;
+  background-color: salmon;
+`;
+
+const Error = styled.div`
+  padding: 20px 40px;
+  border: 1px solid #224466;
+  background-color: salmon;
+`
+
 
 const recipeQuery = gql`
   query RecipeQuery {

@@ -5,7 +5,6 @@ import { ApolloProvider } from 'react-apollo';
 import { client } from './services/apollo-client';
 import { ConnectedRecipes } from './recipe/List';
 
-
 class App extends Component {
   render() {
     return (
