@@ -1,3 +1,4 @@
+// @flow
 import React, { Component } from 'react';
 import { gql, graphql } from 'react-apollo';
 
@@ -10,7 +11,7 @@ class RecipeList extends Component {
     if (loading) {
       return <div>loading</div>;
     }
-  
+
     if (recipes) {
       return (
         <ul>
@@ -35,8 +36,6 @@ const recipeQuery = gql`
   }
 `;
 
-const t: ComponentClass<{}> = RecipeList;
-//export { ConnectedRecipes };
 
-const ConnectedRecipes = graphql(recipeQuery)(t);
+const ConnectedRecipes = graphql(recipeQuery)(RecipeList);
 export { ConnectedRecipes };

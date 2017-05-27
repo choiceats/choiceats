@@ -1,3 +1,4 @@
+// @flow
 import { ApolloClient, createNetworkInterface } from 'react-apollo';
 
 const client = new ApolloClient({
