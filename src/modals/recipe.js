@@ -1,11 +1,5 @@
-export class Recipe {
-  getRecipes() {
-
-  }
-}
 
 export const typeDefs = `
-
 type Recipe {
   author: String
   ingredients: String
@@ -18,5 +12,4 @@ type Recipe {
 type Query {
   recipes: [Recipe]    # "[]" means this is a list of channels
 }
-
 `;
