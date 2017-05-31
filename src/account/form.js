@@ -3,10 +3,11 @@
 
 import React, { Component } from 'react'
 import styled from 'styled-components'
+import { Redirect } from 'react-router-dom'
 
-import { login, setToken } from '../services/users'
+import { login } from '../services/users'
 
-export class Login extends Component {
+export class LoginForm extends Component {
   onSubmit: (e: Event) => void
   onEmailChange: (e: KeyboardEvent) => void
   onPasswordChange: (e: KeyboardEvent) => void
@@ -14,13 +15,13 @@ export class Login extends Component {
   email: string
   password: string
 
-  state: { isLoggedIn: boolean, error: boolean, message?: string }
+  state: { error: boolean, message?: string, signedIn: boolean }
 
   constructor (props: {}) {
     super(props)
     this.state = {
       error: false,
-      isLoggedIn: false
+      signedIn: false
     }
 
     this.onSubmit = this.handleSubmit.bind(this)
@@ -32,6 +33,7 @@ export class Login extends Component {
     e.preventDefault()
 
     login(this.email, this.password)
+      .then(() => this.setState(() => ({ signedIn: true })))
       .catch((e: any) => {
         this.setState(() => ({ error: true, message: 'Bad password, bad!' }))
       })
@@ -52,11 +54,12 @@ export class Login extends Component {
   }
 
   render () {
-    if (this.state.isLoggedIn) {
-      return null
+    if (this.state.signedIn) {
+      debugger
+      return <Redirect to={{ pathname: '/' }} />
     }
 
-    return <LoginContainer>
+    return (
       <form onSubmit={this.onSubmit}>
         <LoginHeader>Login</LoginHeader>
         <InputLabel>Email:</InputLabel>
@@ -64,16 +67,16 @@ export class Login extends Component {
         <InputLabel>Password:</InputLabel>
         <input name='password' type='password' onChange={this.onPasswordChange} />
         <input type='submit' value='Login' />
+
+        { (this.state.error)
+          ? <Error>BAD PASSWORD!</Error>
+          : null
+        }
       </form>
-      { (this.state.error)
-        ? <Error>BAD PASSWORD!</Error>
-        : null
-      }
-    </LoginContainer>
+    )
   }
 }
 
-const LoginContainer = styled.div``
 
 const LoginHeader = styled.h1`
   font-size: 15px;

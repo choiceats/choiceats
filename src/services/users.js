@@ -35,3 +35,36 @@ export const login = (email: string, password: string) => {
 export const clearToken = () => {
   window.localStorage.removeItem('accessToken')
 }
+
+type RegisterParams = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}
+
+export const register = (params: RegisterParams) => {
+  return fetch('http://localhost:4000/user', {
+    method: 'post',
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      email: params.email,
+      firstName: params.firstName,
+      lastName: params.lastName,
+      password: params.password
+    })
+  })
+  .then(response => {
+    if (response.status === 401) {
+      throw Error('Who are you?')
+    }
+
+    debugger
+    return response.json()
+  })
+  .then(responseJson => {
+    console.log('login now?')
+  })
+}
