@@ -6,6 +6,8 @@ import styled from 'styled-components'
 import type { RecipeListProps } from './types'
 
 import { Recipe } from './Recipe'
+import { Login } from '../login'
+import { Logout } from '../login/logout'
 
 class RecipeList extends Component {
   props: RecipeListProps;
@@ -20,11 +22,14 @@ class RecipeList extends Component {
     }
 
     if (recipes) {
-      return <List>
-        { recipes.map(recipe => <Recipe recipe={recipe} />) }
-      </List>
+      return <ListContainer>
+        <Logout />
+        <List>
+          { recipes.map(recipe => <Recipe recipe={recipe} />) }
+        </List>
+      </ListContainer>
     } else {
-      return <Error>Couldn't find recipies</Error>
+      return <Login />
     }
   }
 }
@@ -40,11 +45,8 @@ const Loading = styled.div`
   border: 1px solid #224466;
   background-color: salmon;
 `
-const Error = styled.div`
-  padding: 20px 40px;
-  border: 1px solid #224466;
-  background-color: salmon;
-`
+
+const ListContainer = styled.div``
 
 const recipeQuery = gql`
   query RecipeQuery {
