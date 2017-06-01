@@ -16,7 +16,7 @@ class RecipeList extends Component {
 
     const { recipes, loading } = data
     if (loading) {
-      return <Loading>loading</Loading>
+      return <Loading>loading..</Loading>
     }
 
     if (recipes) {
