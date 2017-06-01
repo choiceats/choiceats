@@ -10,7 +10,6 @@ import { Signup } from './signup'
 export class Account extends Component {
   getLink () {
     const { match, location } = this.props
-    console.log('ULR', match.url, location.pathname)
     return location.pathname.endsWith('sign-up')
       ? <Link to={`${match.url}`}>Login</Link>
       : <Link to={`${match.url}/sign-up`}>Sign up</Link>

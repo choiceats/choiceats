@@ -55,7 +55,6 @@ export class LoginForm extends Component {
 
   render () {
     if (this.state.signedIn) {
-      debugger
       return <Redirect to={{ pathname: '/' }} />
     }
 

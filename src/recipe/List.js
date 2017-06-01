@@ -6,7 +6,6 @@ import styled from 'styled-components'
 import type { RecipeListProps } from './types'
 
 import { Recipe } from './Recipe'
-import { Logout } from '../account/logout'
 
 class RecipeList extends Component {
   props: RecipeListProps;
@@ -21,12 +20,13 @@ class RecipeList extends Component {
     }
 
     if (recipes) {
-      return <ListContainer>
-        <Logout />
-        <List>
-          { recipes.map(recipe => <Recipe recipe={recipe} />) }
-        </List>
-      </ListContainer>
+      return(
+        <ListContainer>
+          <List>
+            { recipes.map(recipe => <Recipe recipe={recipe} />) }
+          </List>
+        </ListContainer>
+      )
     }
   }
 }

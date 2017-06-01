@@ -1,7 +1,7 @@
 // @flow
 import React from 'react'
 import styled from 'styled-components'
-import {Card, CardTitle, CardText} from 'material-ui/Card'
+import { Card, CardTitle, CardText } from 'material-ui/Card'
 
 import type { Recipe as TRecipe } from './types'
 
@@ -12,9 +12,7 @@ type RecipeProps = {
 export const Recipe = ({recipe}: RecipeProps) => {
   return (
     <Card style={{marginBottom: 25, maxWidth: 550}}>
-      <CardTitle
-        title={recipe.name}
-        subtitle='pasta' />
+      <CardTitle title={recipe.name} subtitle='pasta' />
       <CardText>
         <Ingredients>{ recipe.ingredients }</Ingredients>
         <Instructions>{ recipe.instructions }</Instructions>

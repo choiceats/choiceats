@@ -28,7 +28,6 @@ export const login = (email: string, password: string) => {
   })
   .then(responseJson => {
     setToken(responseJson.token)
-    window.location.reload()
   })
 }
 
@@ -60,8 +59,6 @@ export const register = (params: RegisterParams) => {
     if (response.status === 401) {
       throw Error('Who are you?')
     }
-
-    debugger
     return response.json()
   })
   .then(responseJson => {

@@ -3,42 +3,41 @@ import React, { Component } from 'react'
 import { ApolloProvider } from 'react-apollo'
 import {
   BrowserRouter as Router,
-  Route,
-  Link
+  Route
  } from 'react-router-dom'
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
-import AppBar from 'material-ui/AppBar'
-import FlatButton from 'material-ui/FlatButton'
 
 import { Account } from './account'
 import { client } from './services/apollo-client'
 import { ConnectedRecipes } from './recipe/List'
+import { userReducer } from './state/reducers'
+
+import ApplicationBar from './application-bar'
 
 
-class Login extends Component {
-  static muiName = 'FlatButton';
-  render () {
-    return (
-      <Link to='/login'>
-        <FlatButton label='Login' />
-      </Link>
-    )
-  }
-}
+const store = createStore(
+  combineReducers({
+    user: userReducer,
+    apollo: client.reducer()
+  }),
+  {},
+  compose(
+      applyMiddleware(client.middleware()),
+      (typeof window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined') ? window.__REDUX_DEVTOOLS_EXTENSION__() : f => f
+  )
+)
+
 
 class App extends Component {
-  state = { logged: false }
   render () {
     return (
-      <ApolloProvider client={client}>
+      <ApolloProvider store={store} client={client}>
         <MuiThemeProvider>
           <Router>
             <div>
-              <AppBar
-                title='ChoicEats'
-                iconElementRight={this.state.logged ? <div /> : <Login />}
-                />
+              <ApplicationBar />
               <Route exact path='/' component={ConnectedRecipes} />
               <Route path='/login' component={Account} />
             </div>

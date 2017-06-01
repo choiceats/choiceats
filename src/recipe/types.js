@@ -1,10 +1,10 @@
 // @flow
 
 export type Recipe = {
-  author: String;
-  ingredients: String;
-  instructions: String;
-  name: String;
+  author: string;
+  ingredients: string;
+  instructions: string;
+  name: string;
 }
 
 export type RecipeListProps = {
