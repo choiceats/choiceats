@@ -7,6 +7,7 @@ import { Login } from './account/login-button'
 
 
 export const ApplicationBar = ({userToken}) => {
+  console.log('USER TOKEN')
   const isLoggedIn = userToken !== null
   return (
     <AppBar

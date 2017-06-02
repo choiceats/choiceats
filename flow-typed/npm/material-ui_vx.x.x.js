@@ -25,8 +25,8 @@ declare module 'material-ui' {
 declare module 'material-ui/AppBar' {
   declare export default class AppBar extends React$Component {
     props: {
-      title: string
-      iconElementRight: React$Element
+      title: string;
+      iconElementRight: React$Element;
     }
   }
 }
@@ -34,5 +34,15 @@ declare module 'material-ui/AppBar' {
 declare module 'material-ui/Card' {
   declare class AppBar extends React$Component {
     props: { }
+  }
+}
+
+declare module 'material-ui/TextField' {
+  declare export default class TextField extends React$Component {
+    props: {
+      hintText: string;
+      floatingLabelText: string;
+      type: string;
+    }
   }
 }

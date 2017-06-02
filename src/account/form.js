@@ -3,6 +3,10 @@
 
 import React, { Component } from 'react'
 import styled from 'styled-components'
+import TextField from 'material-ui/TextField'
+import RaisedButton from 'material-ui/RaisedButton'
+import FlatButton from 'material-ui/FlatButton'
+
 import { Redirect } from 'react-router-dom'
 
 import { login } from '../services/users'
@@ -43,14 +47,12 @@ export class LoginForm extends Component {
     if (e.target instanceof HTMLInputElement) {
       this.email = e.target.value
     }
-    console.log('email', this.email)
   }
 
   handleOnPasswordChange (e: KeyboardEvent) {
     if (e.target instanceof HTMLInputElement) {
       this.password = e.target.value
     }
-    console.log('password', this.password)
   }
 
   render () {
@@ -59,26 +61,49 @@ export class LoginForm extends Component {
     }
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <LoginHeader>Login</LoginHeader>
-        <InputLabel>Email:</InputLabel>
-        <input name='email' type='text' onChange={this.onEmailChange} />
-        <InputLabel>Password:</InputLabel>
-        <input name='password' type='password' onChange={this.onPasswordChange} />
-        <input type='submit' value='Login' />
-
-        { (this.state.error)
-          ? <Error>BAD PASSWORD!</Error>
-          : null
-        }
-      </form>
+      <FormContainer>
+        <form onSubmit={this.onSubmit}>
+          <LoginHeader>Login</LoginHeader>
+          <TextField
+            onChange={this.onEmailChange}
+            hintText='Email'
+            floatingLabelText='Email Address'
+            fullWidth
+            type='text'
+          />
+          <TextField
+            onChange={this.onPasswordChange}
+            hintText='Password Field'
+            floatingLabelText='Password'
+            fullWidth
+            type='password'
+          />
+          <br />
+          <RaisedButton
+            label='Login'
+            fullWidth
+            primary
+            onClick={(e) => this.handleSubmit(e)}
+          />
+          <br /><br />
+          <FlatButton
+            label='Sign Up'
+            
+            />
+          { (this.state.error)
+            ? <Error>BAD PASSWORD!</Error>
+            : null
+          }
+        </form>
+      </FormContainer>
     )
   }
 }
 
 
 const LoginHeader = styled.h1`
-  font-size: 15px;
+  font-family: Fira Code;
+  font-size: 25px;
 `
 
 const Error = styled.div`
@@ -87,7 +112,7 @@ const Error = styled.div`
   padding: 5px 10px;
 `
 
-const InputLabel = styled.p`
-  font-size: 13px;
-  color: #333;
+const FormContainer = styled.div`
+  width: 500px;
+  margin: auto
 `
