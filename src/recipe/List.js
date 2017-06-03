@@ -11,9 +11,9 @@ import { Recipe } from './Recipe'
 import {RecipeEditor} from './recipe-editor'
 
 const mapStateToProps = (state) => {
-  console.log(state.user)
   return {
-    isLoggedIn: state.user.token
+    isLoggedIn: state.user.token,
+    userId: state.user.userId,
   }
 }
 
@@ -24,6 +24,7 @@ export class RecipeList extends Component {
     const {
       data,
       isLoggedIn,
+      userId
     } = this.props
     if (!data) return <Loading>loading</Loading>
 
@@ -40,6 +41,7 @@ export class RecipeList extends Component {
             { recipes.map(recipe => (
               <Recipe key={recipe.id}
                 recipe={recipe}
+                allowEdits={userId.toString() === recipe.authorId.toString()}
                 isLoggedIn={isLoggedIn} />
             )) }
           </List>
@@ -72,6 +74,7 @@ const recipeQuery = gql`
     recipes {
       id
       author
+      authorId
       ingredients
       instructions
       name

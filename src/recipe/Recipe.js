@@ -16,7 +16,11 @@ type RecipeProps = {
   recipe: TRecipe
 };
 
-export const Recipe = ({recipe}: RecipeProps, isLoggedIn) => {
+export const Recipe = ({
+  recipe,
+  isLoggedIn,
+  allowEdits
+}) => {
   return (
     <Card style={{marginBottom: 25, maxWidth: 550}}>
       <CardTitle title={recipe.name} subtitle={recipe.author} />
@@ -24,7 +28,7 @@ export const Recipe = ({recipe}: RecipeProps, isLoggedIn) => {
         <Ingredients>{ recipe.ingredients }</Ingredients>
         <Instructions>{ recipe.instructions }</Instructions>
       </CardText>
-      {isLoggedIn && <CardActions>
+      {allowEdits && isLoggedIn && <CardActions>
         <FlatButton label='Edit'
           backgroundColor={colors.colorWarningHighlight}
           hoverColor={colors.colorWarning}
