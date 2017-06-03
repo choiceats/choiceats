@@ -11,8 +11,10 @@ import { login } from '../services/users'
 
 import { FormContainer, FormHeader, Error } from './styles'
 
-
-import type { WithRouterProps } from '../../types/standard'
+interface WithRouterProps {
+  history: { push: (string) => void };
+  match: { url: string };
+}
 
 export class LoginForm extends Component {
   props: WithRouterProps
@@ -39,10 +41,10 @@ export class LoginForm extends Component {
   }
 
   handleSubmit (e: Event) {
+    const { history } = this.props
     e.preventDefault()
-
     login(this.email, this.password)
-      .then(() => this.setState(() => ({ signedIn: true })))
+      .then(() => history.push('/'))
       .catch((e: any) => {
         this.setState(() => ({ error: true, message: 'Bad password, bad!' }))
       })

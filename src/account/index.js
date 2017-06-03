@@ -10,7 +10,6 @@ import { Signup } from './signup'
 export class Account extends Component {
   render () {
     const { match } = this.props
-
     return (
       <AccountContainer>
         <Route exact path={match.url} component={LoginForm} />

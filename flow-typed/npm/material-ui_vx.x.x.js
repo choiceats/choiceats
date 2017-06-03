@@ -27,7 +27,15 @@ declare module 'material-ui/AppBar' {
 }
 
 declare module 'material-ui/Card' {
-  declare class AppBar extends React$Component {
+  declare class CardTitle extends React$Component {
+    props: { }
+  }
+
+  declare class CardText extends React$Component {
+    props: { }
+  }
+
+  declare class Card extends React$Component {
     props: { }
   }
 }
@@ -35,9 +43,9 @@ declare module 'material-ui/Card' {
 declare module 'material-ui/TextField' {
   declare export default class TextField extends React$Component {
     props: {
-      hintText: string;
-      floatingLabelText: string;
-      type: string;
+      hintText?: string;
+      floatingLabelText?: string;
+      type?: string;
     }
   }
 }
@@ -57,7 +65,7 @@ declare module 'material-ui/RaisedButton' {
 declare module 'material-ui/FlatButton' {
   declare export default class FlatButton extends React$Component {
     props: {
-      label: string;
+      label?: string;
     }
   }
 }

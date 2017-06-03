@@ -12,7 +12,7 @@ type RecipeProps = {
 export const Recipe = ({recipe}: RecipeProps) => {
   return (
     <Card style={{marginBottom: 25, maxWidth: 550}}>
-      <CardTitle title={recipe.name} subtitle={recipe.author}/>
+      <CardTitle title={recipe.name} subtitle={recipe.author} />
       <CardText>
         <Ingredients>{ recipe.ingredients }</Ingredients>
         <Instructions>{ recipe.instructions }</Instructions>

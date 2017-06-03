@@ -6,7 +6,7 @@ import { Redirect } from 'react-router-dom'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 
-import { FormContainer, FormHeader, Error } from './styles'
+import { FormContainer, FormHeader } from './styles'
 
 import { register } from '../services/users'
 
@@ -14,13 +14,13 @@ type SignupField =
   'email' | 'firstName' | 'lastName' | 'password' | 'passwordCheck'
 
 export class Signup extends Component {
-  inputs: {
-    email: string,
-    firstName: string,
-    lastName: string,
-    password: string,
-    passwordCheck: string
-  } = {}
+  inputs = {
+    email: '',
+    firstName: '',
+    lastName: '',
+    password: '',
+    passwordCheck: ''
+  }
 
   state: { registered: boolean } = { registered: false }
 

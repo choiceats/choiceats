@@ -12,6 +12,6 @@ export const Error = styled.div`
 `
 
 export const FormContainer = styled.div`
-  width: 500px;
+  max-width: 500px;
   margin: auto
 `
