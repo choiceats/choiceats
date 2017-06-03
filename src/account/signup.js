@@ -1,8 +1,12 @@
 /* global HTMLInputElement, KeyboardEvent, Event */
 // @flow
 import React, { Component } from 'react'
-import styled from 'styled-components'
 import { Redirect } from 'react-router-dom'
+
+import TextField from 'material-ui/TextField'
+import RaisedButton from 'material-ui/RaisedButton'
+
+import { FormContainer, FormHeader, Error } from './styles'
 
 import { register } from '../services/users'
 
@@ -41,26 +45,42 @@ export class Signup extends Component {
     }
 
     return (
-      <SignupContainer>
+      <FormContainer>
         <form onSubmit={(e) => this.handleSubmit(e)}>
-          <h1>Signup!</h1>
-          <p>Email</p>
-          <input type='text' onChange={(e) => this.handleInputChange('email', e)} />
-          <p>First Name</p>
-          <input type='text' onChange={(e) => this.handleInputChange('firstName', e)} />
-          <p>Last Name</p>
-          <input type='text' onChange={(e) => this.handleInputChange('lastName', e)} />
-          <p>Password</p>
-          <input type='text' onChange={(e) => this.handleInputChange('password', e)} />
-          <p>Re-Password</p>
-          <input type='text' onChange={(e) => this.handleInputChange('passwordCheck', e)} />
+          <FormHeader>Signup!</FormHeader>
+          <TextField
+            floatingLabelText='Email'
+            fullWidth
+            onChange={(e) => this.handleInputChange('email', e)} />
+
+          <TextField
+            floatingLabelText='First Name'
+            fullWidth
+            onChange={(e) => this.handleInputChange('firstName', e)} />
+
+          <TextField
+            floatingLabelText='Last Name'
+            fullWidth
+            onChange={(e) => this.handleInputChange('lastName', e)} />
+
+          <TextField
+            floatingLabelText='Password'
+            fullWidth
+            onChange={(e) => this.handleInputChange('password', e)} />
+
+          <TextField
+            floatingLabelText='Re-Password'
+            fullWidth
+            onChange={(e) => this.handleInputChange('passwordCheck', e)} />
           <br />
-          <input type='submit' value='SIGN UP!' />
+          <RaisedButton
+            label='Signup'
+            fullWidth
+            primary
+            onClick={(e) => this.handleSubmit(e)}
+          />
         </form>
-      </SignupContainer>
+      </FormContainer>
     )
   }
 }
-
-
-const SignupContainer = styled.div``
