@@ -1,17 +1,30 @@
 // @flow
 import React, { Component } from 'react'
 import { gql, graphql } from 'react-apollo'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
 
 import type { RecipeListProps } from './types'
 
 import { Recipe } from './Recipe'
 
+import {RecipeEditor} from './recipe-editor'
+
+const mapStateToProps = (state) => {
+  console.log(state.user)
+  return {
+    isLoggedIn: state.user.token
+  }
+}
+
 export class RecipeList extends Component {
   props: RecipeListProps;
 
   render () {
-    const { data } = this.props
+    const {
+      data,
+      isLoggedIn,
+    } = this.props
     if (!data) return <Loading>loading</Loading>
 
     const { recipes, loading } = data
@@ -22,8 +35,13 @@ export class RecipeList extends Component {
     if (recipes) {
       return (
         <ListContainer>
+          <RecipeEditor />
           <List>
-            { recipes.map(recipe => <Recipe key={recipe.id} recipe={recipe} />) }
+            { recipes.map(recipe => (
+              <Recipe key={recipe.id}
+                recipe={recipe}
+                isLoggedIn={isLoggedIn} />
+            )) }
           </List>
         </ListContainer>
       )
@@ -43,7 +61,11 @@ export const Loading = styled.div`
   background-color: salmon;
 `
 
-const ListContainer = styled.div``
+const ListContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+`
 
 const recipeQuery = gql`
   query RecipeQuery {
@@ -57,5 +79,5 @@ const recipeQuery = gql`
   }
 `
 
-const ConnectedRecipes = graphql(recipeQuery)(RecipeList)
+const ConnectedRecipes = connect(mapStateToProps)(graphql(recipeQuery)(RecipeList))
 export { ConnectedRecipes }

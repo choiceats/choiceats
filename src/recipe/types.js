@@ -12,5 +12,6 @@ export type RecipeListProps = {
     loading: string;
     error: string;
     recipes: Recipe[];
+    isLoggedIn: any;
   }
 }
