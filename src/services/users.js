@@ -1,10 +1,12 @@
 /* global fetch */
 // @flow
 export const getToken = () => {
+  if (!window.localStorage) return null
   return window.localStorage.getItem('accessToken')
 }
 
 export const setToken = (token: string) => {
+  if (!window.localStorage) return null
   return window.localStorage.setItem('accessToken', token)
 }
 
@@ -32,6 +34,7 @@ export const login = (email: string, password: string) => {
 }
 
 export const clearToken = () => {
+  if (!window.localStorage) return null
   window.localStorage.removeItem('accessToken')
 }
 

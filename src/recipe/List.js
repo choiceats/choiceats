@@ -7,7 +7,7 @@ import type { RecipeListProps } from './types'
 
 import { Recipe } from './Recipe'
 
-class RecipeList extends Component {
+export class RecipeList extends Component {
   props: RecipeListProps;
 
   render () {
@@ -20,10 +20,10 @@ class RecipeList extends Component {
     }
 
     if (recipes) {
-      return(
+      return (
         <ListContainer>
           <List>
-            { recipes.map(recipe => <Recipe recipe={recipe} />) }
+            { recipes.map(recipe => <Recipe key={recipe.id} recipe={recipe} />) }
           </List>
         </ListContainer>
       )
@@ -33,7 +33,7 @@ class RecipeList extends Component {
 
 const List = styled.div``
 
-const Loading = styled.div`
+export const Loading = styled.div`
   width: 100%;
   font-size: 36px;
   font-family: sans-serif;
@@ -48,6 +48,7 @@ const ListContainer = styled.div``
 const recipeQuery = gql`
   query RecipeQuery {
     recipes {
+      id
       author
       ingredients
       instructions
