@@ -17,11 +17,6 @@ declare module 'material-ui' {
   declare module.exports: any;
 }
 
-/**
- * We include stubs for each file inside this npm package in case you need to
- * require those files directly. Feel free to delete any files that aren't
- * needed.
- */
 declare module 'material-ui/AppBar' {
   declare export default class AppBar extends React$Component {
     props: {
@@ -43,6 +38,26 @@ declare module 'material-ui/TextField' {
       hintText: string;
       floatingLabelText: string;
       type: string;
+    }
+  }
+}
+
+declare module 'material-ui/styles/MuiThemeProvider' {
+  declare export default class MuiThemeProvider extends React$Component {
+
+  }
+}
+
+declare module 'material-ui/RaisedButton' {
+  declare export default class RaisedButton extends React$Component {
+
+  }
+}
+
+declare module 'material-ui/FlatButton' {
+  declare export default class FlatButton extends React$Component {
+    props: {
+      label: string;
     }
   }
 }

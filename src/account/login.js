@@ -1,17 +1,22 @@
 /* global Event, KeyboardEvent, HTMLInputElement */
 // @flow
-
 import React, { Component } from 'react'
-import styled from 'styled-components'
+import { withRouter, Link } from 'react-router-dom'
+
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 import FlatButton from 'material-ui/FlatButton'
 
-import { Redirect } from 'react-router-dom'
-
 import { login } from '../services/users'
 
+import { FormContainer, FormHeader, Error } from './styles'
+
+
+import type { WithRouterProps } from '../../types/standard'
+
 export class LoginForm extends Component {
+  props: WithRouterProps
+
   onSubmit: (e: Event) => void
   onEmailChange: (e: KeyboardEvent) => void
   onPasswordChange: (e: KeyboardEvent) => void
@@ -19,9 +24,9 @@ export class LoginForm extends Component {
   email: string
   password: string
 
-  state: { error: boolean, message?: string, signedIn: boolean }
+  state: { error: boolean, message?: string }
 
-  constructor (props: {}) {
+  constructor (props: WithRouterProps) {
     super(props)
     this.state = {
       error: false,
@@ -55,15 +60,17 @@ export class LoginForm extends Component {
     }
   }
 
-  render () {
-    if (this.state.signedIn) {
-      return <Redirect to={{ pathname: '/' }} />
-    }
+  navigateToSignup () {
+    const { history } = this.props
+    history.push('/')
+  }
 
+  render () {
+    const { match } = this.props
     return (
       <FormContainer>
         <form onSubmit={this.onSubmit}>
-          <LoginHeader>Login</LoginHeader>
+          <FormHeader>Login</FormHeader>
           <TextField
             onChange={this.onEmailChange}
             hintText='Email'
@@ -85,11 +92,11 @@ export class LoginForm extends Component {
             primary
             onClick={(e) => this.handleSubmit(e)}
           />
-          <br /><br />
-          <FlatButton
-            label='Sign Up'
-            
-            />
+          <br />
+          <br />
+          <FlatButton>
+            <Link to={`${match.url}/sign-up`}>Sign up</Link>
+          </FlatButton>
           { (this.state.error)
             ? <Error>BAD PASSWORD!</Error>
             : null
@@ -100,19 +107,4 @@ export class LoginForm extends Component {
   }
 }
 
-
-const LoginHeader = styled.h1`
-  font-family: Fira Code;
-  font-size: 25px;
-`
-
-const Error = styled.div`
-  border: 1px solid red;
-  background-color: #ff5555;
-  padding: 5px 10px;
-`
-
-const FormContainer = styled.div`
-  width: 500px;
-  margin: auto
-`
+export default withRouter(LoginForm)
