@@ -11,13 +11,12 @@ type UserState = {
 
 type UserAction = {
   type: string;
-  payload: mixed;
+  payload: any;
 }
 
 export const user = (state: UserState = { ...getUser() }, action: UserAction) => {
   switch (action.type) {
     case LOGIN:
-      console.log('USER', action.payload)
       return { ...action.payload }
 
     case LOGOUT:

@@ -10,7 +10,7 @@ export const getUser = () => {
   }
 }
 
-export const setUser = (user: object) => {
+export const setUser = (user: any) => {
   if (!window.localStorage) return null
   window.localStorage.setItem('accessToken', user.token)
   window.localStorage.setItem('email', user.email)
