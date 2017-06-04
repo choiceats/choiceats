@@ -1,9 +1,12 @@
 // @flow
 import { LOGIN, LOGOUT } from './action-types'
-import { getToken, clearToken } from '../services/users'
+import { getUser, clearUser } from '../services/users'
 
 type UserState = {
-  token: ?string
+  token: ?string,
+  name: ?string,
+  email: ?string,
+  userId: ?number
 }
 
 type UserAction = {
@@ -11,14 +14,19 @@ type UserAction = {
   payload: mixed;
 }
 
-export const user = (state: UserState = { token: getToken() }, action: UserAction) => {
+export const user = (state: UserState = { ...getUser() }, action: UserAction) => {
   switch (action.type) {
     case LOGIN:
-      return { token: action.payload }
+      return { ...action.payload }
 
     case LOGOUT:
-      clearToken()
-      return { token: null }
+      clearUser()
+      return {
+        token: null,
+        name: null,
+        email: null,
+        userId: null
+      }
 
     default:
       return state

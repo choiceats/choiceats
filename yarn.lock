@@ -1971,6 +1971,14 @@ dotenv@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-4.0.0.tgz#864ef1379aced55ce6f95debecdce179f7a0cd1d"
 
+draft-js@^0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/draft-js/-/draft-js-0.10.1.tgz#6f1219d8095729691429ca6fd7a58d2a8be5cb67"
+  dependencies:
+    fbjs "^0.8.7"
+    immutable "~3.7.4"
+    object-assign "^4.1.0"
+
 duplexer2@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/duplexer2/-/duplexer2-0.1.4.tgz#8b12dab878c0d69e3e7891051662a32fc6bddcc1"
@@ -2512,7 +2520,7 @@ fb-watchman@^2.0.0:
   dependencies:
     bser "^2.0.0"
 
-fbjs@^0.8.1, fbjs@^0.8.4, fbjs@^0.8.5, fbjs@^0.8.6, fbjs@^0.8.9:
+fbjs@^0.8.1, fbjs@^0.8.4, fbjs@^0.8.5, fbjs@^0.8.6, fbjs@^0.8.7, fbjs@^0.8.9:
   version "0.8.12"
   resolved "https://registry.yarnpkg.com/fbjs/-/fbjs-0.8.12.tgz#10b5d92f76d45575fd63a217d4ea02bea2f8ed04"
   dependencies:
@@ -3096,9 +3104,9 @@ ignore@^3.0.11, ignore@^3.0.9, ignore@^3.2.0:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-3.3.3.tgz#432352e57accd87ab3110e82d3fea0e47812156d"
 
-immutable@3.7.x:
+immutable@3.7.x, immutable@~3.7.4:
   version "3.7.6"
-  resolved "https://leadpages.jfrog.io/leadpages/api/npm/npm/immutable/-/immutable-3.7.6.tgz#13b4d3cb12befa15482a26fe1b2ebae640071e4b"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.7.6.tgz#13b4d3cb12befa15482a26fe1b2ebae640071e4b"
 
 imurmurhash@^0.1.4:
   version "0.1.4"
@@ -4054,7 +4062,7 @@ lodash.uniq@^4.5.0:
 
 lodash@3.10.x:
   version "3.10.1"
-  resolved "https://leadpages.jfrog.io/leadpages/api/npm/npm/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
 
 "lodash@>=3.5 <5", lodash@^4.0.0, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.2, lodash@^4.17.3, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0:
   version "4.17.4"
@@ -5173,8 +5181,8 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.1.7:
     strip-json-comments "~2.0.1"
 
 react-apollo@^1.2.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/react-apollo/-/react-apollo-1.4.0.tgz#6ba4e5a8e3510d02d03b5ed1610c2b73580466be"
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/react-apollo/-/react-apollo-1.4.1.tgz#0c661204de51bf86f0803b7e4fff7e3f02581262"
   dependencies:
     apollo-client "^1.4.0"
     graphql-anywhere "^3.0.0"
@@ -5341,7 +5349,7 @@ react-scripts@1.0.6:
 
 react-shallow-testutils@2.0.x:
   version "2.0.0"
-  resolved "https://leadpages.jfrog.io/leadpages/api/npm/npm/react-shallow-testutils/-/react-shallow-testutils-2.0.0.tgz#9087b40b368b124674c7bfcf9fdd6ad983914a97"
+  resolved "https://registry.yarnpkg.com/react-shallow-testutils/-/react-shallow-testutils-2.0.0.tgz#9087b40b368b124674c7bfcf9fdd6ad983914a97"
 
 react-tap-event-plugin@^2.0.1:
   version "2.0.1"
@@ -5351,7 +5359,7 @@ react-tap-event-plugin@^2.0.1:
 
 react-test-render@^1.0.3:
   version "1.0.3"
-  resolved "https://leadpages.jfrog.io/leadpages/api/npm/npm/react-test-render/-/react-test-render-1.0.3.tgz#5cf02adde5350b7e807e9ddbd77a1d687d312d76"
+  resolved "https://registry.yarnpkg.com/react-test-render/-/react-test-render-1.0.3.tgz#5cf02adde5350b7e807e9ddbd77a1d687d312d76"
   dependencies:
     immutable "3.7.x"
     lodash "3.10.x"

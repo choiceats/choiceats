@@ -1,13 +1,23 @@
 /* global fetch */
 // @flow
-export const getToken = () => {
+export const getUser = () => {
   if (!window.localStorage) return null
-  return window.localStorage.getItem('accessToken')
+  return {
+    email: window.localStorage.getItem('email'),
+    name: window.localStorage.getItem('name'),
+    token: window.localStorage.getItem('accessToken'),
+    userId: window.localStorage.getItem('userId')
+  }
 }
 
-export const setToken = (token: string) => {
+export const setUser = (user: object) => {
   if (!window.localStorage) return null
-  return window.localStorage.setItem('accessToken', token)
+  window.localStorage.setItem('accessToken', user.token)
+  window.localStorage.setItem('email', user.email)
+  window.localStorage.setItem('name', user.name)
+  window.localStorage.setItem('userId', user.userId)
+
+  return user
 }
 
 export const login = (email: string, password: string) => {
@@ -29,14 +39,16 @@ export const login = (email: string, password: string) => {
     return response.json()
   })
   .then(responseJson => {
-    console.log('Token set...')
-    setToken(responseJson.token)
+    setUser(responseJson)
   })
 }
 
-export const clearToken = () => {
+export const clearUser = () => {
   if (!window.localStorage) return null
   window.localStorage.removeItem('accessToken')
+  window.localStorage.removeItem('email')
+  window.localStorage.removeItem('name')
+  window.localStorage.removeItem('userId')
 }
 
 type RegisterParams = {

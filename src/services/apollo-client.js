@@ -8,7 +8,7 @@ const authenicationMiddleware = {
       req.options.headers = {}
     }
 
-    const token = user.getToken()
+    const token = user.getUser().token
     if (token !== null) {
       req.options.headers.authorization = `Bearer ${token}`
     }
