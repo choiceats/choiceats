@@ -7,27 +7,21 @@ import { login } from '../../services/users'
 
 jest.mock('../../services/users')
 
-function testAsync (asyncTest) {
-  return (done) => {
-    return asyncTest()
-      .then(() => {
-        done()
-      })
-  }
-}
-
 describe('Login Form', () => {
   let history
   let match
   let wrapper
+  let dispatch
 
   beforeEach(() => {
     history = {
       push: jest.fn()
     }
     match = { url: 'hello.world' }
+    dispatch = jest.fn()
     wrapper = shallow(
       <LoginForm
+        dispatch={dispatch}
         history={history}
         match={match} />
     )
@@ -80,7 +74,7 @@ describe('Login Form', () => {
       expect(login).toBeCalledWith('joe', 'secret')
     })
 
-    it('should redirect (history) to the main page after the login is successful', testAsync(async () => {
+    it('should redirect (history) to the main page after the login is successful', async () => {
       const event = {}
       let loginPromise
       login.mockImplementation(() => {
@@ -92,14 +86,14 @@ describe('Login Form', () => {
 
       await loginPromise
       expect(history.push).toBeCalledWith('/')
-    }))
+    })
 
-    xit('should show an error if login failed', (done) => {
+    it('should show an error if login failed', async () => {
       const event = {}
       let loginPromise
       login.mockImplementation(() => {
         loginPromise = new Promise((resolve, reject) => {
-          setTimeout(() => reject(new Error('derp')), 2000)
+          setTimeout(() => reject(new Error('derp')))
         })
         return loginPromise
       })
@@ -107,19 +101,13 @@ describe('Login Form', () => {
       event.preventDefault = jest.fn()
       wrapper.find('RaisedButton').simulate('click', event)
 
-      loginPromise
-        .then(() => {
-          console.log('SHOULD FAILE')
-          done()
-        })
-        .catch((e) => {
-          console.log('WRApp')
-          wrapper.update()
-          console.log('wrapper.find', wrapper.instance().state)
-
-          expect(wrapper.find('Error').length).toEqual('BAD PASSWORD!')
-          done()
-        })
+      try {
+        await loginPromise
+        expect('this').toBe('failing')
+      } catch (e) {
+        wrapper.update()
+        expect(wrapper.find('#form-error').length).toBe(1)
+      }
     })
   })
 })

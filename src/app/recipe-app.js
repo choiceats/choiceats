@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { Route, Redirect, withRouter } from 'react-router-dom'
 
 import { Account } from '../account'
-import { ConnectedRecipes } from '../recipe/list'
+import RecipeList from '../recipe/list'
 import Navbar from './navbar'
 
 import type { Connected, WithRouter } from '../types'
@@ -31,7 +31,7 @@ export class RecipeApp extends Component {
     return (
       <div>
         <Navbar isLoggedIn={userToken !== null} />
-        <Route exact path='/' component={ConnectedRecipes} />
+        <Route exact path='/' component={RecipeList} />
         <Route path='/login' component={Account} />
       </div>
     )

@@ -18,7 +18,7 @@ import type { WithRouter } from '../types'
 export class LoginForm extends Component {
   props: WithRouter
 
-  onSubmit: (e: Event) => void
+  onSubmit: (e: Event) => Promise<any>
   onEmailChange: (e: KeyboardEvent) => void
   onPasswordChange: (e: KeyboardEvent) => void
 
@@ -39,18 +39,16 @@ export class LoginForm extends Component {
     this.onPasswordChange = this.handleOnPasswordChange.bind(this)
   }
 
-  handleSubmit (e: Event) {
+  async handleSubmit (e: Event): Promise<any> {
     const { history, dispatch } = this.props
     e.preventDefault()
-    login(this.email, this.password)
-      .then((userInfo) => {
-        console.log('USER INFO', userInfo)
-        dispatch(loginAction(userInfo))
-        history.push('/')
-      })
-      .catch((e: any) => {
-        this.setState(() => ({ error: true, message: 'Bad password, bad!' }))
-      })
+    try {
+      const userInfo = await login(this.email, this.password)
+      dispatch(loginAction(userInfo))
+      history.push('/')
+    } catch (e) {
+      this.setState({ error: true, message: 'Bad password, bad!' })
+    }
   }
 
   handleOnEmailChange (e: KeyboardEvent) {
@@ -98,7 +96,7 @@ export class LoginForm extends Component {
             <Link to={`${match.url}/sign-up`}>Sign up</Link>
           </FlatButton>
           { (this.state.error)
-            ? <Error>BAD PASSWORD!</Error>
+            ? <Error id='form-error'>BAD PASSWORD!</Error>
             : null
           }
         </form>
