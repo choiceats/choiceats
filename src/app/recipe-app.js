@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { Route, Redirect, withRouter } from 'react-router-dom'
 
 import { Account } from '../account'
-import { ConnectedRecipes } from '../recipe/List'
+import { ConnectedRecipes } from '../recipe/list'
 import Navbar from './navbar'
 
 import type { Connected, WithRouter } from '../types'

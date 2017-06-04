@@ -4,16 +4,26 @@ import { gql, graphql } from 'react-apollo'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 
-import type { RecipeListProps } from './types'
-
-import { Recipe } from './Recipe'
+import Recipe from './recipe'
 
 import {RecipeEditor} from './recipe-editor'
+
+import type { Recipe as RecipeT } from './types'
+
+type RecipeListProps = {
+  data?: {
+    loading: string;
+    error: string;
+    recipes: RecipeT[];
+  },
+  userId: string;
+  isLoggedIn: boolean;
+}
 
 const mapStateToProps = (state) => {
   return {
     isLoggedIn: state.user.token,
-    userId: state.user.userId,
+    userId: state.user.userId
   }
 }
 
@@ -21,11 +31,7 @@ export class RecipeList extends Component {
   props: RecipeListProps;
 
   render () {
-    const {
-      data,
-      isLoggedIn,
-      userId
-    } = this.props
+    const { data, isLoggedIn } = this.props
     if (!data) return <Loading>loading</Loading>
 
     const { recipes, loading } = data
@@ -41,7 +47,7 @@ export class RecipeList extends Component {
             { recipes.map(recipe => (
               <Recipe key={recipe.id}
                 recipe={recipe}
-                allowEdits={userId.toString() === recipe.authorId.toString()}
+                allowEdits
                 isLoggedIn={isLoggedIn} />
             )) }
           </List>
@@ -64,9 +70,9 @@ export const Loading = styled.div`
 `
 
 const ListContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `
 
 const recipeQuery = gql`
@@ -82,5 +88,4 @@ const recipeQuery = gql`
   }
 `
 
-const ConnectedRecipes = connect(mapStateToProps)(graphql(recipeQuery)(RecipeList))
-export { ConnectedRecipes }
+export default connect(mapStateToProps)(graphql(recipeQuery)(RecipeList))

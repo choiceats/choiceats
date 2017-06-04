@@ -6,12 +6,3 @@ export type Recipe = {
   instructions: string;
   name: string;
 }
-
-export type RecipeListProps = {
-  data?: {
-    loading: string;
-    error: string;
-    recipes: Recipe[];
-    isLoggedIn: any;
-  }
-}

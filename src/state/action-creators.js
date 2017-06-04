@@ -1,5 +1,6 @@
 // @flow
 import { LOGOUT, LOGIN } from './action-types'
+import type { User } from '../types'
 
 export const logout = () => {
   return {
@@ -7,7 +8,7 @@ export const logout = () => {
   }
 }
 
-export const login = (userInfo) => {
+export const login = (userInfo: User) => {
   return {
     type: LOGIN,
     payload: userInfo

@@ -38,6 +38,10 @@ declare module 'material-ui/Card' {
   declare class Card extends React$Component {
     props: { }
   }
+
+  declare class CardActions extends React$Component {
+    props: { }
+  }
 }
 
 declare module 'material-ui/TextField' {

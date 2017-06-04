@@ -10,11 +10,19 @@ import {
 import FlatButton from 'material-ui/FlatButton'
 import * as colors from '../styles/colors'
 
-export const Recipe = ({
+import type { Recipe } from '../types'
+
+type RecipeProps = {
+  recipe: Recipe;
+  isLoggedIn: boolean;
+  allowEdits: boolean;
+}
+
+export default ({
   recipe,
   isLoggedIn,
   allowEdits
-}) => {
+}: RecipeProps) => {
   return (
     <Card style={{marginBottom: 25, maxWidth: 550}}>
       <CardTitle title={recipe.name} subtitle={recipe.author} />

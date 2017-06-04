@@ -99,7 +99,7 @@ describe('Login Form', () => {
       let loginPromise
       login.mockImplementation(() => {
         loginPromise = new Promise((resolve, reject) => {
-          setTimeout(() => reject(), 2000)
+          setTimeout(() => reject(new Error('derp')), 2000)
         })
         return loginPromise
       })
