@@ -7,8 +7,9 @@ export const logout = () => {
   }
 }
 
-export const login = () => {
+export const login = (userInfo) => {
   return {
-    type: LOGIN
+    type: LOGIN,
+    payload: userInfo
   }
 }

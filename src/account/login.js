@@ -43,8 +43,9 @@ export class LoginForm extends Component {
     const { history, dispatch } = this.props
     e.preventDefault()
     login(this.email, this.password)
-      .then(() => {
-        dispatch(loginAction())
+      .then((userInfo) => {
+        console.log('USER INFO', userInfo)
+        dispatch(loginAction(userInfo))
         history.push('/')
       })
       .catch((e: any) => {

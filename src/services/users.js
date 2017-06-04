@@ -40,6 +40,7 @@ export const login = (email: string, password: string) => {
   })
   .then(responseJson => {
     setUser(responseJson)
+    return responseJson
   })
 }
 
