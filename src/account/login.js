@@ -2,22 +2,21 @@
 // @flow
 import React, { Component } from 'react'
 import { withRouter, Link } from 'react-router-dom'
+import { connect } from 'react-redux'
 
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 import FlatButton from 'material-ui/FlatButton'
 
+import { login as loginAction } from '../state/action-creators'
 import { login } from '../services/users'
 
 import { FormContainer, FormHeader, Error } from './styles'
 
-interface WithRouterProps {
-  history: { push: (string) => void };
-  match: { url: string };
-}
+import type { WithRouter } from '../types'
 
 export class LoginForm extends Component {
-  props: WithRouterProps
+  props: WithRouter
 
   onSubmit: (e: Event) => void
   onEmailChange: (e: KeyboardEvent) => void
@@ -28,7 +27,7 @@ export class LoginForm extends Component {
 
   state: { error: boolean, message?: string }
 
-  constructor (props: WithRouterProps) {
+  constructor (props: WithRouter) {
     super(props)
     this.state = {
       error: false,
@@ -41,10 +40,13 @@ export class LoginForm extends Component {
   }
 
   handleSubmit (e: Event) {
-    const { history } = this.props
+    const { history, dispatch } = this.props
     e.preventDefault()
     login(this.email, this.password)
-      .then(() => history.push('/'))
+      .then(() => {
+        dispatch(loginAction())
+        history.push('/')
+      })
       .catch((e: any) => {
         this.setState(() => ({ error: true, message: 'Bad password, bad!' }))
       })
@@ -60,11 +62,6 @@ export class LoginForm extends Component {
     if (e.target instanceof HTMLInputElement) {
       this.password = e.target.value
     }
-  }
-
-  navigateToSignup () {
-    const { history } = this.props
-    history.push('/')
   }
 
   render () {
@@ -109,4 +106,4 @@ export class LoginForm extends Component {
   }
 }
 
-export default withRouter(LoginForm)
+export default withRouter(connect()(LoginForm))

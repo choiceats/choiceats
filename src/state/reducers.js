@@ -1,1 +1,1 @@
-export { userReducer } from './user-reducer'
+export { user } from './user-reducer'

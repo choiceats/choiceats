@@ -29,6 +29,7 @@ export const login = (email: string, password: string) => {
     return response.json()
   })
   .then(responseJson => {
+    console.log('Token set...')
     setToken(responseJson.token)
   })
 }

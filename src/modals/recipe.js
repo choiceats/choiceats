@@ -12,4 +12,4 @@ type Recipe {
 type Query {
   recipes: [Recipe]    # "[]" means this is a list of channels
 }
-`;
+`

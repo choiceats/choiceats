@@ -11,7 +11,7 @@ type UserAction = {
   payload: mixed;
 }
 
-export const userReducer = (state: UserState = { token: getToken() }, action: UserAction) => {
+export const user = (state: UserState = { token: getToken() }, action: UserAction) => {
   switch (action.type) {
     case LOGIN:
       return { token: action.payload }

@@ -1,5 +1,4 @@
 /* eslint-env jest */
-
 import React from 'react'
 import { shallow } from 'enzyme'
 
@@ -10,11 +9,8 @@ jest.mock('../../services/users')
 
 function testAsync (asyncTest) {
   return (done) => {
-    asyncTest()
-      .then(() => done())
-      .catch((e) => {
-        console.error(e)
-        expect(true).toBe(false) // Forced fail
+    return asyncTest()
+      .then(() => {
         done()
       })
   }
@@ -97,5 +93,33 @@ describe('Login Form', () => {
       await loginPromise
       expect(history.push).toBeCalledWith('/')
     }))
+
+    xit('should show an error if login failed', (done) => {
+      const event = {}
+      let loginPromise
+      login.mockImplementation(() => {
+        loginPromise = new Promise((resolve, reject) => {
+          setTimeout(() => reject(), 2000)
+        })
+        return loginPromise
+      })
+
+      event.preventDefault = jest.fn()
+      wrapper.find('RaisedButton').simulate('click', event)
+
+      loginPromise
+        .then(() => {
+          console.log('SHOULD FAILE')
+          done()
+        })
+        .catch((e) => {
+          console.log('WRApp')
+          wrapper.update()
+          console.log('wrapper.find', wrapper.instance().state)
+
+          expect(wrapper.find('Error').length).toEqual('BAD PASSWORD!')
+          done()
+        })
+    })
   })
 })
