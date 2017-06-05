@@ -1,3 +1,5 @@
+/* global MouseEvent, KeyboardEvent */
+// @flow
 import React from 'react'
 import {Editor, EditorState, RichUtils} from 'draft-js'
 import styled from 'styled-components'
@@ -5,8 +7,21 @@ import styled from 'styled-components'
 import './recipe-editor.css'
 import 'draft-js/dist/Draft.css'
 
+type RecipeEditorState = {
+  editorState: EditorState
+}
+
 export class RecipeEditor extends React.Component {
-  constructor (props) {
+  focus: () => void
+  handleKeyCommand: (command: string) => string
+  onTab: (event: KeyboardEvent) => void
+  toggleBlockType: (type: string) => void
+  toggleInlineStyle: (type: string) => void
+  onChange: (state: EditorState) => void
+
+  state: RecipeEditorState
+
+  constructor (props: {}) {
     super(props)
     this.state = {
       editorState: EditorState.createEmpty()
@@ -21,7 +36,7 @@ export class RecipeEditor extends React.Component {
     this.toggleInlineStyle = (style) => this._toggleInlineStyle(style)
   }
 
-  _handleKeyCommand (command) {
+  _handleKeyCommand (command: string) {
     const newState = RichUtils.handleKeyCommand(this.state.editorState, command)
     if (newState) {
       this.onChange(newState)
@@ -30,12 +45,12 @@ export class RecipeEditor extends React.Component {
     return 'not-handled'
   }
 
-  _onTab (e) {
+  _onTab (e: KeyboardEvent) {
     const maxDepth = 4
     this.onChange(RichUtils.onTab(e, this.state.editorState, maxDepth))
   }
 
-  _toggleBlockType (blockType) {
+  _toggleBlockType (blockType: string) {
     this.onChange(
       RichUtils.toggleBlockType(
         this.state.editorState,
@@ -44,7 +59,7 @@ export class RecipeEditor extends React.Component {
     )
   }
 
-  _toggleInlineStyle (inlineStyle) {
+  _toggleInlineStyle (inlineStyle: string) {
     this.onChange(
       RichUtils.toggleInlineStyle(
         this.state.editorState,
@@ -80,6 +95,8 @@ export class RecipeEditor extends React.Component {
 }
 
 class StyleButton extends React.Component {
+  onToggle: (e: MouseEvent) => void
+
   constructor () {
     super()
     this.onToggle = (e) => {
@@ -105,9 +122,6 @@ const BLOCK_TYPES = [
   {label: 'H1', style: 'header-one'},
   {label: 'H2', style: 'header-two'},
   {label: 'H3', style: 'header-three'},
-  {label: 'H4', style: 'header-four'},
-  {label: 'H5', style: 'header-five'},
-  {label: 'H6', style: 'header-six'},
   {label: 'Blockquote', style: 'blockquote'},
   {label: 'UL', style: 'unordered-list-item'},
   {label: 'OL', style: 'ordered-list-item'},

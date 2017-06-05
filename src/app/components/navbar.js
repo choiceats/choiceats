@@ -2,10 +2,10 @@
 import React from 'react'
 import AppBar from 'material-ui/AppBar'
 
-import Logout from '../account/logout-button'
-import Login from '../account/login-button'
+import Logout from './logout-button'
+import Login from './login-button'
 
-import type { Connected } from '../types'
+import type { Connected } from '../../types'
 
 type NavbarProps = Connected & {
   isLoggedIn: boolean

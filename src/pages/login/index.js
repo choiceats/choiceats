@@ -8,14 +8,14 @@ import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 import FlatButton from 'material-ui/FlatButton'
 
-import { login as loginAction } from '../state/action-creators'
-import { login } from '../services/users'
+import { login as loginAction } from '../../state/action-creators'
+import { login } from '../../services/users'
 
-import { FormContainer, FormHeader, Error } from './styles'
+import { FormContainer, FormHeader, Error } from '../form-styles'
 
-import type { WithRouter } from '../types'
+import type { WithRouter } from '../../types'
 
-export class LoginForm extends Component {
+export class Login extends Component {
   props: WithRouter
 
   onSubmit: (e: Event) => Promise<any>
@@ -105,4 +105,4 @@ export class LoginForm extends Component {
   }
 }
 
-export default withRouter(connect()(LoginForm))
+export default withRouter(connect()(Login))

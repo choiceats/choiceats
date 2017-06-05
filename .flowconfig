@@ -1,5 +1,5 @@
 [ignore]
-.*/node_modules/.*
+.*/node_modules/*.
 
 [include]
 
@@ -7,3 +7,4 @@
 flow-typed/
 
 [options]
+module.name_mapper.extension='css' -> '<PROJECT_ROOT>/stubs/css-stub.js'

@@ -4,9 +4,9 @@ import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import FlatButton from 'material-ui/FlatButton'
 
-import { logout } from '../state/action-creators'
+import { logout } from '../../state/action-creators'
 
-import type { WithRouter, Connected } from '../types'
+import type { WithRouter, Connected } from '../../types'
 
 type LogoutButtonProps = WithRouter | Connected;
 

@@ -2,10 +2,10 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 
-import { LoginForm } from '../login'
-import { login } from '../../services/users'
+import { Login } from '../'
+import { login } from '../../../services/users'
 
-jest.mock('../../services/users')
+jest.mock('../../../services/users')
 
 describe('Login Form', () => {
   let history
@@ -20,7 +20,7 @@ describe('Login Form', () => {
     match = { url: 'hello.world' }
     dispatch = jest.fn()
     wrapper = shallow(
-      <LoginForm
+      <Login
         dispatch={dispatch}
         history={history}
         match={match} />

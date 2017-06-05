@@ -19,7 +19,7 @@
     "babel-eslint": "^7.2.3",
     "enzyme": "^2.8.2",
     "eslint-plugin-flowtype": "^2.33.0",
-    "flow-bin": "^0.47.0",
+    "flow-bin": "0.47.0",
     "pre-commit": "^1.2.2",
     "react-scripts": "1.0.6",
     "react-test-renderer": "^15.5.4",

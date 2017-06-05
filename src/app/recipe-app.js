@@ -3,9 +3,10 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Route, Redirect, withRouter } from 'react-router-dom'
 
-import { Account } from '../account'
-import RecipeList from '../recipe/list'
-import Navbar from './navbar'
+import Login from '../pages/login'
+import Signup from '../pages/signup'
+import RecipeList from '../pages/recipies'
+import Navbar from './components/navbar'
 
 import type { Connected, WithRouter } from '../types'
 
@@ -32,7 +33,9 @@ export class RecipeApp extends Component {
       <div>
         <Navbar isLoggedIn={userToken !== null} />
         <Route exact path='/' component={RecipeList} />
-        <Route path='/login' component={Account} />
+
+        <Route path='/sign-up' component={Signup} />
+        <Route path='/login' component={Login} />
       </div>
     )
   }

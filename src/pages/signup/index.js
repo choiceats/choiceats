@@ -6,14 +6,14 @@ import { Redirect } from 'react-router-dom'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 
-import { FormContainer, FormHeader } from './styles'
+import { FormContainer, FormHeader } from '../form-styles'
 
-import { register } from '../services/users'
+import { register } from '../../services/users'
 
 type SignupField =
   'email' | 'firstName' | 'lastName' | 'password' | 'passwordCheck'
 
-export class Signup extends Component {
+export default class Signup extends Component {
   inputs = {
     email: '',
     firstName: '',

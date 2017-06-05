@@ -8,9 +8,9 @@ import {
   CardActions
 } from 'material-ui/Card'
 import FlatButton from 'material-ui/FlatButton'
-import * as colors from '../styles/colors'
+import * as colors from '../../styles/colors'
 
-import type { Recipe } from '../types'
+import type { Recipe } from '../../types'
 
 type RecipeProps = {
   recipe: Recipe;

@@ -1,6 +1,6 @@
 /* eslint-env jest */
 import React from 'react'
-import { RecipeList, Loading } from '../list'
+import { RecipeList, Loading } from '../'
 import {shallow} from 'enzyme'
 
 describe('RecipeList', () => {
