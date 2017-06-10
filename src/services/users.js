@@ -1,5 +1,9 @@
 /* global fetch */
 // @flow
+import endpoints from './endpoints'
+
+const baseUrl = `${endpoints.protocol}://${endpoints.url}:${endpoints.port}`
+
 export const getUser = () => {
   if (!window.localStorage) return null
   return {
@@ -21,7 +25,7 @@ export const setUser = (user: any) => {
 }
 
 export const login = (email: string, password: string) => {
-  return fetch('http://localhost:4000/auth', {
+  return fetch(`${baseUrl}/auth`, {
     method: 'post',
     headers: {
       'content-type': 'application/json'
@@ -60,7 +64,7 @@ type RegisterParams = {
 }
 
 export const register = (params: RegisterParams) => {
-  return fetch('http://localhost:4000/user', {
+  return fetch(`${baseUrl}/user`, {
     method: 'post',
     headers: {
       'content-type': 'application/json'
