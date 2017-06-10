@@ -1,6 +1,7 @@
 // @flow
 import { ApolloClient, createNetworkInterface } from 'react-apollo'
 import * as user from './users'
+import endpoints from './endpoints'
 
 const authenicationMiddleware = {
   applyMiddleware (req, next) {
@@ -21,7 +22,7 @@ const authenicationMiddleware = {
 }
 
 const networkInterface = createNetworkInterface({
-  uri: 'http://localhost:4000/graphql'
+  uri: `${endpoints.protocol}://${endpoints.url}:${endpoints.port}/graphql`
 })
 
 networkInterface.use([authenicationMiddleware])
