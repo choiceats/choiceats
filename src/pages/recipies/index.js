@@ -81,7 +81,14 @@ const recipeQuery = gql`
       id
       author
       authorId
-      ingredients
+      ingredients {
+        name
+        unit {
+          name
+          abbr
+        }
+        quantity
+      }
       instructions
       name
     }
