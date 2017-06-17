@@ -34,7 +34,7 @@ export class RecipeApp extends Component {
         <Navbar isLoggedIn={userToken !== null} />
         <Route exact path='/' component={RecipeList} />
 
-        <Route path='/sign-up' component={Signup} />
+        <Route path='/login/sign-up' component={Signup} />
         <Route path='/login' component={Login} />
       </div>
     )
