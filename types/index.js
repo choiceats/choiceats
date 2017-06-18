@@ -1,6 +1,9 @@
 // @flow
+
+import type { Dispatch } from 'redux'
+
 export type ConnectedProps = {
-  dispatch: (action: any) => void;
+  dispatch: Dispatch<*>;
 }
 
 export type User = {
@@ -18,4 +21,8 @@ export type Recipe = {
   ingredients: Ingredient[];
   instructions: string;
   name: string;
+}
+
+export type Action = {
+  type: ?string
 }

@@ -15,7 +15,7 @@ const Navbar = ({isLoggedIn}: NavbarProps) => {
       title='ChoicEats'
       iconElementRight={
         isLoggedIn
-          ? <Logout h='d' />
+          ? <Logout />
           : <Login />
       } />
   )

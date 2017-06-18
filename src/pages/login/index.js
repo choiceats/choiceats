@@ -1,4 +1,4 @@
-/* global Event, KeyboardEvent, HTMLInputElement */
+/* global Event, KeyboardEvent, HTMLInputElement, MouseEvent */
 // @flow
 import React, { Component } from 'react'
 import { withRouter, Link } from 'react-router-dom'
@@ -89,7 +89,7 @@ export class Login extends Component {
             label='Login'
             fullWidth
             primary
-            onClick={(e) => this.handleSubmit(e)}
+            onClick={(e: MouseEvent) => this.handleSubmit(e)}
           />
           <br />
           <br />
