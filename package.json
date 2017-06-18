@@ -44,9 +44,6 @@
     ],
     "parser": "babel-eslint"
   },
-  "jest": {
-    
-  },
   "pre-commit": [
     "standard",
     "flow",

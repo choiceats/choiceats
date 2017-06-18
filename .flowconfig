@@ -8,3 +8,4 @@ flow-typed/
 
 [options]
 module.name_mapper.extension='css' -> '<PROJECT_ROOT>/stubs/css-stub.js'
+module.name_mapper='types' -> '<PROJECT_ROOT>/types/index.js'

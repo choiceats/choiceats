@@ -11,7 +11,7 @@ type RichEditorState = {
   editorState: EditorState
 }
 
-export class RichEditor extends Component {
+export default class RichEditor extends Component {
   focus: () => void
   handleKeyCommand: (command: string) => string
   onTab: (event: KeyboardEvent) => void

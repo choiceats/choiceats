@@ -6,15 +6,15 @@ import styled from 'styled-components'
 
 import Recipe from './recipe'
 
-import {RecipeEditor} from './recipe-editor'
+import RecipeEditor from './recipe-editor'
 
-import type { Recipe as RecipeT } from './types'
+import type { Recipe as TRecipe } from 'types'
 
 type RecipeListProps = {
   data?: {
     loading: string;
     error: string;
-    recipes: RecipeT[];
+    recipes: TRecipe[];
   },
   userId: string;
   isLoggedIn: boolean;
@@ -42,7 +42,7 @@ export class RecipeList extends Component {
     if (recipes) {
       return (
         <ListContainer>
-          <RecipeEditor />
+          <RecipeEditor recipe={null} />
           <List>
             { recipes.map(recipe => (
               <Recipe key={recipe.id}

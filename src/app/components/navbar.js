@@ -5,9 +5,7 @@ import AppBar from 'material-ui/AppBar'
 import Logout from './logout-button'
 import Login from './login-button'
 
-import type { Connected } from '../../types'
-
-type NavbarProps = Connected & {
+type NavbarProps = {
   isLoggedIn: boolean
 }
 
@@ -17,7 +15,7 @@ const Navbar = ({isLoggedIn}: NavbarProps) => {
       title='ChoicEats'
       iconElementRight={
         isLoggedIn
-          ? <Logout />
+          ? <Logout h='d' />
           : <Login />
       } />
   )

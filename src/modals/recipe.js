@@ -21,9 +21,8 @@ export const typeDefs = `
   }
  
 
-# This type specifies the entry points into our API. In this case
-# there is only one - "channels" - which returns a list of channels.
+# This type specifies the entry points into our API.
 type Query {
-  recipes: [Recipe]    # "[]" means this is a list of channels
+  recipes: [Recipe]    
 }
 `

@@ -8,14 +8,15 @@ import Signup from '../pages/signup'
 import RecipeList from '../pages/recipies'
 import Navbar from './components/navbar'
 
-import type { Connected, WithRouter } from '../types'
+import type { ContextRouter } from 'react-router-dom'
+import type { ConnectedProps } from 'types'
 
 const NON_RESTRICTED_PATHS = [
   '/login',
   '/login/sign-up'
 ]
 
-type RecipeAppProps = Connected & WithRouter & {
+type RecipeAppProps = ConnectedProps & ContextRouter & {
   userToken: string
 }
 
