@@ -14,10 +14,9 @@ describe('Recipies : Components : IngredientEditor::', () => {
 
   it('should show a text field for the ingredient name', () => {
     const wrapper = shallow(<IngredientEditor ingredient={fakeIngredient} />)
-    const textField = wrapper.find('TextField')
+    const textField = wrapper.find('Input')
     expect(textField.length).toBe(1)
     expect(textField.props().id).toBe('ingredient-name-123')
     expect(textField.props().defaultValue).toBe(fakeIngredient.name)
-    expect(textField.props().floatingLabelText).toBe('Ingredient Name')
   })
 })

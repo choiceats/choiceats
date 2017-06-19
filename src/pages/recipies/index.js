@@ -6,7 +6,7 @@ import styled from 'styled-components'
 
 import Recipe from './recipe'
 
-import RecipeEditor from './components/recipe-editor'
+// import RecipeEditor from './components/recipe-editor'
 
 import type { Recipe as TRecipe } from 'types'
 
@@ -42,7 +42,7 @@ export class RecipeList extends Component {
     if (recipes) {
       return (
         <ListContainer>
-          <RecipeEditor recipe={null} />
+          {/* <RecipeEditor recipe={null} /> */}
           <List>
             { recipes.map(recipe => (
               <Recipe key={recipe.id}

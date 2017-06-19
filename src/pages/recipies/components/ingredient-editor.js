@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import TextField from 'material-ui/TextField'
+import { Input } from 'semantic-ui-react'
 
 import type { Ingredient } from 'types'
 
@@ -12,10 +12,9 @@ export default class IngredientEditor extends Component {
   render () {
     const { ingredient } = this.props
     return <div>
-      <TextField
+      <Input
         id={`ingredient-name-${ingredient.id}`}
         defaultValue={ingredient.name}
-        floatingLabelText='Ingredient Name'
       />
     </div>
   }
