@@ -32,14 +32,12 @@ export default ({
         <Ingredients ingredients={recipe.ingredients} />
         <Instructions>{ recipe.instructions }</Instructions>
       </CardText>
-      {allowEdits && isLoggedIn && <CardActions>
+      {allowEdits && isLoggedIn && <CardActions style={{textAlign: 'right'}}>
         <FlatButton label='Edit'
-          backgroundColor={colors.colorWarningHighlight}
-          hoverColor={colors.colorWarning}
+          primary
           onClick={() => console.log('not yet connected to editRecipe mutation')} />
         <FlatButton label='Delete'
-          backgroundColor={colors.colorDanger}
-          hoverColor={colors.colorDangerHighlight}
+          secondary
           onClick={() => console.log('not yet connected to deleteRecipe mutation')} />
       </CardActions>}
 
