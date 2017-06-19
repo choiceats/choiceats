@@ -4,8 +4,6 @@ import { ApolloProvider } from 'react-apollo'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
-
 import { client } from '../services/apollo-client'
 import { user } from '../state/reducers'
 
@@ -27,11 +25,9 @@ class App extends Component {
   render () {
     return (
       <ApolloProvider store={store} client={client}>
-        <MuiThemeProvider>
-          <Router>
-            <RecipeApp />
-          </Router>
-        </MuiThemeProvider>
+        <Router>
+          <RecipeApp />
+        </Router>
       </ApolloProvider>
     )
   }

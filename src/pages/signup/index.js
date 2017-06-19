@@ -3,8 +3,7 @@
 import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
 
-import TextField from 'material-ui/TextField'
-import RaisedButton from 'material-ui/RaisedButton'
+import { Button, Form, Input } from 'semantic-ui-react'
 
 import { FormContainer, FormHeader } from '../form-styles'
 
@@ -46,40 +45,39 @@ export default class Signup extends Component {
 
     return (
       <FormContainer>
-        <form onSubmit={(e) => this.handleSubmit(e)}>
+        <Form onSubmit={(e) => this.handleSubmit(e)}>
           <FormHeader>Signup!</FormHeader>
-          <TextField
-            floatingLabelText='Email'
-            fullWidth
-            onChange={(e) => this.handleInputChange('email', e)} />
+          <Form.Field>
+            <label>Email</label>
+            <Input onChange={(e) => this.handleInputChange('email', e)} />
+          </Form.Field>
+          <Form.Field>
+            <label>First Name</label>
+            <Input onChange={(e) => this.handleInputChange('firstName', e)} />
+          </Form.Field>
+          <Form.Field>
+            <label>Last Name</label>
+            <Input onChange={(e) => this.handleInputChange('lastName', e)} />
+          </Form.Field>
+          <Form.Field>
+            <label>Password</label>
+            <Input
+              type='password'
+              onChange={(e) => this.handleInputChange('password', e)} />
+          </Form.Field>
+          <Form.Field>
+            <label>Re-Password</label>
+            <Input type='password' onChange={(e) => this.handleInputChange('passwordCheck', e)} />
+          </Form.Field>
 
-          <TextField
-            floatingLabelText='First Name'
-            fullWidth
-            onChange={(e) => this.handleInputChange('firstName', e)} />
-
-          <TextField
-            floatingLabelText='Last Name'
-            fullWidth
-            onChange={(e) => this.handleInputChange('lastName', e)} />
-
-          <TextField
-            floatingLabelText='Password'
-            fullWidth
-            onChange={(e) => this.handleInputChange('password', e)} />
-
-          <TextField
-            floatingLabelText='Re-Password'
-            fullWidth
-            onChange={(e) => this.handleInputChange('passwordCheck', e)} />
           <br />
-          <RaisedButton
-            label='Signup'
-            fullWidth
+          <Button
+            type='submit'
             primary
-            onClick={(e) => this.handleSubmit(e)}
-          />
-        </form>
+            onClick={(e) => this.handleSubmit(e)}>
+            Signup
+          </Button>
+        </Form>
       </FormContainer>
     )
   }

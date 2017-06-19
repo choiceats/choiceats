@@ -28,7 +28,7 @@ describe('Login Form', () => {
   })
 
   it('should display a login form', () => {
-    expect(wrapper.find('form').length).toBe(1)
+    expect(wrapper.find('Form').length).toBe(1)
   })
 
   it('should update the email address when input has changed', () => {
@@ -36,7 +36,7 @@ describe('Login Form', () => {
     event.target = document.createElement('input')
     event.target.value = 'jim@gmail.com'
 
-    wrapper.find('TextField').at(0).simulate('change', event)
+    wrapper.find('Input').at(0).simulate('change', event)
     expect(wrapper.instance().email).toEqual('jim@gmail.com')
   })
 
@@ -45,7 +45,7 @@ describe('Login Form', () => {
     event.target = document.createElement('input')
     event.target.value = 'secret'
 
-    wrapper.find('TextField').at(1).simulate('change', event)
+    wrapper.find('Input').at(1).simulate('change', event)
     expect(wrapper.instance().password).toEqual('secret')
   })
 
@@ -60,7 +60,7 @@ describe('Login Form', () => {
     })
 
     it('should prefent the default form submition', () => {
-      wrapper.find('RaisedButton').simulate('click', event)
+      wrapper.find('Form').simulate('submit', event)
       expect(event.preventDefault).toBeCalled()
     })
 
@@ -69,7 +69,7 @@ describe('Login Form', () => {
       event.preventDefault = jest.fn()
       wrapper.instance().email = 'joe'
       wrapper.instance().password = 'secret'
-      wrapper.find('RaisedButton').simulate('click', event)
+      wrapper.find('Form').simulate('submit', event)
 
       expect(login).toBeCalledWith('joe', 'secret')
     })
@@ -82,7 +82,7 @@ describe('Login Form', () => {
         return loginPromise
       })
       event.preventDefault = jest.fn()
-      wrapper.find('RaisedButton').simulate('click', event)
+      wrapper.find('Form').simulate('submit', event)
 
       await loginPromise
       expect(history.push).toBeCalledWith('/')
@@ -99,7 +99,7 @@ describe('Login Form', () => {
       })
 
       event.preventDefault = jest.fn()
-      wrapper.find('RaisedButton').simulate('click', event)
+      wrapper.find('Form').simulate('submit', event)
 
       try {
         await loginPromise

@@ -36,7 +36,7 @@ export class RecipeApp extends Component {
         <Route exact path='/' component={RecipeList} />
 
         <Route path='/login/sign-up' component={Signup} />
-        <Route path='/login' component={Login} />
+        <Route exact path='/login' component={Login} />
       </div>
     )
   }

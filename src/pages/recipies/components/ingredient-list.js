@@ -3,5 +3,5 @@ import Ingredient from './ingredient'
 
 export default ({ingredients}) =>
   <ul>
-    { ingredients.map(ingredient => <Ingredient ingredient={ingredient} />)}
+    { ingredients.map((ingredient, index) => <Ingredient key={index} ingredient={ingredient} />)}
   </ul>

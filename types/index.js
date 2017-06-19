@@ -7,16 +7,25 @@ export type ConnectedProps = {
 }
 
 export type User = {
-  id: string;
+  id: number;
   token: string;
 }
 
-export type Ingredient = {
+export type Unit = {
+  id: number;
   name: string;
+  abbr: string;
+}
+
+export type Ingredient = {
+  id: ?number;  // Null id means unsaved
+  name: string;
+  unit: ?Unit;
+  quantity: number;
 }
 
 export type Recipe = {
-  id: ?string;
+  id: ?number;  // Null id means unsaved
   author: string;
   ingredients: Ingredient[];
   instructions: string;

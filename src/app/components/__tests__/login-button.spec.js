@@ -20,6 +20,6 @@ describe('Login Form', () => {
   })
 
   it('should display a Button', () => {
-    expect(wrapper.find('FlatButton').length).toBe(1)
+    expect(wrapper.find('Button').length).toBe(1)
   })
 })

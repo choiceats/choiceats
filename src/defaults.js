@@ -1,5 +1,5 @@
 // @flow
-import type { Recipe } from 'types'
+import type { Recipe, Ingredient } from 'types'
 
 export const DEFAULT_RECIPE: Recipe = {
   id: null,
@@ -7,4 +7,11 @@ export const DEFAULT_RECIPE: Recipe = {
   author: '',
   instructions: '',
   ingredients: []
+}
+
+export const DEFAULT_INGREDIENT: Ingredient = {
+  id: null,
+  quantity: 1,
+  unit: null,
+  name: 'Can of Soup'
 }

@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
-import FlatButton from 'material-ui/FlatButton'
+import { Button } from 'semantic-ui-react'
 
 import { logout } from '../../state/action-creators'
 
@@ -20,9 +20,9 @@ export class LogoutButton extends Component {
 
   render () {
     return (
-      <FlatButton
-        onClick={this.onClick}
-        label='Logout' />
+      <Button onClick={this.onClick}>
+        Logout
+      </Button>
     )
   }
 

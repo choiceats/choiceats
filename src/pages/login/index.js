@@ -1,12 +1,10 @@
-/* global Event, KeyboardEvent, HTMLInputElement, MouseEvent */
+/* global Event, KeyboardEvent, HTMLInputElement */
 // @flow
 import React, { Component } from 'react'
 import { withRouter, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 
-import TextField from 'material-ui/TextField'
-import RaisedButton from 'material-ui/RaisedButton'
-import FlatButton from 'material-ui/FlatButton'
+import { Button, Form, Input } from 'semantic-ui-react'
 
 import { login as loginAction } from '../../state/action-creators'
 import { login } from '../../services/users'
@@ -68,39 +66,34 @@ export class Login extends Component {
     const { match } = this.props
     return (
       <FormContainer>
-        <form onSubmit={this.onSubmit}>
+        <Form onSubmit={this.onSubmit}>
           <FormHeader>Login</FormHeader>
-          <TextField
-            onChange={this.onEmailChange}
-            hintText='Email'
-            floatingLabelText='Email Address'
-            fullWidth
-            type='text'
-          />
-          <TextField
-            onChange={this.onPasswordChange}
-            hintText='Password Field'
-            floatingLabelText='Password'
-            fullWidth
-            type='password'
-          />
+          <Form.Field>
+            <label>Email</label>
+            <Input onChange={this.onEmailChange} />
+          </Form.Field>
+          <Form.Field>
+            <label>Password</label>
+            <Input
+              onChange={this.onPasswordChange}
+              type='password' />
+          </Form.Field>
+
           <br />
-          <RaisedButton
-            label='Login'
-            fullWidth
-            primary
-            onClick={(e: MouseEvent) => this.handleSubmit(e)}
-          />
+          <Button primary type='submit'>
+            Login
+          </Button>
+
           <br />
           <br />
-          <FlatButton>
+          <Button>
             <Link to={`${match.url}/sign-up`}>Sign up</Link>
-          </FlatButton>
+          </Button>
           { (this.state.error)
             ? <Error id='form-error'>BAD PASSWORD!</Error>
             : null
           }
-        </form>
+        </Form>
       </FormContainer>
     )
   }

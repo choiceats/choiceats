@@ -1,11 +1,12 @@
 // @flow
 import React from 'react'
 import { Link } from 'react-router-dom'
-import FlatButton from 'material-ui/FlatButton'
+
+import { Button } from 'semantic-ui-react'
 
 const LoginButton = () => (
   <Link to='/login'>
-    <FlatButton label='Login' />
+    <Button>Login</Button>
   </Link>
 )
 
