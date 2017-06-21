@@ -19,7 +19,7 @@ export default ({
   allowEdits
 }: RecipeProps) => {
   return (
-    <Card>
+    <Card className={{width: '100%'}}>
       <Card.Content>
         <Card.Header>{recipe.name}</Card.Header>
         <Card.Meta>{recipe.author}</Card.Meta>

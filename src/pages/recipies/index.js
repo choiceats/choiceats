@@ -43,21 +43,41 @@ export class RecipeList extends Component {
       return (
         <ListContainer>
           {/* <RecipeEditor recipe={null} /> */}
-          <List>
-            { recipes.map(recipe => (
+          <ListColumn>
+            { recipes.filter((r, i) => i % 3 === 0).map(recipe => (
               <Recipe key={recipe.id}
                 recipe={recipe}
                 allowEdits
                 isLoggedIn={isLoggedIn} />
             )) }
-          </List>
+          </ListColumn>
+          <ListColumn>
+            { recipes.filter((r, i) => i % 3 === 1).map(recipe => (
+              <Recipe key={recipe.id}
+                recipe={recipe}
+                allowEdits
+                isLoggedIn={isLoggedIn} />
+            )) }
+          </ListColumn>
+          <ListColumn>
+            { recipes.filter((r, i) => i % 3 === 2).map(recipe => (
+              <Recipe key={recipe.id}
+                recipe={recipe}
+                allowEdits
+                isLoggedIn={isLoggedIn} />
+            )) }
+          </ListColumn>
         </ListContainer>
       )
     }
   }
 }
 
-const List = styled.div``
+const ListColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 32%;
+`
 
 export const Loading = styled.div`
   width: 100%;
@@ -70,9 +90,9 @@ export const Loading = styled.div`
 `
 
 const ListContainer = styled.div`
+  padding-top: 30px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: space-around;
 `
 
 const recipeQuery = gql`
