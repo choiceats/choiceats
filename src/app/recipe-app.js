@@ -5,7 +5,7 @@ import { Route, Redirect, withRouter } from 'react-router-dom'
 
 import Login from '../pages/login'
 import Signup from '../pages/signup'
-import RecipeList from '../pages/recipies'
+import RecipeList from '../pages/recipes'
 import Navbar from './components/navbar'
 
 import type { ContextRouter } from 'react-router-dom'
