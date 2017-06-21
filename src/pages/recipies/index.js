@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import { gql, graphql } from 'react-apollo'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
 import Recipe from './recipe'
 
@@ -73,6 +73,16 @@ export class RecipeList extends Component {
   }
 }
 
+const slideIn = keyframes`
+from {
+  margin-left: 100%;
+}
+
+to {
+  margin-left: 0%;
+}
+`
+
 const ListColumn = styled.div`
   display: flex;
   flex-direction: column;
@@ -90,6 +100,7 @@ export const Loading = styled.div`
 `
 
 const ListContainer = styled.div`
+  animation: ${slideIn} .5s linear;
   padding-top: 30px;
   display: flex;
   justify-content: space-around;

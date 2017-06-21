@@ -1,6 +1,8 @@
 
 declare module 'styled-components' {
-  declare module.exports: {
+  declare export function keyframes (any): string;
+  
+  declare export default {
     div: (strings: string[]) => ReactClass;
     h1: any;
     p: (strings: string[]) => ReactClass;
