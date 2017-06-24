@@ -20,9 +20,24 @@ export const typeDefs = `
     name: String
   }
  
+  input LikeRecipePayload {
+    recipeId: ID!
+    userId: ID!
+  }
+
+  type LikeRecipeResult {
+    recipeId: ID!
+    userId: ID!
+    likeStatus: Boolean!
+  }
+
 
 # This type specifies the entry points into our API.
 type Query {
   recipes: [Recipe]    
+}
+
+type Mutation {
+  likeRecipe
 }
 `

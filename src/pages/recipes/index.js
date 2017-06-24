@@ -8,7 +8,9 @@ import Recipe from './recipe'
 
 // import RecipeEditor from './components/recipe-editor'
 
-import type { Recipe as TRecipe } from 'types'
+import type {
+  Recipe as TRecipe
+} from 'types'
 
 type RecipeListProps = {
   data?: {
