@@ -29,7 +29,10 @@ export class RecipeList extends Component {
   props: RecipeListProps;
 
   render () {
-    const { data, isLoggedIn } = this.props
+    const {
+      data,
+      isLoggedIn
+    } = this.props
     if (!data) return <Loading>loading</Loading>
 
     const { recipes, loading } = data
@@ -90,6 +93,7 @@ const recipeQuery = gql`
       description
       imageUrl
       name
+      likes
     }
   }
 `
