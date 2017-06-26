@@ -5,7 +5,7 @@ import { Card, Icon } from 'semantic-ui-react'
 
 import Ingredients from './components/ingredient-list'
 
-import type { TRecipe } from '../../types'
+import type { Recipe as TRecipe } from '../../types'
 
 import { gql, graphql } from 'react-apollo'
 
@@ -35,6 +35,7 @@ export const Recipe = ({
   likes = 0,
   youLike,
   mutate,
+  userId,
   ...other
 }: RecipeProps) => {
   return (
@@ -54,7 +55,7 @@ export const Recipe = ({
               mutate({
                 variables: {
                   recipeId: recipe.id,
-                  userId: 1
+                  userId
                 }
               })
                 .then(({ data }) => {
@@ -63,8 +64,8 @@ export const Recipe = ({
                   console.log('there was an error sending the query', error)
                 })
             }} />
-          {(likes || youLike) && <span>by you and {likes} {likes > 1 ? 'others' : 'other'}</span>}
-          {!likes && <span>Be the first to like this</span>}
+          {(recipe.likes || youLike) && <span>by you and {recipe.likes - 1} {likes > 1 ? 'others' : 'other'}</span>}
+          {!recipe.likes && <span>Be the first to like this</span>}
         </Card.Description>
       </Card.Content>
     </Card>

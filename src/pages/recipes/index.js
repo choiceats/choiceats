@@ -33,7 +33,11 @@ export class RecipeList extends Component {
   props: RecipeListProps;
 
   render () {
-    const { data, isLoggedIn } = this.props
+    const {
+      data,
+      isLoggedIn,
+      userId
+    } = this.props
     if (!data) return <Loading>loading</Loading>
 
     const { recipes, loading } = data
@@ -50,6 +54,7 @@ export class RecipeList extends Component {
               <Recipe key={recipe.id}
                 recipe={recipe}
                 allowEdits
+                userId={userId}
                 isLoggedIn={isLoggedIn} />
             )) }
           </ListColumn>
@@ -58,6 +63,7 @@ export class RecipeList extends Component {
               <Recipe key={recipe.id}
                 recipe={recipe}
                 allowEdits
+                userId={userId}
                 isLoggedIn={isLoggedIn} />
             )) }
           </ListColumn>
@@ -66,6 +72,7 @@ export class RecipeList extends Component {
               <Recipe key={recipe.id}
                 recipe={recipe}
                 allowEdits
+                userId={userId}
                 isLoggedIn={isLoggedIn} />
             )) }
           </ListColumn>
@@ -126,6 +133,7 @@ const recipeQuery = gql`
       }
       instructions
       name
+      likes
     }
   }
 `
