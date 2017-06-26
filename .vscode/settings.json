@@ -4,5 +4,5 @@
   "standard.autoFixOnSave": true,
   "javascript.validate.enable": false,
   "typescript.validate.enable": false,
-  "flow.useNPMPackagedFlow": true
+  "flowide.useCodeSnippetsOnFunctionSuggest": false
 }

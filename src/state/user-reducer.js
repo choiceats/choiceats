@@ -11,24 +11,26 @@ type UserState = {
 
 type UserAction = {
   type: string;
-  payload: any;
+  payload: UserState;
 }
 
-export const user = (state: UserState = { ...getUser() }, action: UserAction) => {
-  switch (action.type) {
-    case LOGIN:
-      return { ...action.payload }
+export const user
+  : (UserState, UserAction) => UserState =
+    (state = { ...getUser() }, action) => {
+      switch (action.type) {
+        case LOGIN:
+          return { ...action.payload }
 
-    case LOGOUT:
-      clearUser()
-      return {
-        token: null,
-        name: null,
-        email: null,
-        userId: null
+        case LOGOUT:
+          clearUser()
+          return {
+            token: null,
+            name: null,
+            email: null,
+            userId: null
+          }
+
+        default:
+          return state
       }
-
-    default:
-      return state
-  }
-}
+    }

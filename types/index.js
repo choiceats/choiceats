@@ -30,8 +30,15 @@ export type Recipe = {
   ingredients: Ingredient[];
   instructions: string;
   name: string;
+  description: string;
 }
 
 export type Action = {
   type: ?string
+}
+
+export type AppState = {
+  ui: {
+    selectedRecipeId: number
+  }
 }

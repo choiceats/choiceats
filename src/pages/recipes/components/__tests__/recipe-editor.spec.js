@@ -17,7 +17,8 @@ describe('Recipe: Recipe Editor::', () => {
       author: 'Some dude',
       name: 'Cool Recipe',
       instructions: '1. Mix well',
-      ingredients: []
+      ingredients: [],
+      description: ''
     }
   })
 

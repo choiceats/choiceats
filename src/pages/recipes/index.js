@@ -6,8 +6,6 @@ import styled, { keyframes } from 'styled-components'
 
 import Recipe from './recipe'
 
-// import RecipeEditor from './components/recipe-editor'
-
 import type { Recipe as TRecipe } from 'types'
 
 type RecipeListProps = {
@@ -42,31 +40,14 @@ export class RecipeList extends Component {
     if (recipes) {
       return (
         <ListContainer>
-          {/* <RecipeEditor recipe={null} /> */}
-          <ListColumn>
-            { recipes.filter((r, i) => i % 3 === 0).map(recipe => (
-              <Recipe key={recipe.id}
-                recipe={recipe}
-                allowEdits
-                isLoggedIn={isLoggedIn} />
+          { recipes.map(recipe => (
+            <Recipe key={recipe.id}
+              recipe={recipe}
+              allowEdits
+              likes={3}
+              youLike={false}
+              isLoggedIn={isLoggedIn} />
             )) }
-          </ListColumn>
-          <ListColumn>
-            { recipes.filter((r, i) => i % 3 === 1).map(recipe => (
-              <Recipe key={recipe.id}
-                recipe={recipe}
-                allowEdits
-                isLoggedIn={isLoggedIn} />
-            )) }
-          </ListColumn>
-          <ListColumn>
-            { recipes.filter((r, i) => i % 3 === 2).map(recipe => (
-              <Recipe key={recipe.id}
-                recipe={recipe}
-                allowEdits
-                isLoggedIn={isLoggedIn} />
-            )) }
-          </ListColumn>
         </ListContainer>
       )
     }
@@ -83,12 +64,6 @@ to {
 }
 `
 
-const ListColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 32%;
-`
-
 export const Loading = styled.div`
   width: 100%;
   font-size: 36px;
@@ -102,8 +77,8 @@ export const Loading = styled.div`
 const ListContainer = styled.div`
   animation: ${slideIn} .5s linear;
   padding-top: 30px;
-  display: flex;
-  justify-content: space-around;
+  width: 500px;
+  margin: auto;
 `
 
 const recipeQuery = gql`
@@ -114,15 +89,6 @@ const recipeQuery = gql`
       authorId
       description
       imageUrl
-      ingredients {
-        name
-        unit {
-          name
-          abbr
-        }
-        quantity
-      }
-      instructions
       name
     }
   }

@@ -6,7 +6,8 @@ export const DEFAULT_RECIPE: Recipe = {
   name: '',
   author: '',
   instructions: '',
-  ingredients: []
+  ingredients: [],
+  description: ''
 }
 
 export const DEFAULT_INGREDIENT: Ingredient = {
@@ -14,4 +15,8 @@ export const DEFAULT_INGREDIENT: Ingredient = {
   quantity: 1,
   unit: null,
   name: 'Can of Soup'
+}
+
+export const DEFAULT_UI_STATE = {
+  selectedRecipeId: null
 }

@@ -1,45 +1,39 @@
 // @flow
 import React from 'react'
-import styled from 'styled-components'
-import { Card, Icon } from 'semantic-ui-react'
+import { connect } from 'react-redux'
 
-import Ingredients from './components/ingredient-list'
+import RecipeSimple from './recipe-simple'
+import RecipeDetail from './recipe-detail'
 
-import type { Recipe } from '../../types'
+import type { ConnectedProps, AppState } from 'types'
+import type { RecipeProps } from './prop-types.flow'
 
-type RecipeProps = {
-  recipe: Recipe;
-  isLoggedIn: boolean;
-  allowEdits: boolean;
+type MappedProps = {
+  selectedRecipeId: number
 }
 
-export default ({
-  recipe,
-  isLoggedIn,
-  allowEdits,
-  likes=0,
-  youLike,
-}: RecipeProps) => {
-  return (
-    <Card >
-      <Card.Content>
-        <Card.Header>{recipe.name}</Card.Header>
-        <Card.Meta>{recipe.author}</Card.Meta>
-        <Card.Description>
-          <Ingredients ingredients={recipe.ingredients} />
-          <Instructions>{ recipe.instructions }</Instructions>
-        </Card.Description>
-        <Card.Description>
-          <Icon name="smile" size="big" color={youLike ? "green" : "black"} onClick={()=>console.log('onclick function not implemented yet')} />
-          {(likes || youLike) && <span>by you and {likes} {likes > 1 ? 'others' : 'other'}</span>}
-          {!likes && <span>Be the first to like this</span>}
-        </Card.Description>
-      </Card.Content>
-    </Card>
-  )
-}
+export const Recipe
+  : (RecipeProps & ConnectedProps & MappedProps) => React.Element<*> =
+    ({
+      recipe,
+      isLoggedIn,
+      allowEdits,
+      likes = 0,
+      youLike,
+      selectedRecipeId,
+      dispatch
+    }) => {
+      return selectedRecipeId === recipe.id
+        ? <RecipeDetail recipe={recipe} />
+        : <RecipeSimple recipe={recipe} />
+    }
 
-const Instructions = styled.div`
-  margin-top: 15px;
-  white-space: pre-wrap;
-`
+const mapStateToProps
+  : (AppState) => MappedProps =
+    (state) => {
+      return {
+        selectedRecipeId: state.ui.selectedRecipeId
+      }
+    }
+
+export default connect(mapStateToProps)(Recipe)

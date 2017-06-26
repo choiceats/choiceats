@@ -1,5 +1,5 @@
 // @flow
-import { LOGOUT, LOGIN } from './action-types'
+import { LOGOUT, LOGIN, SELECT_RECIPE } from './action-types'
 import type { User, Action } from 'types'
 
 // Testing out this syntax for defining a var, its type then
@@ -12,9 +12,18 @@ export const logout
       }
     }
 
-export const login = (userInfo: User) => {
-  return {
-    type: LOGIN,
-    payload: userInfo
-  }
-}
+export const login
+  : (User) => Action =
+    (userInfo) => {
+      return {
+        type: LOGIN,
+        payload: userInfo
+      }
+    }
+
+export const selectRecipe
+  : (recipeId: number) => Action & { payload: number } =
+    (recipeId) => ({
+      type: SELECT_RECIPE,
+      payload: recipeId
+    })

@@ -32,7 +32,7 @@
     "standard": "standard",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "ci-test": "CI=true yarn test",
+    "ci-test": "CI=true npm run test",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },

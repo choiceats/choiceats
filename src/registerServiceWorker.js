@@ -1,3 +1,4 @@
+// @flow
 // In production, we register a service worker to serve assets from local cache.
 
 // This lets the app load faster on subsequent visits in production, and gives
@@ -11,7 +12,15 @@
 export default function register () {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`
+      const publicUrl = process.env.PUBLIC_URL
+        ? process.env.PUBLIC_URL
+        : ''
+
+      const swUrl = `${publicUrl}/service-worker.js`
+      if (!navigator.serviceWorker) {
+        return
+      }
+
       navigator.serviceWorker
         .register(swUrl)
         .then(registration => {
@@ -22,7 +31,7 @@ export default function register () {
             }
 
             installingWorker.onstatechange = () => {
-              if (installingWorker.state === 'installed') {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker) {
                 if (navigator.serviceWorker.controller) {
                   // At this point, the old content will have been purged and
                   // the fresh content will have been added to the cache.
@@ -47,7 +56,7 @@ export default function register () {
 }
 
 export function unregister () {
-  if ('serviceWorker' in navigator) {
+  if (navigator.serviceWorker) {
     navigator.serviceWorker.ready.then(registration => {
       registration.unregister()
     })

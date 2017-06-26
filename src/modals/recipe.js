@@ -23,6 +23,7 @@ export const typeDefs = `
 
 # This type specifies the entry points into our API.
 type Query {
-  recipes: [Recipe]    
+  recipes: [Recipe]
+  recipe: Recipe
 }
 `
