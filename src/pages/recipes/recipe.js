@@ -21,11 +21,12 @@ export const Recipe
       likes = 0,
       youLike,
       selectedRecipeId,
-      dispatch
+      dispatch,
+      userId
     }) => {
       return selectedRecipeId === recipe.id
-        ? <RecipeDetail recipe={recipe} />
-        : <RecipeSimple recipe={recipe} />
+        ? <RecipeDetail recipe={recipe} userId={userId} />
+        : <RecipeSimple recipe={recipe} userId={userId} />
     }
 
 const mapStateToProps

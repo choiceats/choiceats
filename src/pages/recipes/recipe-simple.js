@@ -19,6 +19,7 @@ export const RecipeSimple
     likes = 0,
     youLike,
     mutate,
+    userId,
     dispatch
   }) => (
     <Card>
@@ -29,9 +30,24 @@ export const RecipeSimple
           <Description>{ recipe.description }</Description>
         </Card.Description>
         <Card.Description>
-          <Icon name='smile' size='big' color={youLike ? 'green' : 'black'} onClick={() => console.log('onclick function not implemented yet')} />
-          {(likes || youLike) && <span>by you and {likes} {likes > 1 ? 'others' : 'other'}</span>}
-          {!likes && <span>Be the first to like this</span>}
+          <Icon name='smile'
+            size='big'
+            color={youLike ? 'green' : 'black'}
+            onClick={() => {
+              mutate({
+                variables: {
+                  recipeId: recipe.id,
+                  userId
+                }
+              })
+                .then(({ data }) => {
+                  console.log('got data', data)
+                }).catch((error) => {
+                  console.log('there was an error sending the query', error)
+                })
+            }} />
+          {(recipe.likes) && <span>Likes: {recipe.likes} {recipe.youLike && '(including you)'}</span>}
+          {!recipe.likes && <span>Be the first to like this</span>}
         </Card.Description>
       </Card.Content>
     </Card>
