@@ -46,7 +46,7 @@ export const RecipeSimple
                   console.log('there was an error sending the query', error)
                 })
             }} />
-          {(recipe.likes) && <span>Likes: {recipe.likes} {recipe.youLike && "(including you)"}</span>}
+          {(recipe.likes) && <span>Likes: {recipe.likes} {recipe.youLike && '(including you)'}</span>}
           {!recipe.likes && <span>Be the first to like this</span>}
         </Card.Description>
       </Card.Content>

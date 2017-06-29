@@ -52,7 +52,7 @@ export const RecipeDetail
                   console.log('there was an error sending the query', error)
                 })
             }} />
-          {(recipe.likes) && <span>Likes: {recipe.likes} {recipe.youLike && "(including you)"}</span>}
+          {(recipe.likes) && <span>Likes: {recipe.likes} {recipe.youLike && '(including you)'}</span>}
           {!recipe.likes && <span>Be the first to like this</span>}
         </Card.Description>
       </Card.Content>
@@ -113,5 +113,5 @@ const options
 
 export default compose(
   graphql(likeRecipe),
-  graphql(recipeQuery, { options }),
+  graphql(recipeQuery, { options })
 )(RecipeDetail)
