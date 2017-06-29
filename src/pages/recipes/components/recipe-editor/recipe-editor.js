@@ -3,8 +3,8 @@ import React, { Component } from 'react'
 import { Input, Form } from 'semantic-ui-react'
 
 import RichEditor from './rich-editor'
-import IngredientEditor from './ingredient-editor'
-import { DEFAULT_RECIPE } from '../../../defaults'
+// import RecipeIngredientsEditor from './recipe-ingredients-editor'
+import { DEFAULT_RECIPE } from '../../../../defaults'
 
 import type { Recipe } from 'types'
 
@@ -29,7 +29,7 @@ export default class RecipeEditor extends Component {
         </Form.Field>
 
         <h2>Ingredients</h2>
-        { useRecipe.ingredients.map(i => <IngredientEditor key={i.id} ingredient={i} />) }
+        {/* { useRecipe.ingredients.map(i => <IngredientEditor key={i.id} ingredient={i} />) } */}
 
         <RichEditor text={useRecipe.instructions} />
       </Form>

@@ -25,7 +25,8 @@
     "react-scripts": "1.0.6",
     "react-test-renderer": "^15.5.4",
     "selenium-webdriver": "^3.4.0",
-    "standard": "^10.0.2"
+    "standard": "^10.0.2",
+    "@storybook/react": "^3.1.7"
   },
   "scripts": {
     "flow": "flow",
@@ -34,7 +35,9 @@
     "build": "react-scripts build",
     "ci-test": "CI=true npm run test",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "storybook": "start-storybook -p 9009 -s public",
+    "build-storybook": "build-storybook -s public"
   },
   "standard": {
     "plugins": [
