@@ -18,5 +18,6 @@ export const DEFAULT_INGREDIENT: Ingredient = {
 }
 
 export const DEFAULT_UI_STATE = {
-  selectedRecipeId: null
+  selectedRecipeId: null,
+  editingRecipeId: null
 }

@@ -62,6 +62,7 @@ const recipeQuery = gql`
       description
       imageUrl
       name
+      instructions
       ingredients {
         name
         unit {
@@ -76,13 +77,10 @@ const recipeQuery = gql`
 
 const options
 : (RecipeProps) => any =
-  ({recipe}) => {
-    console.log('OROPS', recipe)
-    return {
-      variables: {
-        recipeId: recipe.id
-      }
+  ({recipe}) => ({
+    variables: {
+      recipeId: recipe.id
     }
-  }
+  })
 
 export default graphql(recipeQuery, { options })(RecipeDetail)

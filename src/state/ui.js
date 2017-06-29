@@ -1,10 +1,11 @@
 // @flow
-import { SELECT_RECIPE } from './action-types'
+import { SELECT_RECIPE, EDIT_RECIPE } from './action-types'
 import { DEFAULT_UI_STATE } from '../defaults'
 import type { Action } from 'types'
 
 type UiState = {
-  selectedRecipeId: ?number
+  selectedRecipeId: ?number,
+  editingRecipeId: ?number
 }
 
 export const ui
@@ -12,7 +13,16 @@ export const ui
     (state = DEFAULT_UI_STATE, action) => {
       switch (action.type) {
         case SELECT_RECIPE:
-          return { selectedRecipeId: action.payload }
+          return {
+            ...state,
+            selectedRecipeId: action.payload
+          }
+
+        case EDIT_RECIPE:
+          return {
+            ...state,
+            editingRecipeId: action.payload
+          }
       }
       return state
     }
