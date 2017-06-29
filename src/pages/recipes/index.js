@@ -31,7 +31,8 @@ export class RecipeList extends Component {
   render () {
     const {
       data,
-      isLoggedIn
+      isLoggedIn,
+      userId
     } = this.props
     if (!data) return <Loading>loading</Loading>
 
@@ -49,6 +50,7 @@ export class RecipeList extends Component {
               allowEdits
               likes={3}
               youLike={false}
+              userId={userId}
               isLoggedIn={isLoggedIn} />
             )) }
         </ListContainer>

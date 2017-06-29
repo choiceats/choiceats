@@ -31,6 +31,7 @@ export type Recipe = {
   instructions: string;
   name: string;
   description: string;
+  likes?: number;
 }
 
 export type Action = {

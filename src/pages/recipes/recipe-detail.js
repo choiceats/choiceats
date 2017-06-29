@@ -1,7 +1,7 @@
 // @flow
 import React from 'react'
 import styled from 'styled-components'
-import { gql, graphql } from 'react-apollo'
+import { compose, gql, graphql } from 'react-apollo'
 import { Card, Icon } from 'semantic-ui-react'
 
 import IngredientList from './components/ingredient-list'
@@ -16,13 +16,15 @@ export const RecipeDetail
   isLoggedIn,
   allowEdits,
   likes = 0,
+  userId,
+  mutate,
   youLike
 }) => {
   if (data.loading) {
     return <div> LOADING...</div>
   }
 
-  const recipe = data.recipe
+  const recipe = data.recipe || {}
   return (
     <Card>
       <Card.Content>
@@ -34,9 +36,24 @@ export const RecipeDetail
           <Directions>{ recipe.instructions }</Directions>
         </Card.Description>
         <Card.Description>
-          <Icon name='smile' size='big' color={youLike ? 'green' : 'black'} onClick={() => console.log('onclick function not implemented yet')} />
-          {(likes || youLike) && <span>by you and {likes} {likes > 1 ? 'others' : 'other'}</span>}
-          {!likes && <span>Be the first to like this</span>}
+          <Icon name='smile'
+            size='big'
+            color={youLike ? 'green' : 'black'}
+            onClick={() => {
+              mutate({
+                variables: {
+                  recipeId: recipe.id,
+                  userId
+                }
+              })
+                .then(({ data }) => {
+                  console.log('got data', data)
+                }).catch((error) => {
+                  console.log('there was an error sending the query', error)
+                })
+            }} />
+          {(recipe.likes) && <span>Likes: {recipe.likes} {recipe.youLike && "(including you)"}</span>}
+          {!recipe.likes && <span>Be the first to like this</span>}
         </Card.Description>
       </Card.Content>
     </Card>
@@ -71,6 +88,17 @@ const recipeQuery = gql`
         }
         quantity
       }
+      likes
+    }
+  }
+`
+
+const likeRecipe = gql`
+  mutation likeRecipe($userId: ID!, $recipeId: ID!) {
+    likeRecipe(userId: $userId, recipeId: $recipeId) {
+      id
+      likes
+      youLike
     }
   }
 `
@@ -83,4 +111,7 @@ const options
     }
   })
 
-export default graphql(recipeQuery, { options })(RecipeDetail)
+export default compose(
+  graphql(likeRecipe),
+  graphql(recipeQuery, { options }),
+)(RecipeDetail)
