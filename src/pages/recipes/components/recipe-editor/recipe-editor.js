@@ -1,22 +1,36 @@
 // @flow
 import React, { Component } from 'react'
-import { Input, Form } from 'semantic-ui-react'
+import { Input, Form, TextArea, Button } from 'semantic-ui-react'
 
-import RichEditor from './rich-editor'
-// import RecipeIngredientsEditor from './recipe-ingredients-editor'
+import RecipeIngredientsEditor from './recipe-ingredients-editor'
 import { DEFAULT_RECIPE } from '../../../../defaults'
 
 import type { Recipe } from 'types'
 
 type RecipeEditorProps = {
-  recipe: ?Recipe
+  recipe: ?Recipe;
+  units: any;
+  ingredients: any;
 }
 
 export default class RecipeEditor extends Component {
   props: RecipeEditorProps
+  state: {
+    editingRecipe: Recipe
+  }
+
+  componetWillMount () {
+    this.setState(() => ({
+
+    }))
+  }
+
+  addIngredient () {
+    console.log('oh ya')
+  }
 
   render () {
-    const { recipe } = this.props
+    const { recipe, ingredients, units } = this.props
     const useRecipe = recipe || DEFAULT_RECIPE
 
     return (
@@ -24,14 +38,27 @@ export default class RecipeEditor extends Component {
         <h1>Recipe Editor</h1>
         <Form.Field>
           <label>Recipe Name</label>
-          <Input
-            defaultValue={useRecipe.name} />
+          <Input value={useRecipe.name} />
         </Form.Field>
 
-        <h2>Ingredients</h2>
-        {/* { useRecipe.ingredients.map(i => <IngredientEditor key={i.id} ingredient={i} />) } */}
+        <Form.Field>
+          <label>Description</label>
+          <TextArea value={useRecipe.description} />
+        </Form.Field>
 
-        <RichEditor text={useRecipe.instructions} />
+        <Form.Field>
+          <label>Instructions</label>
+          <TextArea value={useRecipe.instructions} />
+        </Form.Field>
+
+        <RecipeIngredientsEditor
+          recipe={recipe}
+          ingredients={ingredients}
+          units={units} />
+        <Form.Field>
+          <Button primary
+            onClick={() => this.addIngredient()}>Add Ingredient</Button>
+        </Form.Field>
       </Form>
     )
   }

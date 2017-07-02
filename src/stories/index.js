@@ -2,7 +2,7 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import RecipeIngredientsEditor from '../pages/recipes/components/recipe-editor/recipe-ingredients-editor'
+import RecipeEditor from '../pages/recipes/components/recipe-editor/recipe-editor'
 
 import 'semantic-ui-css/semantic.min.css'
 // import { action } from '@storybook/addon-actions'
@@ -58,9 +58,45 @@ const TEST_UNITS = [
   }
 ]
 
-storiesOf('IngredientEditor', module)
-  .add('basic', () =>
-    <RecipeIngredientsEditor
+const TEST_RECIPE = {
+  id: 1,
+  name: 'Apple Pie',
+  author: 'n',
+  description: 'Smells good apple pie',
+  ingredients: [{
+    id: 1,
+    name: 'Apples',
+    quantity: 1,
+    unit: {
+      id: 1,
+      name: 'count',
+      abbr: ''
+    }
+  }, {
+    id: 2,
+    name: 'Flour',
+    quantity: 2,
+    unit: {
+      id: 3,
+      name: 'Cups',
+      abbr: 'C.'
+    }
+  }],
+  instructions: 'bake at 450 degrees'
+}
+
+// storiesOf('IngredientEditor', module)
+//   .add('basic', () =>
+//     <RecipeIngredientsEditor
+//       recipe={TEST_RECIPE}
+//       units={TEST_UNITS}
+//       ingredients={TEST_INGREDIENT} />
+//   )
+
+storiesOf('RecipeEditor', module)
+  .add('Basic', () =>
+    <RecipeEditor
       units={TEST_UNITS}
-      ingredients={TEST_INGREDIENT} />
+      ingredients={TEST_INGREDIENT}
+      recipe={TEST_RECIPE} />
   )

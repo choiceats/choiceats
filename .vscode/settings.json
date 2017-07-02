@@ -2,6 +2,7 @@
 {
   "standard.enable": true,
   "standard.autoFixOnSave": true,
+  "editor.minimap.enabled":false,
   "javascript.validate.enable": false,
   "typescript.validate.enable": false,
   "flowide.useCodeSnippetsOnFunctionSuggest": false
