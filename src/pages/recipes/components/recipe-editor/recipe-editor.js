@@ -1,6 +1,6 @@
 // @flow
 import React, { Component } from 'react'
-import { Input, Form, TextArea, Button } from 'semantic-ui-react'
+import { Input, Form, TextArea } from 'semantic-ui-react'
 
 import RecipeIngredientsEditor from './recipe-ingredients-editor'
 import { DEFAULT_RECIPE } from '../../../../defaults'
@@ -55,10 +55,7 @@ export default class RecipeEditor extends Component {
           recipe={recipe}
           ingredients={ingredients}
           units={units} />
-        <Form.Field>
-          <Button primary
-            onClick={() => this.addIngredient()}>Add Ingredient</Button>
-        </Form.Field>
+
       </Form>
     )
   }
