@@ -1,103 +1,20 @@
 // @flow
 import React, { Component } from 'react'
-import { gql, graphql } from 'react-apollo'
-import { connect } from 'react-redux'
-import styled, { keyframes } from 'styled-components'
+import { Route } from 'react-router-dom'
 
-import Recipe from './recipe'
+import RecipeList from './recipe-list'
+import RecipeDetail from './recipe-detail'
+import RecipeEditor from './recipe-editor'
 
-import type { Recipe as TRecipe } from 'types'
-
-type RecipeListProps = {
-  data?: {
-    loading: string;
-    error: string;
-    recipes: TRecipe[];
-  },
-  userId: string;
-  isLoggedIn: boolean;
-}
-
-const mapStateToProps = (state) => {
-  return {
-    isLoggedIn: state.user.token,
-    userId: state.user.userId
-  }
-}
-
-export class RecipeList extends Component {
-  props: RecipeListProps;
-
+export default class RecipeRoute extends Component {
   render () {
-    const {
-      data,
-      isLoggedIn,
-      userId
-    } = this.props
-    if (!data) return <Loading>loading</Loading>
-
-    const { recipes, loading } = data
-    if (loading) {
-      return <Loading>loading..</Loading>
-    }
-
-    if (recipes) {
-      return (
-        <ListContainer>
-          { recipes.map(recipe => (
-            <Recipe key={recipe.id}
-              recipe={recipe}
-              allowEdits
-              likes={3}
-              youLike={false}
-              userId={userId}
-              isLoggedIn={isLoggedIn} />
-            )) }
-        </ListContainer>
-      )
-    }
+    const { match } = this.props
+    return (
+      <div>
+        <Route path={`${match.url}recipe/:recipeId/edit`} exact component={RecipeEditor} />
+        <Route path={`${match.url}recipe/:recipeId`} exact component={RecipeDetail} />
+        <Route path={match.url} exact component={RecipeList} />
+      </div>
+    )
   }
 }
-
-const slideIn = keyframes`
-from {
-  margin-left: 100%;
-}
-
-to {
-  margin-left: 0%;
-}
-`
-
-export const Loading = styled.div`
-  width: 100%;
-  font-size: 36px;
-  font-family: sans-serif;
-  text-align: center;
-  padding: 20px 40px;
-  border: 1px solid #224466;
-  background-color: salmon;
-`
-
-const ListContainer = styled.div`
-  animation: ${slideIn} .5s linear;
-  padding-top: 30px;
-  width: 500px;
-  margin: auto;
-`
-
-const recipeQuery = gql`
-  query RecipeQuery {
-    recipes {
-      id
-      author
-      authorId
-      description
-      imageUrl
-      name
-      likes
-    }
-  }
-`
-
-export default connect(mapStateToProps)(graphql(recipeQuery)(RecipeList))

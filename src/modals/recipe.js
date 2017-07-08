@@ -6,16 +6,22 @@ export const typeDefs = `
   }
 
   type Ingredient {
+    id: ID
+    name: String!
+  }
+
+  type RecipeIngredient {
+    id: ID
     name: String!
     unit: Unit
-    quantity: Int!
+    quantity: Float!
   }
 
   type Recipe {
     id: ID
     author: String
     authorId: String
-    ingredients: [Ingredient]
+    ingredients: [RecipeIngredient]
     instructions: String
     name: String
   }
@@ -36,6 +42,8 @@ export const typeDefs = `
 type Query {
   recipes: [Recipe]
   recipe: Recipe
+  units: [Unit]
+  ingredients: [Ingredient]
 }
 
 type Mutation {

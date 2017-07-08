@@ -1,8 +1,9 @@
 /* globals HTMLInputElement, HTMLTextAreaElement, Event */
 // @flow
 import React, { Component } from 'react'
+import { gql, graphql } from 'react-apollo'
 import cloneDeep from 'lodash.clonedeep'
-import { Input, Form, TextArea } from 'semantic-ui-react'
+import { Input, Form, TextArea, Button } from 'semantic-ui-react'
 
 import RecipeIngredientsEditor from './recipe-ingredients-editor'
 import { DEFAULT_RECIPE } from '../../../../defaults'
@@ -13,13 +14,14 @@ type RecipeEditorProps = {
   recipe: ?Recipe;
   units: any;
   ingredients: any;
+  mutate: (any) => window.Promise;
 }
 
 type RecipeEditorState = {
   editingRecipe: Recipe;
 }
 
-export default class RecipeEditor extends Component {
+export class RecipeEditor extends Component {
   props: RecipeEditorProps
   state: RecipeEditorState
 
@@ -48,6 +50,17 @@ export default class RecipeEditor extends Component {
       }
       this.setState(() => ({editingRecipe: newRecipe}))
     }
+  }
+
+  onSave (e: Event, recipe: Recipe) {
+    const { mutate } = this.props
+    e.preventDefault()
+
+    mutate({
+      variables: { recipe }
+    })
+    .then(({data}) => console.log('Got back data', data))
+    .catch((error) => console.error('Got back error', error))
   }
 
   render () {
@@ -84,7 +97,18 @@ export default class RecipeEditor extends Component {
           updateIngredients={newIngredients => this.updateIngredients(newIngredients)}
           units={units} />
 
+        <Button onClick={e => this.onSave(e, editingRecipe)}>Save</Button>
       </Form>
     )
   }
 }
+
+const gqlStuff = gql`
+mutation submitRepository($repoFullName: Recipe!) {
+  submitRepository(repoFullName: $repoFullName) {
+    recipe
+  }
+}
+`
+
+export default graphql(gqlStuff)(RecipeEditor)

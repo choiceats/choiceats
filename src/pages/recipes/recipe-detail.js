@@ -2,6 +2,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { compose, gql, graphql } from 'react-apollo'
+import { Link } from 'react-router-dom'
 import { Card, Icon } from 'semantic-ui-react'
 
 import IngredientList from './components/ingredient-list'
@@ -28,33 +29,17 @@ export const RecipeDetail
   return (
     <Card>
       <Card.Content>
-        <Card.Header>{recipe.name}</Card.Header>
+        <Card.Header>
+          <Link to='/'>Back</Link>
+          {recipe.name}
+        </Card.Header>
         <Card.Meta>{recipe.author}</Card.Meta>
         <Card.Description>
           <Description>{ recipe.description }</Description>
           <IngredientList ingredients={recipe.ingredients} />
           <Directions>{ recipe.instructions }</Directions>
         </Card.Description>
-        <Card.Description>
-          <Icon name='smile'
-            size='big'
-            color={youLike ? 'green' : 'black'}
-            onClick={() => {
-              mutate({
-                variables: {
-                  recipeId: recipe.id,
-                  userId
-                }
-              })
-                .then(({ data }) => {
-                  console.log('got data', data)
-                }).catch((error) => {
-                  console.log('there was an error sending the query', error)
-                })
-            }} />
-          {(recipe.likes) && <span>Likes: {recipe.likes} {recipe.youLike && '(including you)'}</span>}
-          {!recipe.likes && <span>Be the first to like this</span>}
-        </Card.Description>
+        <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link>
       </Card.Content>
     </Card>
   )
@@ -93,25 +78,16 @@ const recipeQuery = gql`
   }
 `
 
-const likeRecipe = gql`
-  mutation likeRecipe($userId: ID!, $recipeId: ID!) {
-    likeRecipe(userId: $userId, recipeId: $recipeId) {
-      id
-      likes
-      youLike
-    }
+type RouteMatch = {
+  match: { params: { recipeId: string } };
+}
+type RecipeQueryOptions = (RouteMatch) => any;
+const options: RecipeQueryOptions = ({match}) => ({
+  variables: {
+    recipeId: match.params.recipeId
   }
-`
-
-const options
-: (RecipeProps) => any =
-  ({recipe}) => ({
-    variables: {
-      recipeId: recipe.id
-    }
-  })
+})
 
 export default compose(
-  graphql(likeRecipe),
   graphql(recipeQuery, { options })
 )(RecipeDetail)

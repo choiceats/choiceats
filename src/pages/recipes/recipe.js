@@ -1,40 +1,41 @@
 // @flow
-import React from 'react'
-import { connect } from 'react-redux'
+import React, { Component } from 'react'
+import styled from 'styled-components'
+import { Link } from 'react-router-dom'
+import { Card } from 'semantic-ui-react'
 
-import RecipeSimple from './recipe-simple'
-import RecipeDetail from './recipe-detail'
-
-import type { ConnectedProps, AppState } from 'types'
+import type { ConnectedProps } from 'types'
 import type { RecipeProps } from './prop-types.flow'
 
-type MappedProps = {
-  selectedRecipeId: number
+export default class Recipe extends Component {
+  props: RecipeProps & { mutate: Function } & ConnectedProps
+
+  render () {
+    const {
+      recipe,
+      youLike,
+      userId
+    } = this.props
+
+    return (
+      <Link to={{pathname: `/recipe/${recipe.id}`}}>
+        <Card>
+          <Card.Content>
+            <Card.Header>
+              {recipe.name}
+            </Card.Header>
+            <Card.Meta>{recipe.author}</Card.Meta>
+            <Card.Description>
+              <Description>{ recipe.description }</Description>
+            </Card.Description>
+          </Card.Content>
+        </Card>
+      </Link>
+    )
+  }
 }
 
-export const Recipe
-  : (RecipeProps & ConnectedProps & MappedProps) => React.Element<*> =
-    ({
-      recipe,
-      isLoggedIn,
-      allowEdits,
-      likes = 0,
-      youLike,
-      selectedRecipeId,
-      dispatch,
-      userId
-    }) => {
-      return selectedRecipeId === recipe.id
-        ? <RecipeDetail recipe={recipe} userId={userId} />
-        : <RecipeSimple recipe={recipe} userId={userId} />
-    }
-
-const mapStateToProps
-  : (AppState) => MappedProps =
-    (state) => {
-      return {
-        selectedRecipeId: state.ui.selectedRecipeId
-      }
-    }
-
-export default connect(mapStateToProps)(Recipe)
+const Description = styled.div`
+  margin-top: 15px;
+  white-space: pre-wrap;
+`
