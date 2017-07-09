@@ -1,46 +1,26 @@
 // @flow
 import React from 'react'
-import styled from 'styled-components'
 import { compose, gql, graphql } from 'react-apollo'
-import { Link } from 'react-router-dom'
-import RecipeEditorComponent from './components/recipe-editor/recipe-editor'
+import RecipeDetail from './recipe-detail'
 
 import type { Recipe } from 'types'
-import type { RecipeProps } from './prop-types.flow'
 
-export const RecipeEditor
-:(RecipeProps & { data: {recipe: Recipe } }) => React.Element<*> =
-({
-  data,
-  isLoggedIn,
-  allowEdits,
-  likes = 0,
-  userId,
-  mutate,
-  youLike
-}) => {
+type ApolloRecipeProps = {
+  data: {
+    loading: boolean;
+    recipe: Recipe
+  }
+}
+
+export const RecipeDetailApollo:(ApolloRecipeProps) => React.Element<any> =
+({ data }) => {
   if (data.loading) {
     return <div> LOADING...</div>
   }
 
   const recipe = data.recipe || {}
-  return (
-    <RecipeEditorComponent
-      units={data.units}
-      ingredients={data.ingredients}
-      recipe={recipe} />
-  )
+  return <RecipeDetail recipe={recipe} />
 }
-
-const Description = styled.div`
-  margin-top: 15px;
-  white-space: pre-wrap;
-`
-
-const Directions = styled.div`
-  margin-top: 15px;
-  white-space: pre-wrap;
-`
 
 const recipeQuery = gql`
   query RecipeById($recipeId: Int!) {
@@ -53,27 +33,14 @@ const recipeQuery = gql`
       name
       instructions
       ingredients {
-        id
         name
         unit {
-          id
           name
           abbr
         }
         quantity
       }
       likes
-    }
-
-    units {
-      id
-      name
-      abbr
-    }
-
-    ingredients {
-      id
-      name
     }
   }
 `
@@ -90,4 +57,4 @@ const options: RecipeQueryOptions = ({match}) => ({
 
 export default compose(
   graphql(recipeQuery, { options })
-)(RecipeEditor)
+)(RecipeDetailApollo)

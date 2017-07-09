@@ -18,6 +18,11 @@ export type Unit = {
 }
 
 export type Ingredient = {
+  id: number;
+  name: string;
+}
+
+export type RecipeIngredient = {
   id: ?number;  // Null id means unsaved
   name: string;
   unit: ?Unit;
@@ -27,7 +32,7 @@ export type Ingredient = {
 export type Recipe = {
   id: ?number;  // Null id means unsaved
   author: string;
-  ingredients: Ingredient[];
+  ingredients: RecipeIngredient[];
   instructions: string;
   name: string;
   description: string;

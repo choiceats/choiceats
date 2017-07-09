@@ -5,8 +5,8 @@ import { Breadcrumb } from 'semantic-ui-react'
 import styled from 'styled-components'
 
 import RecipeList from './recipe-list'
-import RecipeDetail from './recipe-detail'
-import RecipeEditor from './recipe-editor'
+import RecipeDetail from './recipe-detail.apollo'
+import RecipeEditor from './recipe-editor.apollo'
 
 export default class RecipeRoute extends Component {
   render () {
@@ -29,7 +29,7 @@ export default class RecipeRoute extends Component {
     const { pathname } = this.props.location
     const breadcrumbs = []
     breadcrumbs.push(
-      <Breadcrumb.Section>
+      <Breadcrumb.Section key={breadcrumbs.length}>
         <NavLink to='/'>Recipe List</NavLink>
       </Breadcrumb.Section>
     )
@@ -37,9 +37,9 @@ export default class RecipeRoute extends Component {
     const parts = pathname.split('/').splice(1)
     if (pathname.indexOf('recipe') > -1) {
       const navTo = `/recipe/${parts[1]}`
-      breadcrumbs.push(<Breadcrumb.Divider icon='right angle' />)
+      breadcrumbs.push(<Breadcrumb.Divider icon='right angle' key={breadcrumbs.length} />)
       breadcrumbs.push(
-        <Breadcrumb.Section>
+        <Breadcrumb.Section key={breadcrumbs.length}>
           <NavLink to={navTo}>Recipe</NavLink>
         </Breadcrumb.Section>
       )
@@ -47,9 +47,9 @@ export default class RecipeRoute extends Component {
 
     if (pathname.indexOf('edit') > -1) {
       const navTo = `/recipe/${parts[1]}/edit`
-      breadcrumbs.push(<Breadcrumb.Divider icon='right angle' />)
+      breadcrumbs.push(<Breadcrumb.Divider icon='right angle' key={breadcrumbs.length} />)
       breadcrumbs.push(
-        <Breadcrumb.Section>
+        <Breadcrumb.Section key={breadcrumbs.length}>
           <NavLink to={navTo}>Edit</NavLink>
         </Breadcrumb.Section>
       )

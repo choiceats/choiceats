@@ -4,18 +4,16 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Card } from 'semantic-ui-react'
 
-import type { ConnectedProps } from 'types'
 import type { RecipeProps } from './prop-types.flow'
 
 export default class Recipe extends Component {
-  props: RecipeProps & { mutate: Function } & ConnectedProps
+  props: RecipeProps
 
   render () {
-    const {
-      recipe,
-      youLike,
-      userId
-    } = this.props
+    const { recipe } = this.props
+    if (!recipe.id) {
+      return null
+    }
 
     return (
       <Link to={{pathname: `/recipe/${recipe.id}`}}>

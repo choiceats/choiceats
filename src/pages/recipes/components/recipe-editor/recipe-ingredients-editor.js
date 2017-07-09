@@ -5,7 +5,7 @@ import cloneDeep from 'lodash.clonedeep'
 import { Form, Button } from 'semantic-ui-react'
 
 import RecipeIngredientEditor from './recipe-ingredient-editor'
-import { DEFAULT_INGREDIENT } from '../../../../defaults'
+import { DEFAULT_RECIPE_INGREDIENT } from '../../../../defaults'
 
 type RecipeIngredientsEditorProps = {
   recipeIngredients: any[];
@@ -22,7 +22,7 @@ export default class RecipeIngredientsEditor extends Component {
 
     const { recipeIngredients, updateIngredients } = this.props
     const recipeIngredientsCopy = cloneDeep(recipeIngredients)
-    recipeIngredientsCopy.push(cloneDeep(DEFAULT_INGREDIENT))
+    recipeIngredientsCopy.push(cloneDeep(DEFAULT_RECIPE_INGREDIENT))
     updateIngredients(recipeIngredientsCopy)
   }
 
