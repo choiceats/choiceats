@@ -1,14 +1,30 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { Typeahead } from 'react-typeahead'
 
-export default ({ingredients, selectedIngredient, onSelect}) => {
-  return <Typeahead
-    options={ingredients}
-    value={selectedIngredient.name}
-    displayOption='name'
-    searchOptions={(inputValue, options) =>
-      options.filter(o => o.name.toLowerCase().indexOf(inputValue.toLowerCase()) > -1)
+export default class IngredientTypeahead extends Component {
+  // TODO: This is a recommended hack to get around a bug not
+  // updating the value.
+  // https://github.com/fmoo/react-typeahead/issues/214#issuecomment-245218554
+  componentWillReceiveProps (nextProps) {
+    const { selectedIngredient } = this.props
+    if (selectedIngredient !== nextProps.selectedIngredient) {
+      console.log('changed')
+      this.typeahead.setState({entryValue: nextProps.selectedIngredient.name})
     }
-    onOptionSelected={ingredient => onSelect(ingredient)}
-    maxVisible={4} />
+  }
+
+  render () {
+    const {ingredients, selectedIngredient, onSelect} = this.props
+
+    return <Typeahead
+      ref={ref => { this.typeahead = ref }}
+      options={ingredients}
+      value={selectedIngredient ? selectedIngredient.name : ''}
+      displayOption='name'
+      searchOptions={(inputValue, options) =>
+        options.filter(o => o.name.toLowerCase().indexOf(inputValue.toLowerCase()) > -1)
+      }
+      onOptionSelected={ingredient => onSelect(ingredient)}
+      maxVisible={6} />
+  }
 }

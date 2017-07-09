@@ -1,7 +1,7 @@
 // @flow
-import React from 'react'
+import React, { Component } from 'react'
 import { compose, gql, graphql } from 'react-apollo'
-import RecipeEditorComponent from './components/recipe-editor/recipe-editor'
+import RecipeEditor from './components/recipe-editor/recipe-editor'
 
 import type { Recipe, Ingredient, Unit } from 'types'
 
@@ -10,22 +10,70 @@ type RecipeApolloData = {
     recipe: Recipe;
     ingredients: Ingredient[];
     units: Unit[];
-  }
+  },
+  mutate: (any)=> window.Promise
 }
 
-export const RecipeEditor: (RecipeApolloData) => React.Element<any> =
-({ data }) => {
-  if (data.loading) {
-    return <div>LOADING...</div>
+// TODO: not sure why we are getting a __typename
+function stripOutTypenames (obj) {
+  if (obj === null || obj === undefined) {
+    return obj
   }
 
-  const recipe = data.recipe || {}
-  return (
-    <RecipeEditorComponent
-      units={data.units}
-      ingredients={data.ingredients}
-      recipe={recipe} />
-  )
+  if (typeof obj !== 'object') {
+    console.log('scaler?', obj)
+    return obj
+  }
+
+  if (obj instanceof String) {
+    console.log('sgring?', obj)
+    return obj
+  }
+
+  if (obj instanceof Array) {
+    console.log('array?', obj)
+    return obj.map(o => stripOutTypenames(o))
+  }
+
+  const keys = Object.keys(obj)
+  const newObj = {}
+  keys.forEach(k => {
+    if (k !== '__typename') {
+      newObj[k] = stripOutTypenames(obj[k])
+    }
+  })
+
+  return newObj
+}
+
+export class RecipeEditorApollo extends Component {
+  props: RecipeApolloData
+
+  onSave (recipe: Recipe) {
+    const { mutate } = this.props
+    const cleanRecipe = stripOutTypenames(recipe)
+    mutate({
+      variables: { recipe: cleanRecipe }
+    })
+    .then(({data}) => console.log('Got back data', data))
+    .catch((error) => console.error('Got back error', error))
+  }
+
+  render () {
+    const { data } = this.props
+    if (data.loading) {
+      return <div>LOADING...</div>
+    }
+
+    const recipe = data.recipe || {}
+    return (
+      <RecipeEditor
+        onSave={this.onSave.bind(this)}
+        units={data.units}
+        ingredients={data.ingredients}
+        recipe={recipe} />
+    )
+  }
 }
 
 const recipeQuery = gql`
@@ -64,6 +112,31 @@ const recipeQuery = gql`
   }
 `
 
+const gqlStuff = gql`
+mutation SaveRecipe($recipe: RecipeInput!) {
+  saveRecipe(recipe: $recipe) {
+    id
+    author
+    authorId
+    description
+    imageUrl
+    name
+    instructions
+    ingredients {
+      id
+      name
+      unit {
+        id
+        name
+        abbr
+      }
+      quantity
+    }
+    likes
+  }
+}
+`
+
 type RouteMatch = {
   match: { params: { recipeId: string } };
 }
@@ -75,5 +148,6 @@ const options: RecipeQueryOptions = ({match}) => ({
 })
 
 export default compose(
+  graphql(gqlStuff),
   graphql(recipeQuery, { options })
-)(RecipeEditor)
+)(RecipeEditorApollo)

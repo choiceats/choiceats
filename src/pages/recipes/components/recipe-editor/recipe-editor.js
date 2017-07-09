@@ -1,7 +1,6 @@
 /* globals HTMLInputElement, HTMLTextAreaElement, Event */
 // @flow
 import React, { Component } from 'react'
-import { gql, graphql } from 'react-apollo'
 import cloneDeep from 'lodash.clonedeep'
 import { Input, Form, TextArea, Button } from 'semantic-ui-react'
 
@@ -14,14 +13,14 @@ type RecipeEditorProps = {
   recipe: ?Recipe;
   units: any;
   ingredients: any;
-  mutate: (any) => window.Promise;
+  onSave: (Recipe) => void;
 }
 
 type RecipeEditorState = {
   editingRecipe: Recipe;
 }
 
-export class RecipeEditor extends Component {
+export default class RecipeEditor extends Component {
   props: RecipeEditorProps
   state: RecipeEditorState
 
@@ -53,14 +52,9 @@ export class RecipeEditor extends Component {
   }
 
   onSave (e: Event, recipe: Recipe) {
-    const { mutate } = this.props
+    const { onSave } = this.props
     e.preventDefault()
-
-    mutate({
-      variables: { recipe }
-    })
-    .then(({data}) => console.log('Got back data', data))
-    .catch((error) => console.error('Got back error', error))
+    onSave(recipe)
   }
 
   render () {
@@ -102,13 +96,3 @@ export class RecipeEditor extends Component {
     )
   }
 }
-
-const gqlStuff = gql`
-mutation submitRepository($repoFullName: Recipe!) {
-  submitRepository(repoFullName: $repoFullName) {
-    recipe
-  }
-}
-`
-
-export default graphql(gqlStuff)(RecipeEditor)
