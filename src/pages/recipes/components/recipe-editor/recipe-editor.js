@@ -84,18 +84,18 @@ export class RecipeEditor extends Component {
             value={editingRecipe.description} />
         </Form.Field>
 
+        <RecipeIngredientsEditor
+          recipeIngredients={editingRecipe.ingredients}
+          ingredients={ingredients}
+          updateIngredients={newIngredients => this.updateIngredients(newIngredients)}
+          units={units} />
+
         <Form.Field>
           <label>Instructions</label>
           <TextArea
             onChange={e => this.updateProp(e, 'instructions')}
             value={editingRecipe.instructions} />
         </Form.Field>
-
-        <RecipeIngredientsEditor
-          recipeIngredients={editingRecipe.ingredients}
-          ingredients={ingredients}
-          updateIngredients={newIngredients => this.updateIngredients(newIngredients)}
-          units={units} />
 
         <Button onClick={e => this.onSave(e, editingRecipe)}>Save</Button>
       </Form>

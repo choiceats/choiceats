@@ -3,14 +3,12 @@ import React from 'react'
 import styled from 'styled-components'
 import { compose, gql, graphql } from 'react-apollo'
 import { Link } from 'react-router-dom'
-import { Card, Icon } from 'semantic-ui-react'
-
-import IngredientList from './components/ingredient-list'
+import RecipeEditorComponent from './components/recipe-editor/recipe-editor'
 
 import type { Recipe } from 'types'
 import type { RecipeProps } from './prop-types.flow'
 
-export const RecipeDetail
+export const RecipeEditor
 :(RecipeProps & { data: {recipe: Recipe } }) => React.Element<*> =
 ({
   data,
@@ -27,21 +25,10 @@ export const RecipeDetail
 
   const recipe = data.recipe || {}
   return (
-    <Card fluid>
-      <Card.Content>
-        <Card.Header>
-          {recipe.name}
-        </Card.Header>
-        <Card.Meta>{recipe.author}</Card.Meta>
-        <Card.Description>
-          <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link>
-          <Description>{ recipe.description }</Description>
-          <IngredientList ingredients={recipe.ingredients} />
-          <Directions>{ recipe.instructions }</Directions>
-        </Card.Description>
-
-      </Card.Content>
-    </Card>
+    <RecipeEditorComponent
+      units={data.units}
+      ingredients={data.ingredients}
+      recipe={recipe} />
   )
 }
 
@@ -66,14 +53,27 @@ const recipeQuery = gql`
       name
       instructions
       ingredients {
+        id
         name
         unit {
+          id
           name
           abbr
         }
         quantity
       }
       likes
+    }
+
+    units {
+      id
+      name
+      abbr
+    }
+
+    ingredients {
+      id
+      name
     }
   }
 `
@@ -90,4 +90,4 @@ const options: RecipeQueryOptions = ({match}) => ({
 
 export default compose(
   graphql(recipeQuery, { options })
-)(RecipeDetail)
+)(RecipeEditor)

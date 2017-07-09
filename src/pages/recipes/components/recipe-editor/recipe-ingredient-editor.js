@@ -58,6 +58,7 @@ export default class RecipeIngredientEditor extends Component {
         <Form.Field
           control={Input}
           width={2}
+          size='mini'
           onChange={(e) => this.updateQuantity(e)}
           value={ingredient.quantity}
           placeholder='#' />
@@ -65,6 +66,7 @@ export default class RecipeIngredientEditor extends Component {
         <Form.Field
           control={Select}
           placeholder='Units'
+          size='mini'
           value={ingredient.unit ? ingredient.unit.id : ''}
           width={4}
           selection
@@ -74,6 +76,7 @@ export default class RecipeIngredientEditor extends Component {
         <Form.Field
           control={Dropdown}
           width={8}
+          size='mini'
           placeholder='Enter Ingredient'
           search
           selection
@@ -83,6 +86,7 @@ export default class RecipeIngredientEditor extends Component {
 
         <Form.Field>
           <Button
+            size='mini'
             negative
             onClick={(e) => remove(e, index)}>remove
           </Button>
