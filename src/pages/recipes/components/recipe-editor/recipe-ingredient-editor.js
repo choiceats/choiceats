@@ -1,7 +1,10 @@
 /* global Event, KeyboardEvent, HTMLInputElement */
 // @flow
 import React, { Component } from 'react'
-import { Dropdown, Select, Input, Form, Button } from 'semantic-ui-react'
+import { Select, Input, Form, Button } from 'semantic-ui-react'
+import IngredientTypeahead from './ingredient-typeahead'
+
+import type { Ingredient } from 'types'
 
 const BLANK_UNIT = {
   key: null,
@@ -37,9 +40,8 @@ export default class RecipeIngredientEditor extends Component {
     update(updatedIngredient, index)
   }
 
-  updateIngredient (e: Event, data: DropdownData) {
-    const { ingredient, update, index, ingredients } = this.props
-    const selectedIngredient = ingredients.find(i => i.id === data.value)
+  updateIngredient (selectedIngredient: Ingredient) {
+    const { ingredient, update, index } = this.props
     const updatedIngredient = {
       ...ingredient,
       ...selectedIngredient
@@ -58,7 +60,6 @@ export default class RecipeIngredientEditor extends Component {
         <Form.Field
           control={Input}
           width={2}
-          size='mini'
           onChange={(e) => this.updateQuantity(e)}
           value={ingredient.quantity}
           placeholder='#' />
@@ -73,22 +74,16 @@ export default class RecipeIngredientEditor extends Component {
           onChange={this.updateUnit.bind(this)}
           options={unitOptionsWithBlank} />
 
-        <Form.Field
-          control={Dropdown}
-          width={8}
-          size='mini'
-          placeholder='Enter Ingredient'
-          search
-          selection
-          onChange={this.updateIngredient.bind(this)}
-          value={ingredient.id || ''}
-          options={ingredients.map(i => ({ key: i.id, value: i.id, text: i.name }))} />
-
+        <Form.Field width={6}>
+          <IngredientTypeahead
+            selectedIngredient={ingredient}
+            onSelect={this.updateIngredient.bind(this)}
+            ingredients={ingredients} />
+        </Form.Field>
         <Form.Field>
           <Button
-            size='mini'
             negative
-            onClick={(e) => remove(e, index)}>remove
+            onClick={(e) => remove(e, index)}>X
           </Button>
         </Form.Field>
 

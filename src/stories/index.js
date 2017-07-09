@@ -2,10 +2,10 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 
-import RecipeEditor from '../pages/recipes/components/recipe-editor/recipe-editor'
+import IngredientTypeahead from '../pages/recipes/components/recipe-editor/ingredient-typeahead'
 
 import 'semantic-ui-css/semantic.min.css'
-// import { action } from '@storybook/addon-actions'
+
 // import { linkTo } from '@storybook/addon-links'
 
 // import { Button, Welcome } from '@storybook/react/demo'
@@ -16,7 +16,7 @@ import 'semantic-ui-css/semantic.min.css'
 //   .add('with text', () => <Button onClick={action('clicked')}>Hello Button</Button>)
 //   .add('with some emoji', () => <Button onClick={action('clicked')}>😀 😎 👍 💯</Button>)
 
-const TEST_INGREDIENT = [
+const TEST_INGREDIENTS = [
   {
     id: 1,
     name: 'Apples'
@@ -38,65 +38,14 @@ const TEST_INGREDIENT = [
   }
 ]
 
-const TEST_UNITS = [
-  {
-    id: 1,
-    name: 'Teaspoon',
-    abbr: 'tsp.'
-  }, {
-    id: 2,
-    name: 'Gallon',
-    abbr: 'g.'
-  }, {
-    id: 3,
-    name: 'Cups',
-    abbr: 'C.'
-  }, {
-    id: 4,
-    name: 'Liter',
-    abbr: 'L.'
-  }
-]
-
-const TEST_RECIPE = {
-  id: 1,
-  name: 'Apple Pie',
-  author: 'n',
-  description: 'Smells good apple pie',
-  ingredients: [{
-    id: 1,
-    name: 'Apples',
-    quantity: 1,
-    unit: {
-      id: 1,
-      name: 'count',
-      abbr: ''
-    }
-  }, {
-    id: 2,
-    name: 'Flour',
-    quantity: 2,
-    unit: {
-      id: 3,
-      name: 'Cups',
-      abbr: 'C.'
-    }
-  }],
-  instructions: 'bake at 450 degrees'
-}
-
-// storiesOf('IngredientEditor', module)
-//   .add('basic', () =>
-//     <RecipeIngredientsEditor
-//       recipe={TEST_RECIPE}
-//       units={TEST_UNITS}
-//       ingredients={TEST_INGREDIENT} />
-//   )
-
-storiesOf('RecipeEditor', module)
+storiesOf('Ingredient Selector', module)
   .add('Basic', () =>
-    <RecipeEditor
-      units={TEST_UNITS}
-      ingredients={TEST_INGREDIENT}
-      recipe={TEST_RECIPE} />
+    <IngredientTypeahead
+      ingredients={TEST_INGREDIENTS} />
+  )
+  .add('Carrot Selected', () =>
+    <IngredientTypeahead
+      onSelect={(data) => console.log(data)}
+      selectedIngredient={TEST_INGREDIENTS[2]}
+      ingredients={TEST_INGREDIENTS} />
   )
