@@ -19,7 +19,7 @@ export default class Recipe extends Component {
 
     return (
       <Link to={{pathname: `/recipe/${recipe.id}`}}>
-        <Card>
+        <Card fluid style={{marginBottom: 15}}>
           <Card.Content>
             <Card.Header>
               {recipe.name}

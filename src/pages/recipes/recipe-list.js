@@ -73,7 +73,7 @@ export const Loading = styled.div`
 `
 
 const ListContainer = styled.div`
-  animation: ${slideIn} .5s linear;
+  animation: ${slideIn} .125s linear;
   padding-top: 30px;
   width: 500px;
   margin: auto;
