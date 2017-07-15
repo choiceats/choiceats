@@ -1,5 +1,9 @@
 // @flow
-import { SELECT_RECIPE, EDIT_RECIPE } from './action-types'
+import {
+  EDIT_RECIPE,
+  SELECT_RECIPE,
+  SELECT_RECIPE_TO_DELETE
+} from './action-types'
 import { DEFAULT_UI_STATE } from '../defaults'
 import type { Action } from 'types'
 
@@ -16,6 +20,12 @@ export const ui
           return {
             ...state,
             selectedRecipeId: action.payload
+          }
+
+        case SELECT_RECIPE_TO_DELETE:
+          return {
+            ...state,
+            recipeIdToDelete: action.payload
           }
 
         case EDIT_RECIPE:

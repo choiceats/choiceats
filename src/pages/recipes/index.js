@@ -14,7 +14,7 @@ export default class RecipeRoute extends Component {
     return (
       <RecipesBody>
         <Breadcrumb>
-          { this.buildBreadcrumbSecions() }
+          { this.buildBreadcrumbSections() }
         </Breadcrumb>
         <RecipesContent>
           <Route path={`${match.url}recipe/:recipeId/edit`} exact component={RecipeEditor} />
@@ -25,7 +25,7 @@ export default class RecipeRoute extends Component {
     )
   }
 
-  buildBreadcrumbSecions () {
+  buildBreadcrumbSections (): Array<React.Element<*>> {
     const { pathname } = this.props.location
     const breadcrumbs = []
     breadcrumbs.push(

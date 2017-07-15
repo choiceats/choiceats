@@ -37,3 +37,32 @@ const Description = styled.div`
   margin-top: 15px;
   white-space: pre-wrap;
 `
+
+// =======
+// export const Recipe
+//  : (RecipeProps & ConnectedProps & MappedProps) => React.Element<*> =
+//    ({
+//      recipe,
+//      isLoggedIn,
+//      allowEdits,
+//      likes = 0,
+//      youLike,
+//      selectedRecipeId,
+//      recipeIdToDelete,
+//      dispatch,
+//      userId
+//    }) => {
+//      return selectedRecipeId === recipe.id
+//        ? <RecipeDetail recipe={recipe} userId={userId} recipeIdToDelete={recipeIdToDelete} dispatch={dispatch}/>
+//        : <RecipeSimple recipe={recipe} userId={userId} />
+//    }
+//
+// const mapStateToProps
+//  : (AppState) => MappedProps =
+//    (state) => {
+//      return {
+//        selectedRecipeId: state.ui.selectedRecipeId,
+//        recipeIdToDelete: state.ui.recipeIdToDelete
+//      }
+//    }
+// >>>>>>> Stashed changes
