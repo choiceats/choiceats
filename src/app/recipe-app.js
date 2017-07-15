@@ -2,6 +2,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Route, Redirect, withRouter } from 'react-router-dom'
+import styled from 'styled-components'
 
 import Login from '../pages/login'
 import Signup from '../pages/signup'
@@ -31,13 +32,17 @@ export class RecipeApp extends Component {
     }
 
     return (
-      <div>
-        <Navbar isLoggedIn={userToken !== null} />
-        <Route path='/' component={RecipeList} />
+      <AppContainer>
+        <NavContainer>
+          <Navbar isLoggedIn={userToken !== null} />
+        </NavContainer>
+        <TopRouteContainer>
+          <Route path='/' component={RecipeList} />
 
-        <Route path='/login/sign-up' component={Signup} />
-        <Route exact path='/login' component={Login} />
-      </div>
+          <Route path='/login/sign-up' component={Signup} />
+          <Route exact path='/login' component={Login} />
+        </TopRouteContainer>
+      </AppContainer>
     )
   }
 }
@@ -45,3 +50,19 @@ export class RecipeApp extends Component {
 export default withRouter(connect((state) => ({
   userToken: state.user.token
 }))(RecipeApp))
+
+const HEADER_HEIGHT = 50
+const AppContainer = styled.div`
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  flex-direction: column;
+`
+
+const TopRouteContainer = styled.div`
+  max-height: calc(100vh - ${HEADER_HEIGHT}px);
+  overflow: auto;
+`
+const NavContainer = styled.div`
+  height: ${HEADER_HEIGHT}px;
+`

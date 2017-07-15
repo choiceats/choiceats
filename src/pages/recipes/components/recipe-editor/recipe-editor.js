@@ -1,6 +1,7 @@
 /* globals HTMLInputElement, HTMLTextAreaElement, Event */
 // @flow
 import React, { Component } from 'react'
+import styled, { keyframes } from 'styled-components'
 import cloneDeep from 'lodash.clonedeep'
 import { Input, Form, TextArea, Button } from 'semantic-ui-react'
 
@@ -62,37 +63,54 @@ export default class RecipeEditor extends Component {
     const { ingredients, units } = this.props
 
     return (
-      <Form>
-        <h1>Recipe Editor</h1>
-        <Form.Field>
-          <label>Recipe Name</label>
-          <Input
-            onChange={e => this.updateProp(e, 'name')}
-            value={editingRecipe.name} />
-        </Form.Field>
+      <RecipeEditorContainer>
+        <Form>
+          <h1>Recipe Editor</h1>
+          <Form.Field>
+            <label>Recipe Name</label>
+            <Input
+              onChange={e => this.updateProp(e, 'name')}
+              value={editingRecipe.name} />
+          </Form.Field>
 
-        <Form.Field>
-          <label>Description</label>
-          <TextArea
-            onChange={e => this.updateProp(e, 'description')}
-            value={editingRecipe.description} />
-        </Form.Field>
+          <Form.Field>
+            <label>Description</label>
+            <TextArea
+              onChange={e => this.updateProp(e, 'description')}
+              value={editingRecipe.description} />
+          </Form.Field>
 
-        <RecipeIngredientsEditor
-          recipeIngredients={editingRecipe.ingredients}
-          ingredients={ingredients}
-          updateIngredients={newIngredients => this.updateIngredients(newIngredients)}
-          units={units} />
+          <RecipeIngredientsEditor
+            recipeIngredients={editingRecipe.ingredients}
+            ingredients={ingredients}
+            updateIngredients={newIngredients => this.updateIngredients(newIngredients)}
+            units={units} />
 
-        <Form.Field>
-          <label>Instructions</label>
-          <TextArea
-            onChange={e => this.updateProp(e, 'instructions')}
-            value={editingRecipe.instructions} />
-        </Form.Field>
+          <Form.Field>
+            <label>Instructions</label>
+            <TextArea
+              onChange={e => this.updateProp(e, 'instructions')}
+              value={editingRecipe.instructions} />
+          </Form.Field>
 
-        <Button onClick={e => this.onSave(e, editingRecipe)}>Save</Button>
-      </Form>
+          <Button onClick={e => this.onSave(e, editingRecipe)}>Save</Button>
+        </Form>
+      </RecipeEditorContainer>
     )
   }
 }
+
+const slideIn = keyframes`
+  from {
+    margin-left: 100%;
+  }
+
+  to {
+    margin-left: 0%;
+  }
+`
+
+const RecipeEditorContainer = styled.div`
+  animation: ${slideIn} .25s linear;
+  min-width: 600px;
+`

@@ -15,30 +15,27 @@ type RecipeApolloData = {
 }
 
 // TODO: not sure why we are getting a __typename
-function stripOutTypenames (obj) {
+function stripOutTypenames (obj: any) {
   if (obj === null || obj === undefined) {
     return obj
   }
 
   if (typeof obj !== 'object') {
-    console.log('scaler?', obj)
     return obj
   }
 
   if (obj instanceof String) {
-    console.log('sgring?', obj)
     return obj
   }
 
   if (obj instanceof Array) {
-    console.log('array?', obj)
     return obj.map(o => stripOutTypenames(o))
   }
 
   const keys = Object.keys(obj)
   const newObj = {}
   keys.forEach(k => {
-    if (k !== '__typename') {
+    if (typeof obj === 'object' && k !== '__typename') {
       newObj[k] = stripOutTypenames(obj[k])
     }
   })

@@ -31,7 +31,8 @@ describe('Recipe: Recipe Editor::', () => {
     defaultProps = {
       recipe: fakeRecipe,
       ingredients,
-      units
+      units,
+      onSave: () => {}
     }
   })
 
