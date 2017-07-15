@@ -10,4 +10,3 @@ describe('Recipe List', () => {
     expect(wrapper.dive().text()).toContain('LOADING')
   })
 })
-
