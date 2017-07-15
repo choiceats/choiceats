@@ -3,6 +3,8 @@ import React from 'react'
 import { compose, gql, graphql } from 'react-apollo'
 import RecipeDetail from './recipe-detail'
 import {connect} from 'react-redux'
+import { withRouter } from 'react-router-dom'
+import NotFound from '../not-found'
 
 import type { Recipe } from 'types'
 
@@ -15,6 +17,7 @@ type ApolloRecipeProps = {
   recipeIdToDelete: string,
   dispatch?: (action: {type: string}) => any,
   likeRecipe?: (arg: {}) => any,
+  history: {push: (string | Object) => void},
   deleteRecipe?: (arg: {variables: {recipeId: null | string | number}}) => any,
 }
 
@@ -25,20 +28,25 @@ export const RecipeDetailApollo:(ApolloRecipeProps) => React.Element<any> =
   recipeIdToDelete,
   dispatch = () => {},
   likeRecipe = () => {},
+  history = {},
   deleteRecipe = () => {}
 }) => {
+  const recipe = data.recipe || {}
+
   if (data.loading) {
     return <div> LOADING...</div>
-  }
-
-  const recipe = data.recipe || {}
-  return <RecipeDetail recipe={recipe}
-    selectedRecipeId={selectedRecipeId}
-    recipeIdToDelete={recipeIdToDelete}
-    likeRecipe={likeRecipe}
-    deleteRecipe={deleteRecipe}
-    dispatch={dispatch}
+  } else if (!data.loading && !recipe.id) {
+    return <NotFound />
+  } else {
+    return <RecipeDetail recipe={recipe}
+      selectedRecipeId={selectedRecipeId}
+      recipeIdToDelete={recipeIdToDelete}
+      likeRecipe={likeRecipe}
+      deleteRecipe={deleteRecipe}
+      dispatch={dispatch}
+      goToRecipeList={() => history.push('/')}
     />
+  }
 }
 
 const recipeQuery = gql`
@@ -98,8 +106,8 @@ const mapStateToProps = state => ({
   recipeIdToDelete: state.ui.recipeIdToDelete
 })
 
-export default connect(mapStateToProps)(compose(
+export default connect(mapStateToProps)(withRouter(compose(
   graphql(likeRecipe, {name: 'likeRecipe'}),
   graphql(deleteRecipe, {name: 'deleteRecipe'}),
   graphql(recipeQuery, { options })
-)(RecipeDetailApollo))
+)(RecipeDetailApollo)))

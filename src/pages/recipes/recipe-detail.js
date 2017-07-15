@@ -23,12 +23,14 @@ type OtherProps = {
 
 type HigherOrderProps = {
   dispatch: any,
+  goToRecipeList: () => void,
   likeRecipe: (arg: {}) => any,
   deleteRecipe: (arg: {variables: {recipeId: null | string | number}}) => any,
 }
 
 export const RecipeDetail: (RecipeProps & OtherProps & HigherOrderProps) => React.Element<*> =
   ({
+    goToRecipeList,
     dispatch,
     recipe,
     selectedRecipeId,
@@ -48,7 +50,7 @@ export const RecipeDetail: (RecipeProps & OtherProps & HigherOrderProps) => Reac
           <Card.Description>
             { recipe.id && <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link> }
             <Description>{ recipe.description }</Description>
-            <IngredientList ingredients={recipe.ingredients} />
+            <IngredientList ingredients={recipe.ingredients || []} />
             <Directions>{ recipe.instructions }</Directions>
           </Card.Description>
           <Card.Description>
@@ -78,7 +80,7 @@ export const RecipeDetail: (RecipeProps & OtherProps & HigherOrderProps) => Reac
             >Delete</Button>}
           </Card.Description>
         </Card.Content>
-        <Modal open={recipeIdToDelete === recipe.id}
+        <Modal open={recipeIdToDelete && recipeIdToDelete === recipe.id}
           onClose={() => dispatch(selectRecipeToDelete(null))}
           actions={
           [
@@ -89,6 +91,18 @@ export const RecipeDetail: (RecipeProps & OtherProps & HigherOrderProps) => Reac
                   recipeId: recipe.id || null
                 }
               })
+                .then(data => {
+                  const recipeWasDeleted = data &&
+                    data.data &&
+                    data.data.deleteRecipe &&
+                    data.data.deleteRecipe.deleted === true
+                  if (recipeWasDeleted) {
+                    goToRecipeList()
+                  }
+                })
+                .catch(error => {
+                  console.log('something went wrong:', error)
+                })
               dispatch(selectRecipeToDelete(null))
             }} >Yes</Button>
           ]
