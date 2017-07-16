@@ -60,5 +60,5 @@ const SearchHeader = styled.h2`
 const SearchHelpText = styled.p`
   margin: 0;
   font-size: smaller;
-  color: #333;
+  color: #888;
 `
