@@ -6,6 +6,8 @@ import IngredientTypeahead from './ingredient-typeahead'
 
 import type { Ingredient } from 'types'
 
+import './recipe-editor.css'
+
 const BLANK_UNIT = {
   key: null,
   value: null,
@@ -56,7 +58,7 @@ export default class RecipeIngredientEditor extends Component {
     unitOptionsWithBlank.unshift(BLANK_UNIT)
 
     return (
-      <Form.Group>
+      <Form.Group className='recipe-editor-group' >
         <Form.Field
           control={Input}
           width={2}

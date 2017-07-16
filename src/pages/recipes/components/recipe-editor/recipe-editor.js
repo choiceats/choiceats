@@ -10,6 +10,8 @@ import { DEFAULT_RECIPE } from '../../../../defaults'
 
 import type { Recipe, Ingredient } from 'types'
 
+import './recipe-editor.css'
+
 type RecipeEditorProps = {
   recipe: ?Recipe;
   units: any;
@@ -64,7 +66,7 @@ export default class RecipeEditor extends Component {
 
     return (
       <RecipeEditorContainer>
-        <Form>
+        <Form className='recipe-editor-form'>
           <h1>Recipe Editor</h1>
           <Form.Field>
             <label>Recipe Name</label>
@@ -112,5 +114,6 @@ const slideIn = keyframes`
 
 const RecipeEditorContainer = styled.div`
   animation: ${slideIn} .25s linear;
-  min-width: 600px;
+  min-width: 260px;
 `
+// based off 50px padding and 10px margin to give 320px look, supporting iPhone5 and wider

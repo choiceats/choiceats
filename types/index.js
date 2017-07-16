@@ -30,7 +30,7 @@ export type RecipeIngredient = {
 }
 
 export type Recipe = {
-  id: ?number;  // Null id means unsaved
+  id: ?number | ?string;  // Null id means unsaved
   author: string;
   ingredients: RecipeIngredient[];
   instructions: string;
