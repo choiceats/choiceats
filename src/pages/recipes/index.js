@@ -4,7 +4,7 @@ import { Route, NavLink, Switch } from 'react-router-dom'
 import { Breadcrumb } from 'semantic-ui-react'
 import styled from 'styled-components'
 
-import RecipeList from './recipe-list'
+import RecipeSearch from './recipe-search'
 import RecipeDetail from './recipe-detail.apollo'
 import RecipeEditor from './recipe-editor.apollo'
 import RecipeEditorNew from './recipe-editor-new.apollo'
@@ -22,7 +22,7 @@ export default class RecipeRoute extends Component {
             <Route path={`${match.url}recipe/new`} component={RecipeEditorNew} />
             <Route path={`${match.url}recipe/:recipeId/edit`} component={RecipeEditor} />
             <Route path={`${match.url}recipe/:recipeId`} component={RecipeDetail} />
-            <Route path={match.url} component={RecipeList} />
+            <Route path={match.url} component={RecipeSearch} />
           </Switch>
         </RecipesContent>
       </RecipesBody>

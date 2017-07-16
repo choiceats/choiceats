@@ -6,6 +6,7 @@ declare module 'styled-components' {
     div: (strings: string[]) => ReactClass;
     img: (strings: string[]) => ReactClass;
     h1: any;
+    h2: any;
     p: (strings: string[]) => ReactClass;
   }
 }

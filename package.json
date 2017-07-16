@@ -5,30 +5,30 @@
   "dependencies": {
     "draft-js": "^0.10.1",
     "lodash.clonedeep": "^4.5.0",
-    "react": "^15.5.4",
-    "react-apollo": "^1.2.0",
-    "react-dom": "^15.5.4",
+    "react": "^15.6.1",
+    "react-apollo": "^1.4.3",
+    "react-dom": "^15.6.1",
     "react-redux": "^5.0.5",
     "react-router-dom": "^4.1.1",
     "react-tap-event-plugin": "^2.0.1",
     "react-test-render": "^1.0.3",
     "react-typeahead": "^2.0.0-alpha.5",
-    "redux": "^3.6.0",
-    "semantic-ui-css": "^2.2.10",
-    "semantic-ui-react": "^0.68.5",
-    "styled-components": "^2.0.0"
+    "redux": "^3.7.2",
+    "semantic-ui-css": "^2.2.11",
+    "semantic-ui-react": "^0.71.0",
+    "styled-components": "^2.1.1"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
-    "enzyme": "^2.8.2",
-    "eslint-plugin-flowtype": "^2.33.0",
-    "flow-bin": "0.47.0",
+    "enzyme": "^2.9.1",
+    "eslint-plugin-flowtype": "^2.35.0",
+    "flow-bin": "0.50.0",
     "pre-commit": "^1.2.2",
-    "react-scripts": "1.0.6",
-    "react-test-renderer": "^15.5.4",
+    "react-scripts": "1.0.10",
+    "react-test-renderer": "^15.6.1",
     "selenium-webdriver": "^3.4.0",
     "standard": "^10.0.2",
-    "@storybook/react": "^3.1.7"
+    "@storybook/react": "^3.1.8"
   },
   "scripts": {
     "flow": "flow",
