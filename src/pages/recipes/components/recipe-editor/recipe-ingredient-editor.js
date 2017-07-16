@@ -6,7 +6,7 @@ import IngredientTypeahead from './ingredient-typeahead'
 
 import type { Ingredient } from 'types'
 
-// import './recipe-editor.css'
+import './recipe-editor.css'
 
 const BLANK_UNIT = {
   key: null,
