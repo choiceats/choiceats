@@ -41,5 +41,11 @@
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 9009 -s .storybook",
     "build-storybook": "build-storybook -s .storybook"
+  },
+  "lint-staged": {
+    "src/**/*{.js,jsx}": [
+      "prettier --single-quote --write",
+      "git add"
+    ]
   }
 }
