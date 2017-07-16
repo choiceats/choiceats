@@ -1,12 +1,13 @@
 // @flow
 import React, { Component } from 'react'
-import { Route, NavLink } from 'react-router-dom'
+import { Route, NavLink, Switch } from 'react-router-dom'
 import { Breadcrumb } from 'semantic-ui-react'
 import styled from 'styled-components'
 
 import RecipeList from './recipe-list'
 import RecipeDetail from './recipe-detail.apollo'
 import RecipeEditor from './recipe-editor.apollo'
+import RecipeEditorNew from './recipe-editor-new.apollo'
 
 export default class RecipeRoute extends Component {
   render () {
@@ -17,9 +18,12 @@ export default class RecipeRoute extends Component {
           { this.buildBreadcrumbSecions() }
         </Breadcrumb>
         <RecipesContent>
-          <Route path={`${match.url}recipe/:recipeId/edit`} exact component={RecipeEditor} />
-          <Route path={`${match.url}recipe/:recipeId`} exact component={RecipeDetail} />
-          <Route path={match.url} exact component={RecipeList} />
+          <Switch>
+            <Route path={`${match.url}recipe/new`} component={RecipeEditorNew} />
+            <Route path={`${match.url}recipe/:recipeId/edit`} component={RecipeEditor} />
+            <Route path={`${match.url}recipe/:recipeId`} component={RecipeDetail} />
+            <Route path={match.url} component={RecipeList} />
+          </Switch>
         </RecipesContent>
       </RecipesBody>
     )
@@ -41,6 +45,16 @@ export default class RecipeRoute extends Component {
       breadcrumbs.push(
         <Breadcrumb.Section key={breadcrumbs.length}>
           <NavLink to={navTo}>Recipe</NavLink>
+        </Breadcrumb.Section>
+      )
+    }
+
+    if (pathname.indexOf('new') > -1) {
+      const navTo = `/recipe/new`
+      breadcrumbs.push(<Breadcrumb.Divider icon='right angle' key={breadcrumbs.length} />)
+      breadcrumbs.push(
+        <Breadcrumb.Section key={breadcrumbs.length}>
+          <NavLink to={navTo}>New</NavLink>
         </Breadcrumb.Section>
       )
     }

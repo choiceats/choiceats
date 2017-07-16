@@ -2,20 +2,20 @@
 import React, { Component } from 'react'
 import { compose, gql, graphql } from 'react-apollo'
 import RecipeEditor from './components/recipe-editor/recipe-editor'
+import { DEFAULT_RECIPE } from '../../defaults'
 
 import type { Recipe, Ingredient, Unit } from 'types'
 
-type RecipeApolloData = {
+type RecipeEditorNewData = {
   data: {
-    recipe: Recipe;
     ingredients: Ingredient[];
     units: Unit[];
   },
   mutate: (any)=> window.Promise
 }
 
-export class RecipeEditorApollo extends Component {
-  props: RecipeApolloData
+export class RecipeEditorNewApollo extends Component {
+  props: RecipeEditorNewData
 
   onSave (recipe: Recipe) {
     const { mutate } = this.props
@@ -33,13 +33,12 @@ export class RecipeEditorApollo extends Component {
       return <div>LOADING...</div>
     }
 
-    const recipe = data.recipe || {}
     return (
       <RecipeEditor
         onSave={this.onSave.bind(this)}
         units={data.units}
         ingredients={data.ingredients}
-        recipe={recipe} />
+        recipe={DEFAULT_RECIPE} />
     )
   }
 }
@@ -73,29 +72,8 @@ function stripOutTypenames (obj: any) {
   return newObj
 }
 
-const recipeQuery = gql`
-  query RecipeById($recipeId: Int!) {
-    recipe (recipeId: $recipeId) {
-      id
-      author
-      authorId
-      description
-      imageUrl
-      name
-      instructions
-      ingredients {
-        id
-        name
-        unit {
-          id
-          name
-          abbr
-        }
-        quantity
-      }
-      likes
-    }
-
+const unitsAndIngredientsQuery = gql`
+  query UnitsAndIngredients {
     units {
       id
       name
@@ -134,17 +112,7 @@ mutation SaveRecipe($recipe: RecipeInput!) {
 }
 `
 
-type RouteMatch = {
-  match: { params: { recipeId: string } };
-}
-type RecipeQueryOptions = (RouteMatch) => any;
-const options: RecipeQueryOptions = ({match}) => ({
-  variables: {
-    recipeId: match.params.recipeId
-  }
-})
-
 export default compose(
   graphql(gqlStuff),
-  graphql(recipeQuery, { options })
-)(RecipeEditorApollo)
+  graphql(unitsAndIngredientsQuery)
+)(RecipeEditorNewApollo)

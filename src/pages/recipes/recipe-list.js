@@ -3,6 +3,8 @@ import React, { Component } from 'react'
 import { gql, graphql } from 'react-apollo'
 import { connect } from 'react-redux'
 import styled, { keyframes } from 'styled-components'
+import { Button } from 'semantic-ui-react'
+import { Link } from 'react-router-dom'
 
 import Recipe from './recipe'
 
@@ -44,6 +46,11 @@ export class RecipeList extends Component {
     if (recipes) {
       return (
         <ListContainer>
+          <NewLink>
+            <Link to='/recipe/new'>
+              <Button>New</Button>
+            </Link>
+          </NewLink>
           { recipes.map(recipe => (
             <Recipe key={recipe.id}
               recipe={recipe}
@@ -69,7 +76,12 @@ to {
 }
 `
 
-export const Loading = styled.div`
+const Loading = styled.div`
+`
+
+const NewLink = styled.div`
+  float: right;
+  margin-top: -50px;
 `
 
 const ListContainer = styled.div`
