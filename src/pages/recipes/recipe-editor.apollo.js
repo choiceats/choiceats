@@ -1,5 +1,6 @@
 // @flow
 import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom'
 import { compose, gql, graphql } from 'react-apollo'
 import RecipeEditor from './components/recipe-editor/recipe-editor'
 
@@ -11,6 +12,7 @@ type RecipeApolloData = {
     ingredients: Ingredient[];
     units: Unit[];
   },
+  history: any;
   mutate: (any)=> window.Promise
 }
 
@@ -18,12 +20,15 @@ export class RecipeEditorApollo extends Component {
   props: RecipeApolloData
 
   onSave (recipe: Recipe) {
-    const { mutate } = this.props
+    const { mutate, history } = this.props
     const cleanRecipe = stripOutTypenames(recipe)
     mutate({
       variables: { recipe: cleanRecipe }
     })
-    .then(({data}) => console.log('Got back data', data))
+    .then(({data}) => {
+      history.push('/') // TODO: push to id
+      console.log('Got back data', data)
+    })
     .catch((error) => console.error('Got back error', error))
   }
 
@@ -144,7 +149,7 @@ const options: RecipeQueryOptions = ({match}) => ({
   }
 })
 
-export default compose(
+export default withRouter(compose(
   graphql(gqlStuff),
   graphql(recipeQuery, { options })
-)(RecipeEditorApollo)
+)(RecipeEditorApollo))
