@@ -13,7 +13,7 @@ Second, start up the client
 ```
 yarn start
 ```
-## Minimum Viable Product?
+## Minimum Viable Product
 TODO
 * Edit recipes
   * Must pick exisitng units.

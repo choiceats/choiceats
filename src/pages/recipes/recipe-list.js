@@ -72,10 +72,12 @@ to {
 export const Loading = styled.div`
 `
 
+const PAGE_PADDING = 50
 const ListContainer = styled.div`
   animation: ${slideIn} .125s linear;
   padding-top: 30px;
-  width: 500px;
+  min-width: ${320 - PAGE_PADDING}px;
+  max-width: 500px;
   margin: auto;
 `
 
