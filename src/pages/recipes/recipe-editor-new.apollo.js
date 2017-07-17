@@ -1,10 +1,10 @@
 // @flow
-import React, { Component } from 'react';
-import { compose, gql, graphql } from 'react-apollo';
-import RecipeEditor from './components/recipe-editor/recipe-editor';
-import { DEFAULT_RECIPE } from '../../defaults';
+import React, { Component } from "react";
+import { compose, gql, graphql } from "react-apollo";
+import RecipeEditor from "./components/recipe-editor/recipe-editor";
+import { DEFAULT_RECIPE } from "../../defaults";
 
-import type { Recipe, Ingredient, Unit } from 'types';
+import type { Recipe, Ingredient, Unit } from "types";
 
 type RecipeEditorNewData = {
   data: {
@@ -25,9 +25,9 @@ export class RecipeEditorNewApollo extends Component {
       variables: { recipe: cleanRecipe }
     })
       .then(({ data }) => {
-        history.push('/'); // TODO: push to id
+        history.push("/"); // TODO: push to id
       })
-      .catch(error => console.error('Got back error', error));
+      .catch(error => console.error("Got back error", error));
   }
 
   render() {
@@ -53,7 +53,7 @@ function stripOutTypenames(obj: any) {
     return obj;
   }
 
-  if (typeof obj !== 'object') {
+  if (typeof obj !== "object") {
     return obj;
   }
 
@@ -67,8 +67,9 @@ function stripOutTypenames(obj: any) {
 
   const keys = Object.keys(obj);
   const newObj = {};
+
   keys.forEach(k => {
-    if (typeof obj === 'object' && k !== '__typename') {
+    if (typeof obj === "object" && k !== "__typename") {
       newObj[k] = stripOutTypenames(obj[k]);
     }
   });
