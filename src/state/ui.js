@@ -33,6 +33,7 @@ export const ui
             ...state,
             editingRecipeId: action.payload
           }
+        default:
+          return state
       }
-      return state
     }
