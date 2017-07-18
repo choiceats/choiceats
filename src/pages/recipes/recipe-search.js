@@ -1,40 +1,68 @@
-/* global KeyboardEvent, HTMLInputElement */
+/* global KeyboardEvent, HTMLInputElement, MouseEvent */
 // @flow
 import React, { Component } from 'react'
-import { Input, Button } from 'semantic-ui-react'
+import { Input, Button, Dropdown } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import RecipeListApollo from './recipe-list.apollo'
 
+const FILTER_OPTIONS = [
+  { key: 'my', text: 'My Recipes', value: 'my' },
+  { key: 'fav', text: 'Favorite', value: 'fav' },
+  { key: 'all', text: 'All', value: 'all' }
+]
+
+const DEFAULT_FILTER = 'all'
+
 export default class RecipeSearch extends Component {
   state = {
-    searchText: ''
+    searchText: '',
+    searchFilter: DEFAULT_FILTER
   }
 
-  updateSearch (e: KeyboardEvent) {
+  updateSearch(e: KeyboardEvent) {
     if (e.target instanceof HTMLInputElement) {
       const value = e.target.value
       this.setState(() => ({ searchText: value }))
     }
   }
 
-  render () {
-    const { searchText } = this.state
+  updateFilter(e: MouseEvent, data: { value: string }) {
+    this.setState(() => ({ searchFilter: data.value }))
+  }
+
+  render() {
+    const { searchText, searchFilter } = this.state
     return (
       <SearchContainer>
         <SearchInput>
           <NewLink>
-            <Link to='/recipe/new'>
-              <Button primary>New</Button>
+            <Link to="/recipe/new">
+              <Button size="mini" primary>
+                New
+              </Button>
             </Link>
           </NewLink>
           <SearchHeader>Search</SearchHeader>
-          <SearchHelpText>Searches by recipe name and ingredient list</SearchHelpText>
-          <Input fluid onChange={e => this.updateSearch(e)} />
-
+          <Input
+            action={
+              <Dropdown
+                button
+                basic
+                options={FILTER_OPTIONS}
+                onChange={(e, d) => this.updateFilter(e, d)}
+                defaultValue={DEFAULT_FILTER}
+              />
+            }
+            iconPosition="left"
+            icon="search"
+            placeholder="Search by name or ingredient"
+            fluid
+            onChange={e => this.updateSearch(e)}
+          />
         </SearchInput>
-        <RecipeListApollo searchText={searchText} />
+        <RecipeListApollo searchText={searchText} searchFilter={searchFilter} />
       </SearchContainer>
     )
   }
@@ -46,16 +74,14 @@ const SearchContainer = styled.div`
 `
 
 const NewLink = styled.div`
-  float: right;
+  position: absolute;
+  top: 0px;
+  right: 0px;
 `
 
-const SearchInput = styled.div`
+const SearchInput = styled.div`position: relative;`
 
-`
-
-const SearchHeader = styled.h2`
-  margin-bottom: 2px
-`
+const SearchHeader = styled.h2`margin-bottom: 8px;`
 
 const SearchHelpText = styled.p`
   margin: 0;
