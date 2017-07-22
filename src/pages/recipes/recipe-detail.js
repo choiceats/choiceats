@@ -78,10 +78,9 @@ export const RecipeDetail: (
   recipeIdToDelete,
   likeRecipe,
   deleteRecipe,
-  youLike = false,
   userId = 0
 }) =>
-  <RecipeCard>
+  <RecipeCard style={{ paddingBottom: '3px' }}>
     <Card fluid>
       <Card.Content>
         <Card.Header>
@@ -101,32 +100,38 @@ export const RecipeDetail: (
           </Directions>
         </Card.Description>
         <Card.Description
-          style={{ display: 'flex', alignItems: 'space-around' }}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
         >
-          <Icon
-            name="smile"
-            size="big"
-            color={youLike ? 'green' : 'black'}
-            onClick={() => {
-              likeRecipe({
-                variables: {
-                  recipeId: recipe.id,
-                  userId
-                }
-              })
-                .then(({ data }) => {
-                  console.log('got data', data)
+          <span>
+            <Icon
+              name="favorite"
+              size="big"
+              color={recipe.youLike ? 'teal' : 'grey'}
+              onClick={() => {
+                likeRecipe({
+                  variables: {
+                    recipeId: recipe.id,
+                    userId
+                  }
                 })
-                .catch(error => {
-                  console.log('there was an error sending the query', error)
-                })
-            }}
-          />
-          {!!recipe.likes &&
-            <span>
-              Likes: {recipe.likes} {recipe.youLike && '(including you)'}
-            </span>}
-          {!recipe.likes && <span>Be the first to like this</span>}
+                  .then(({ data }) => {
+                    console.log('got data', data)
+                  })
+                  .catch(error => {
+                    console.log('there was an error sending the query', error)
+                  })
+              }}
+            />
+            {!!recipe.likes &&
+              <span>
+                Likes: {recipe.likes} {recipe.youLike && '(including you)'}
+              </span>}
+            {!recipe.likes && <span>Be the first to like this</span>}
+          </span>
           {userId !== recipe.authorId &&
             <Button
               negative

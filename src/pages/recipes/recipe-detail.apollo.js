@@ -1,12 +1,13 @@
 // @flow
-import React from 'react';
-import { compose, gql, graphql } from 'react-apollo';
-import RecipeDetail from './recipe-detail';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import NotFound from '../not-found';
+import React from 'react'
+import { compose, gql, graphql } from 'react-apollo'
+import RecipeDetail from './recipe-detail'
+import { connect } from 'react-redux'
+import { withRouter } from 'react-router-dom'
+import NotFound from '../shared-components/not-found'
+import Loading from '../shared-components/loading'
 
-import type { Recipe } from 'types';
+import type { Recipe } from 'types'
 
 type ApolloRecipeProps = {
   data: {
@@ -21,7 +22,7 @@ type ApolloRecipeProps = {
   deleteRecipe?: (arg: {
     variables: { recipeId: null | string | number }
   }) => any
-};
+}
 
 export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
   data,
@@ -32,12 +33,12 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
   history = {},
   deleteRecipe = () => {}
 }) => {
-  const recipe = data.recipe || {};
+  const recipe = data.recipe || {}
 
   if (data.loading) {
-    return <div> LOADING...</div>;
+    return <Loading />
   } else if (!data.loading && !recipe.id) {
-    return <NotFound />;
+    return <NotFound />
   } else {
     return (
       <RecipeDetail
@@ -49,9 +50,9 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
         dispatch={dispatch}
         goToRecipeList={() => history.push('/')}
       />
-    );
+    )
   }
-};
+}
 
 const recipeQuery = gql`
   query RecipeById($recipeId: Int!) {
@@ -75,7 +76,7 @@ const recipeQuery = gql`
       youLike
     }
   }
-`;
+`
 
 const deleteRecipe = gql`
   mutation deleteRecipe($recipeId: ID!) {
@@ -84,7 +85,7 @@ const deleteRecipe = gql`
       deleted
     }
   }
-`;
+`
 
 const likeRecipe = gql`
   mutation likeRecipe($userId: ID!, $recipeId: ID!) {
@@ -94,22 +95,22 @@ const likeRecipe = gql`
       youLike
     }
   }
-`;
+`
 
 type RouteMatch = {
   match: { params: { recipeId: string } }
-};
-type RecipeQueryOptions = RouteMatch => any;
+}
+type RecipeQueryOptions = RouteMatch => any
 const options: RecipeQueryOptions = ({ match }) => ({
   variables: {
     recipeId: match.params.recipeId
   }
-});
+})
 
 const mapStateToProps = state => ({
   selectedRecipeId: state.ui.selectedRecipeId,
   recipeIdToDelete: state.ui.recipeIdToDelete
-});
+})
 
 export default connect(mapStateToProps)(
   withRouter(
@@ -119,4 +120,4 @@ export default connect(mapStateToProps)(
       graphql(recipeQuery, { options })
     )(RecipeDetailApollo)
   )
-);
+)

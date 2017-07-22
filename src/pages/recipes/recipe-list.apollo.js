@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 
 import RecipeList from './recipe-list'
+import Loading from '../shared-components/loading'
 
 import type { Recipe as TRecipe } from 'types'
 
@@ -24,11 +25,11 @@ export class RecipeListApollo extends Component {
 
   render() {
     const { data, isLoggedIn, userId } = this.props
-    if (!data) return <Loading>loading</Loading>
+    if (!data) return <Loading />
 
     const { recipes, loading } = data
     if (loading) {
-      return <Loading>LOADING..</Loading>
+      return <Loading />
     }
 
     if (recipes) {
@@ -39,7 +40,6 @@ export class RecipeListApollo extends Component {
   }
 }
 
-const Loading = styled.div``
 const recipesQuery = gql`
   query RecipeQuery($searchText: String, $searchFilter: String) {
     recipes(searchText: $searchText, searchFilter: $searchFilter) {
