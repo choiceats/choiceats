@@ -170,7 +170,7 @@ export const RecipeDetail: (
               </span>}
             {!recipe.likes && <span>Be the first to like this</span>}
           </span>
-          {userId !== recipe.authorId &&
+          {userId === recipe.authorId &&
             (!isDeletingRecipe
               ? <Button
                   negative
