@@ -1,10 +1,11 @@
 // @flow
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
-import { compose, gql, graphql } from 'react-apollo';
-import RecipeEditor from './components/recipe-editor/recipe-editor';
+import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom'
+import { compose, gql, graphql } from 'react-apollo'
+import RecipeEditor from './components/recipe-editor/recipe-editor'
+import Loading from '../shared-components/loading'
 
-import type { Recipe, Ingredient, Unit } from 'types';
+import type { Recipe, Ingredient, Unit } from 'types'
 
 type RecipeApolloData = {
   data: {
@@ -14,30 +15,30 @@ type RecipeApolloData = {
   },
   history: any,
   mutate: any => window.Promise
-};
+}
 
 export class RecipeEditorApollo extends Component {
-  props: RecipeApolloData;
+  props: RecipeApolloData
 
   onSave(recipe: Recipe) {
-    const { mutate, history } = this.props;
-    const cleanRecipe = stripOutTypenames(recipe);
+    const { mutate, history } = this.props
+    const cleanRecipe = stripOutTypenames(recipe)
     mutate({
       variables: { recipe: cleanRecipe }
     })
       .then(({ data }) => {
-        history.push('/'); // TODO: push to id
+        history.push('/') // TODO: push to id
       })
-      .catch(error => console.error('Got back error', error));
+      .catch(error => console.error('Got back error', error))
   }
 
   render() {
-    const { data } = this.props;
+    const { data } = this.props
     if (data.loading) {
-      return <div>LOADING...</div>;
+      return <Loading />
     }
 
-    const recipe = data.recipe || {};
+    const recipe = data.recipe || {}
     return (
       <RecipeEditor
         onSave={this.onSave.bind(this)}
@@ -45,37 +46,37 @@ export class RecipeEditorApollo extends Component {
         ingredients={data.ingredients}
         recipe={recipe}
       />
-    );
+    )
   }
 }
 
 // TODO: not sure why we are getting a __typename
 function stripOutTypenames(obj: any) {
   if (obj === null || obj === undefined) {
-    return obj;
+    return obj
   }
 
   if (typeof obj !== 'object') {
-    return obj;
+    return obj
   }
 
   if (obj instanceof String) {
-    return obj;
+    return obj
   }
 
   if (obj instanceof Array) {
-    return obj.map(o => stripOutTypenames(o));
+    return obj.map(o => stripOutTypenames(o))
   }
 
-  const keys = Object.keys(obj);
-  const newObj = {};
+  const keys = Object.keys(obj)
+  const newObj = {}
   keys.forEach(k => {
     if (typeof obj === 'object' && k !== '__typename') {
-      newObj[k] = stripOutTypenames(obj[k]);
+      newObj[k] = stripOutTypenames(obj[k])
     }
-  });
+  })
 
-  return newObj;
+  return newObj
 }
 
 const recipeQuery = gql`
@@ -110,7 +111,7 @@ const recipeQuery = gql`
       name
     }
   }
-`;
+`
 
 const gqlStuff = gql`
   mutation SaveRecipe($recipe: RecipeInput!) {
@@ -135,20 +136,20 @@ const gqlStuff = gql`
       likes
     }
   }
-`;
+`
 
 type RouteMatch = {
   match: { params: { recipeId: string } }
-};
-type RecipeQueryOptions = RouteMatch => any;
+}
+type RecipeQueryOptions = RouteMatch => any
 const options: RecipeQueryOptions = ({ match }) => ({
   variables: {
     recipeId: match.params.recipeId
   }
-});
+})
 
 export default withRouter(
   compose(graphql(gqlStuff), graphql(recipeQuery, { options }))(
     RecipeEditorApollo
   )
-);
+)

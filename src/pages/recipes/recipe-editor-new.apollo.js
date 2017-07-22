@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { compose, gql, graphql } from 'react-apollo'
 import RecipeEditor from './components/recipe-editor/recipe-editor'
 import { DEFAULT_RECIPE } from '../../defaults'
+import Loading from '../shared-components/loading'
 
 import type { Recipe, Ingredient, Unit } from 'types'
 
@@ -33,7 +34,7 @@ export class RecipeEditorNewApollo extends Component {
   render() {
     const { data } = this.props
     if (data.loading) {
-      return <div>LOADING...</div>
+      return <Loading />
     }
 
     return (
