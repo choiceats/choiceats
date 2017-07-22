@@ -2,8 +2,19 @@
 import React from 'react'
 import styled, { keyframes } from 'styled-components'
 import { Link } from 'react-router-dom'
-import { Button, Card, Modal, Icon } from 'semantic-ui-react'
-import { selectRecipeToDelete } from '../../state/action-creators'
+import { Button, Card, Modal, Icon, Loader } from 'semantic-ui-react'
+import {
+  selectRecipeToDelete,
+  setRecipeStatus,
+  setRecipeLikeStatus
+} from '../../state/action-creators'
+import {
+  UPDATE,
+  DELETE,
+  PENDING,
+  SUCCESS,
+  FAIL
+} from '../../state/action-types'
 
 import IngredientList from './components/ingredient-list'
 
@@ -54,8 +65,11 @@ const readSingleRecipeFromCache = id => gql`
 
 type OtherProps = {
   selectedRecipeId: string,
+  isChangingLike: boolean,
+  isDeletingRecipe: boolean,
+  deleteRecipeError: boolean,
   recipeIdToDelete: string,
-  userId?: number,
+  userId?: string,
   youLike?: boolean
 }
 
@@ -76,6 +90,9 @@ export const RecipeDetail: (
   recipe,
   selectedRecipeId,
   recipeIdToDelete,
+  isChangingLike = false,
+  isDeletingRecipe,
+  deleteRecipeError,
   likeRecipe,
   deleteRecipe,
   userId = 0
@@ -110,8 +127,16 @@ export const RecipeDetail: (
             <Icon
               name="favorite"
               size="big"
+              loading={isChangingLike}
               color={recipe.youLike ? 'teal' : 'grey'}
               onClick={() => {
+                dispatch(
+                  setRecipeLikeStatus({
+                    id: recipe.id,
+                    operation: UPDATE,
+                    status: PENDING
+                  })
+                )
                 likeRecipe({
                   variables: {
                     recipeId: recipe.id,
@@ -119,10 +144,23 @@ export const RecipeDetail: (
                   }
                 })
                   .then(({ data }) => {
-                    console.log('got data', data)
+                    dispatch(
+                      setRecipeLikeStatus({
+                        id: recipe.id,
+                        operation: UPDATE,
+                        status: SUCCESS
+                      })
+                    )
                   })
                   .catch(error => {
                     console.log('there was an error sending the query', error)
+                    dispatch(
+                      setRecipeLikeStatus({
+                        id: recipe.id,
+                        operation: UPDATE,
+                        status: FAIL
+                      })
+                    )
                   })
               }}
             />
@@ -133,15 +171,21 @@ export const RecipeDetail: (
             {!recipe.likes && <span>Be the first to like this</span>}
           </span>
           {userId !== recipe.authorId &&
-            <Button
-              negative
-              onClick={() => {
-                dispatch(selectRecipeToDelete(recipe.id || null))
-              }}
-            >
-              Delete
-            </Button>}
+            (!isDeletingRecipe
+              ? <Button
+                  negative
+                  onClick={() => {
+                    dispatch(selectRecipeToDelete(recipe.id || null))
+                  }}
+                >
+                  Delete
+                </Button>
+              : <Loader inline active size="tiny">
+                  Deleting
+                </Loader>)}
         </Card.Description>
+        {deleteRecipeError &&
+          <DeleteError>Unable to delete recipe.</DeleteError>}
       </Card.Content>
       <Modal
         open={recipeIdToDelete && recipeIdToDelete === recipe.id}
@@ -156,6 +200,14 @@ export const RecipeDetail: (
           <Button
             key={'yes'}
             onClick={() => {
+              dispatch(selectRecipeToDelete(null))
+              dispatch(
+                setRecipeStatus({
+                  id: recipe.id,
+                  operation: DELETE,
+                  status: PENDING
+                })
+              )
               deleteRecipe({
                 variables: {
                   recipeId: recipe.id || null
@@ -165,21 +217,23 @@ export const RecipeDetail: (
                   { data: { deleteRecipe: { deleted, recipeId, __typename } } }
                 ) => {
                   //data is the only element within the second arg
-                  const listCache = store.readQuery({ query: recipesQuery })
-                  const recipeIndexToDelete = listCache.recipes.findIndex(
-                    recipe => recipe.id === recipeId
-                  )
+                  if (deleted) {
+                    const listCache = store.readQuery({ query: recipesQuery })
+                    const recipeIndexToDelete = listCache.recipes.findIndex(
+                      recipe => recipe.id === recipeId
+                    )
 
-                  listCache.recipes.splice(recipeIndexToDelete, 1)
+                    listCache.recipes.splice(recipeIndexToDelete, 1)
 
-                  store.writeQuery({
-                    query: recipesQuery,
-                    data: { recipes: listCache.recipes }
-                  })
-                  store.writeQuery({
-                    query: readSingleRecipeFromCache(recipe.id),
-                    data: { recipe: null }
-                  })
+                    store.writeQuery({
+                      query: recipesQuery,
+                      data: { recipes: listCache.recipes }
+                    })
+                    store.writeQuery({
+                      query: readSingleRecipeFromCache(recipe.id),
+                      data: { recipe: null }
+                    })
+                  }
 
                   //https://github.com/apollographql/apollo-client/issues/621
                 }
@@ -190,14 +244,36 @@ export const RecipeDetail: (
                     data.data &&
                     data.data.deleteRecipe &&
                     data.data.deleteRecipe.deleted === true
+
                   if (recipeWasDeleted) {
+                    dispatch(
+                      setRecipeStatus({
+                        id: recipe.id,
+                        operation: DELETE,
+                        status: SUCCESS
+                      })
+                    )
                     goToRecipeList()
+                  } else {
+                    dispatch(
+                      setRecipeStatus({
+                        id: recipe.id,
+                        operation: DELETE,
+                        status: FAIL
+                      })
+                    )
                   }
                 })
                 .catch(error => {
+                  dispatch(
+                    setRecipeStatus({
+                      id: recipe.id,
+                      operation: DELETE,
+                      status: FAIL
+                    })
+                  )
                   console.log('something went wrong:', error)
                 })
-              dispatch(selectRecipeToDelete(null))
             }}
           >
             Yes
@@ -229,5 +305,7 @@ const Directions = styled.div`
   margin-top: 15px;
   white-space: pre-wrap;
 `
+
+const DeleteError = styled.div`color: red;`
 
 export default RecipeDetail

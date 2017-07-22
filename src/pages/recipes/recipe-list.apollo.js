@@ -2,7 +2,6 @@
 import React, { Component } from 'react'
 import { gql, graphql, compose } from 'react-apollo'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
 
 import RecipeList from './recipe-list'
 import Loading from '../shared-components/loading'

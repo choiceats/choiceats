@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import NotFound from '../shared-components/not-found'
 import Loading from '../shared-components/loading'
+import { UPDATE, DELETE, PENDING, FAIL } from '../../state/action-types'
 
 import type { Recipe } from 'types'
 
@@ -14,24 +15,30 @@ type ApolloRecipeProps = {
     loading: boolean,
     recipe: Recipe
   },
-  selectedRecipeId: string,
-  recipeIdToDelete: string,
-  dispatch?: (action: { type: string }) => any,
-  likeRecipe?: (arg: {}) => any,
-  history: { push: (string | Object) => void },
   deleteRecipe?: (arg: {
     variables: { recipeId: null | string | number }
-  }) => any
+  }) => any,
+  dispatch?: (action: { type: string }) => any,
+  history: { push: (string | Object) => void },
+  likeRecipe?: (arg: {}) => any,
+  recipeIdToDelete: string,
+  recipeLikeStatus?: Object,
+  recipeStatus?: Object,
+  selectedRecipeId: string,
+  userId?: string
 }
 
 export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
   data,
-  selectedRecipeId,
-  recipeIdToDelete,
+  deleteRecipe = () => {},
   dispatch = () => {},
-  likeRecipe = () => {},
   history = {},
-  deleteRecipe = () => {}
+  likeRecipe = () => {},
+  recipeIdToDelete,
+  recipeLikeStatus = {},
+  recipeStatus = {},
+  selectedRecipeId,
+  userId
 }) => {
   const recipe = data.recipe || {}
 
@@ -40,6 +47,21 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
   } else if (!data.loading && !recipe.id) {
     return <NotFound />
   } else {
+    const isDeletingRecipe =
+      recipe.id === recipeStatus.id &&
+      recipeStatus.operation === DELETE &&
+      recipeStatus.status === PENDING
+
+    const isChangingLike =
+      recipe.id === recipeLikeStatus.id &&
+      recipeLikeStatus.operation === UPDATE &&
+      recipeLikeStatus.status === PENDING
+
+    const deleteRecipeError =
+      recipe.id === recipeStatus.id &&
+      recipeStatus.operation === DELETE &&
+      recipeStatus.status === FAIL
+
     return (
       <RecipeDetail
         recipe={recipe}
@@ -48,6 +70,10 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
         likeRecipe={likeRecipe}
         deleteRecipe={deleteRecipe}
         dispatch={dispatch}
+        isDeletingRecipe={isDeletingRecipe}
+        isChangingLike={isChangingLike}
+        deleteRecipeError={deleteRecipeError}
+        userId={userId}
         goToRecipeList={() => history.push('/')}
       />
     )
@@ -109,7 +135,10 @@ const options: RecipeQueryOptions = ({ match }) => ({
 
 const mapStateToProps = state => ({
   selectedRecipeId: state.ui.selectedRecipeId,
-  recipeIdToDelete: state.ui.recipeIdToDelete
+  recipeIdToDelete: state.ui.recipeIdToDelete,
+  recipeStatus: state.ui.recipeStatus,
+  recipeLikeStatus: state.ui.recipeLikeStatus,
+  userId: state.user.userId || null
 })
 
 export default connect(mapStateToProps)(
