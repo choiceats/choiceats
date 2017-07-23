@@ -33,7 +33,11 @@ export class RecipeListApollo extends Component {
 
     if (recipes) {
       return (
-        <RecipeList recipes={recipes} userId={userId} isLoggedIn={isLoggedIn} />
+        <RecipeList
+          recipes={recipes.slice().sort(sortRecipes)}
+          userId={userId}
+          isLoggedIn={isLoggedIn}
+        />
       )
     }
   }
@@ -60,6 +64,34 @@ const options = ({ searchText, searchFilter }) => ({
     searchFilter
   }
 })
+
+const sortRecipes = (a, b) => {
+  const nameALTB =
+    (a.name && a.name.toLowerCase()) < (b.name && b.name.toLowerCase())
+  const nameAGTB =
+    (a.name && a.name.toLowerCase()) > (b.name && b.name.toLowerCase())
+  const youLikeAGTB = !!(a.youLike || false) && !(b.youLike || false)
+  const youLikeALTB = !(a.youLike || false) && !!(b.youLike || false)
+  const allLikeAGTB = (a.likes || 0) > (b.likes || 0)
+  const allLikeALTB = (a.likes || 0) < (b.likes || 0)
+
+  switch (true) {
+    case youLikeAGTB:
+      return -1
+    case youLikeALTB:
+      return 1
+    case allLikeAGTB:
+      return -1
+    case allLikeALTB:
+      return 1
+    case nameALTB:
+      return -1
+    case nameAGTB:
+      return 1
+    default:
+      return 0
+  }
+}
 
 const mapStateToProps = state => {
   return {

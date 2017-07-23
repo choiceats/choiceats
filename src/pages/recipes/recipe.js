@@ -30,7 +30,7 @@ export default class Recipe extends Component {
                 <Icon
                   name="favorite"
                   size="large"
-                  color={recipe.youLike ? 'teal' : ''}
+                  color={recipe.youLike ? 'teal' : 'grey'}
                 />
                 {recipe.likes} like{recipe.likes > 1 ? 's' : ''}
               </Card.Meta>}
