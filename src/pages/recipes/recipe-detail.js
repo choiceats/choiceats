@@ -69,7 +69,9 @@ export const RecipeDetail: (
           {recipe.author}
         </Card.Meta>
         <Card.Description>
-          {recipe.id && <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link>}
+          {recipe.id &&
+            userId === recipe.authorId &&
+            <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link>}
           <Description>
             {recipe.description}
           </Description>

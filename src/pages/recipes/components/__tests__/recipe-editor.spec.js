@@ -32,7 +32,9 @@ describe('Recipe: Recipe Editor::', () => {
       recipe: fakeRecipe,
       ingredients,
       units,
-      onSave: () => {}
+      onSave: () => {},
+      isSavingRecipe: false,
+      recipeSaveError: false
     }
   })
 
@@ -41,7 +43,7 @@ describe('Recipe: Recipe Editor::', () => {
     expect(wrapper.find(Form).length).toBe(1)
   })
 
-  it('should not render an ingredient editor if we don\'t have any ingredients', () => {
+  it("should not render an ingredient editor if we don't have any ingredients", () => {
     const wrapper = shallow(<RecipeEditor {...defaultProps} />)
     const ingredientComponent = wrapper.find('IngredientEditor')
     expect(ingredientComponent.length).toBe(0)
