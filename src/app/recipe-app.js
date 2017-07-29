@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Route, Redirect, withRouter } from 'react-router-dom'
+import { Route, Redirect, Switch, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Login from '../pages/login'
@@ -12,23 +12,22 @@ import Navbar from './components/navbar'
 import type { ContextRouter } from 'react-router-dom'
 import type { ConnectedProps } from 'types'
 
-const NON_RESTRICTED_PATHS = [
-  '/login',
-  '/login/sign-up'
-]
+const NON_RESTRICTED_PATHS = ['/login', '/login/sign-up']
 
-type RecipeAppProps = ConnectedProps & ContextRouter & {
-  userToken: string
-}
+type RecipeAppProps = ConnectedProps &
+  ContextRouter & {
+    userToken: string
+  }
 
 export class RecipeApp extends Component {
   props: RecipeAppProps
 
-  render () {
+  render() {
     const { userToken, location } = this.props
-    const isRestrictedPath = NON_RESTRICTED_PATHS.indexOf(location.pathname) === -1
+    const isRestrictedPath =
+      NON_RESTRICTED_PATHS.indexOf(location.pathname) === -1
     if (userToken === null && isRestrictedPath) {
-      return <Redirect to='/login' />
+      return <Redirect to="/login" />
     }
 
     return (
@@ -37,19 +36,22 @@ export class RecipeApp extends Component {
           <Navbar isLoggedIn={userToken !== null} />
         </NavContainer>
         <TopRouteContainer>
-          <Route path='/' component={RecipeList} />
-
-          <Route path='/login/sign-up' component={Signup} />
-          <Route exact path='/login' component={Login} />
+          <Switch>
+            <Route exact path="/login/sign-up" component={Signup} />
+            <Route exact path="/login" component={Login} />
+            <Route path="/" component={RecipeList} />
+          </Switch>
         </TopRouteContainer>
       </AppContainer>
     )
   }
 }
 
-export default withRouter(connect((state) => ({
-  userToken: state.user.token
-}))(RecipeApp))
+export default withRouter(
+  connect(state => ({
+    userToken: state.user.token
+  }))(RecipeApp)
+)
 
 const HEADER_HEIGHT = 50
 const AppContainer = styled.div`
@@ -62,7 +64,6 @@ const AppContainer = styled.div`
 const TopRouteContainer = styled.div`
   max-height: calc(100vh - ${HEADER_HEIGHT}px);
   overflow: auto;
+  padding: 20px;
 `
-const NavContainer = styled.div`
-  height: ${HEADER_HEIGHT}px;
-`
+const NavContainer = styled.div`height: ${HEADER_HEIGHT}px;`
