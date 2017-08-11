@@ -2,7 +2,8 @@
 // @flow
 import endpoints from './endpoints'
 
-const baseUrl = `${endpoints.protocol}://${endpoints.url}:${endpoints.port}`
+const baseUrl = `${endpoints.protocol}://${window.location
+  .hostname}:${endpoints.port}`
 
 export const getUser = () => {
   if (!window.localStorage) return null
@@ -35,17 +36,17 @@ export const login = (email: string, password: string) => {
       password
     })
   })
-  .then(response => {
-    if (response.status === 401) {
-      throw Error('Bad password!')
-    }
+    .then(response => {
+      if (response.status === 401) {
+        throw Error('Bad password!')
+      }
 
-    return response.json()
-  })
-  .then(responseJson => {
-    setUser(responseJson)
-    return responseJson
-  })
+      return response.json()
+    })
+    .then(responseJson => {
+      setUser(responseJson)
+      return responseJson
+    })
 }
 
 export const clearUser = () => {
@@ -57,10 +58,10 @@ export const clearUser = () => {
 }
 
 type RegisterParams = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
+  email: string,
+  firstName: string,
+  lastName: string,
+  password: string
 }
 
 export const register = (params: RegisterParams) => {
@@ -76,13 +77,13 @@ export const register = (params: RegisterParams) => {
       password: params.password
     })
   })
-  .then(response => {
-    if (response.status === 401) {
-      throw Error('Who are you?')
-    }
-    return response.json()
-  })
-  .then(responseJson => {
-    console.log('login now?')
-  })
+    .then(response => {
+      if (response.status === 401) {
+        throw Error('Who are you?')
+      }
+      return response.json()
+    })
+    .then(responseJson => {
+      console.log('login now?')
+    })
 }

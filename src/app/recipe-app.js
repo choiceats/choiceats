@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import Login from '../pages/login'
 import Signup from '../pages/signup'
 import RecipeList from '../pages/recipes'
+import Randomizer from '../pages/randomizer'
 import Navbar from './components/navbar'
 
 import type { ContextRouter } from 'react-router-dom'
@@ -39,6 +40,7 @@ export class RecipeApp extends Component {
           <Switch>
             <Route exact path="/login/sign-up" component={Signup} />
             <Route exact path="/login" component={Login} />
+            <Route exact path="/random" component={Randomizer} />
             <Route path="/" component={RecipeList} />
           </Switch>
         </TopRouteContainer>
