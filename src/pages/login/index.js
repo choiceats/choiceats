@@ -1,4 +1,3 @@
-/* global Event, KeyboardEvent, HTMLInputElement */
 // @flow
 import React, { Component } from 'react'
 import { withRouter, Link } from 'react-router-dom'
@@ -26,7 +25,7 @@ export class Login extends Component {
 
   state: { error: boolean, message?: string }
 
-  constructor (props: ContextRouter & ConnectedProps) {
+  constructor(props: ContextRouter & ConnectedProps) {
     super(props)
     this.state = {
       error: false,
@@ -38,7 +37,7 @@ export class Login extends Component {
     this.onPasswordChange = this.handleOnPasswordChange.bind(this)
   }
 
-  async handleSubmit (e: Event): Promise<any> {
+  async handleSubmit(e: Event): Promise<any> {
     const { history, dispatch } = this.props
     e.preventDefault()
     try {
@@ -50,19 +49,19 @@ export class Login extends Component {
     }
   }
 
-  handleOnEmailChange (e: KeyboardEvent) {
+  handleOnEmailChange(e: KeyboardEvent) {
     if (e.target instanceof HTMLInputElement) {
       this.email = e.target.value
     }
   }
 
-  handleOnPasswordChange (e: KeyboardEvent) {
+  handleOnPasswordChange(e: KeyboardEvent) {
     if (e.target instanceof HTMLInputElement) {
       this.password = e.target.value
     }
   }
 
-  render () {
+  render() {
     const { match } = this.props
     return (
       <FormContainer>
@@ -74,13 +73,11 @@ export class Login extends Component {
           </Form.Field>
           <Form.Field>
             <label>Password</label>
-            <Input
-              onChange={this.onPasswordChange}
-              type='password' />
+            <Input onChange={this.onPasswordChange} type="password" />
           </Form.Field>
 
           <br />
-          <Button primary type='submit'>
+          <Button primary type="submit">
             Login
           </Button>
 
@@ -89,10 +86,9 @@ export class Login extends Component {
           <Button>
             <Link to={`${match.url}/sign-up`}>Sign up</Link>
           </Button>
-          { (this.state.error)
-            ? <Error id='form-error'>BAD PASSWORD!</Error>
-            : null
-          }
+          {this.state.error
+            ? <Error id="form-error">BAD PASSWORD!</Error>
+            : null}
         </Form>
       </FormContainer>
     )

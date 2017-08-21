@@ -4,7 +4,7 @@ import * as user from './users'
 import endpoints from './endpoints'
 
 const authenicationMiddleware = {
-  applyMiddleware (req, next) {
+  applyMiddleware(req, next) {
     if (!req.options.headers) {
       req.options.headers = {}
     }
@@ -22,7 +22,8 @@ const authenicationMiddleware = {
 }
 
 const networkInterface = createNetworkInterface({
-  uri: `${endpoints.protocol}://${endpoints.url}:${endpoints.port}/graphql`
+  uri: `${endpoints.protocol}://${window.location
+    .hostname}:${endpoints.port}/graphql`
 })
 
 networkInterface.use([authenicationMiddleware])
