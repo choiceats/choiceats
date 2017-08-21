@@ -18,12 +18,14 @@ TODO
   * Must pick existing units.
   * Must pick existing ingredients.
   * Instructions - Basic text for now. Rich text later.
-* Delete recipes
-* Filter recipes by likes (youlike and then overall)
 
 DONE
 * Display recipes
 * Authentication
+* Delete recipes
+* Filter recipes by likes (youlike and then overall)
 
 ## Something Missing?
 
+### Missing Ingredients
+* Ground pork

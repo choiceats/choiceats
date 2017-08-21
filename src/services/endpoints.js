@@ -1,5 +1,5 @@
 export default {
   protocol: 'http',
   url: 'localhost',
-  port: '4000'
+  port: process.env.NODE_ENV === 'production' ? '80' : '4000'
 }
