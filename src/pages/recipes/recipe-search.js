@@ -80,11 +80,4 @@ const NewLink = styled.div`
 `
 
 const SearchInput = styled.div`position: relative;`
-
 const SearchHeader = styled.h2`margin-bottom: 8px;`
-
-// const SearchHelpText = styled.p`
-//   margin: 0;
-//   font-size: smaller;
-//   color: #888;
-// `

@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react'
 import { compose, gql, graphql } from 'react-apollo'
-import { Button } from 'semantic-ui-react'
+import { Button, Dropdown } from 'semantic-ui-react'
 import styled from 'styled-components'
 
 import RecipeComponent from '../recipes/recipe'
@@ -16,22 +16,36 @@ type ApolloRecipeProps = {
   data: {
     loading: boolean,
     randomRecipe: Recipe,
-    refetch: void => void
+    refetch: any => void
   }
 }
 
+const FILTER_OPTIONS = [
+  { key: 'my', text: 'My Recipes', value: 'my' },
+  { key: 'fav', text: 'Favorite', value: 'fav' },
+  { key: 'all', text: 'All', value: 'all' }
+]
+
+const DEFAULT_FILTER = 'all'
+
 export class RecipeDetailApollo extends Component {
   props: ApolloRecipeProps
+  state: { searchFilter: string } = { searchFilter: DEFAULT_FILTER }
 
   getAnotherRecipe() {
     const { data } = this.props
-    data.refetch()
+    const { searchFilter } = this.state
+    data.refetch({ searchFilter })
+  }
+
+  updateFilter(e: MouseEvent, data: { value: string }) {
+    this.setState(() => ({ searchFilter: data.value }))
   }
 
   render() {
     const { data } = this.props
     const recipe = data.randomRecipe || {}
-
+    const { searchFilter } = this.state
     if (data.loading) {
       return <Loading />
     } else if (!data.loading && !recipe.id) {
@@ -42,8 +56,14 @@ export class RecipeDetailApollo extends Component {
           <RecipeComponent recipe={recipe} />
           <RandomButton>
             <Button primary onClick={e => this.getAnotherRecipe()}>
-              NEW RECIPE!
+              NEW IDEA!
             </Button>
+            <Dropdown
+              selection
+              options={FILTER_OPTIONS}
+              defaultValue={searchFilter}
+              onChange={(e, d) => this.updateFilter(e, d)}
+            />
           </RandomButton>
         </RandomizerBody>
       )
@@ -60,8 +80,8 @@ const RandomButton = styled.div`
 `
 
 const recipeQuery = gql`
-  query RandomRecipe {
-    randomRecipe {
+  query RandomRecipe($searchFilter: String) {
+    randomRecipe(searchFilter: $searchFilter) {
       id
       author
       authorId
