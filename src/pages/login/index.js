@@ -13,17 +13,19 @@ import { FormContainer, FormHeader, Error } from '../form-styles'
 import type { ContextRouter } from 'react-router-dom'
 import type { ConnectedProps } from 'types'
 
-export class Login extends Component {
-  props: ContextRouter & ConnectedProps
+type PROPS = ContextRouter & ConnectedProps
+type STATE = {
+  error: boolean,
+  message?: string
+}
 
+export class Login extends Component<PROPS, STATE> {
   onSubmit: (e: Event) => Promise<any>
   onEmailChange: (e: KeyboardEvent) => void
   onPasswordChange: (e: KeyboardEvent) => void
 
   email: string
   password: string
-
-  state: { error: boolean, message?: string }
 
   constructor(props: ContextRouter & ConnectedProps) {
     super(props)

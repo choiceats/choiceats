@@ -1,7 +1,7 @@
 
 
 declare module 'draft-js' {
-  declare export class Editor extends React$Component {
+  declare export class Editor extends React$Component<*> {
   }
 
   declare export class EditorState {

@@ -5,6 +5,7 @@ export const DEFAULT_RECIPE: Recipe = {
   id: null,
   name: '',
   author: '',
+  imageUrl: '',
   instructions: '',
   ingredients: [],
   description: ''

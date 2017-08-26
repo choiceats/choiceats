@@ -2,13 +2,11 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import { Card, Icon } from 'semantic-ui-react'
+import { Card, Icon, Image } from 'semantic-ui-react'
 
 import type { RecipeProps } from './prop-types.flow'
 
-export default class Recipe extends Component {
-  props: RecipeProps
-
+export default class Recipe extends Component<RecipeProps> {
   render() {
     const { recipe } = this.props
     if (!recipe.id) {
@@ -18,6 +16,7 @@ export default class Recipe extends Component {
     return (
       <Link to={{ pathname: `/recipe/${recipe.id}` }}>
         <Card fluid style={{ marginBottom: 15 }}>
+          <Image src={recipe.imageUrl} />
           <Card.Content>
             <Card.Header>
               {recipe.name}
@@ -50,32 +49,3 @@ const Description = styled.div`
   margin-top: 15px;
   white-space: pre-wrap;
 `
-
-// =======
-// export const Recipe
-//  : (RecipeProps & ConnectedProps & MappedProps) => React.Element<*> =
-//    ({
-//      recipe,
-//      isLoggedIn,
-//      allowEdits,
-//      likes = 0,
-//      youLike,
-//      selectedRecipeId,
-//      recipeIdToDelete,
-//      dispatch,
-//      userId
-//    }) => {
-//      return selectedRecipeId === recipe.id
-//        ? <RecipeDetail recipe={recipe} userId={userId} recipeIdToDelete={recipeIdToDelete} dispatch={dispatch}/>
-//        : <RecipeSimple recipe={recipe} userId={userId} />
-//    }
-//
-// const mapStateToProps
-//  : (AppState) => MappedProps =
-//    (state) => {
-//      return {
-//        selectedRecipeId: state.ui.selectedRecipeId,
-//        recipeIdToDelete: state.ui.recipeIdToDelete
-//      }
-//    }
-// >>>>>>> Stashed changes

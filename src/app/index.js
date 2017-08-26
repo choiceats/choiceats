@@ -17,13 +17,15 @@ const store = createStore(
   }),
   {},
   compose(
-      applyMiddleware(client.middleware()),
-      (typeof window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined') ? window.__REDUX_DEVTOOLS_EXTENSION__() : f => f
+    applyMiddleware(client.middleware()),
+    typeof window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined'
+      ? window.__REDUX_DEVTOOLS_EXTENSION__()
+      : f => f
   )
 )
 
-class App extends Component {
-  render () {
+class App extends Component<*> {
+  render() {
     return (
       <ApolloProvider store={store} client={client}>
         <Router>

@@ -2,29 +2,28 @@
 // flow-typed version: 8ab7b85670/react-router-dom_v4.x.x/flow_>=v0.38.x
 
 declare module 'react-router-dom' {
+  
+  declare export class HashRouter extends React$Component<{
+    basename?: string,
+    getUserConfirmation?: GetUserConfirmation,
+    hashType?: 'slash' | 'noslash' | 'hashbang',
+    children?: React$Element<*>,
+  }> {}
+
+  declare type LinkProps = {
+    to: string | LocationShape,
+    replace?: boolean,
+    children?: React$Element<*> | string,
+  };
+  declare export class Link extends React$Component<LinkProps> {
+  }
+
   declare export class BrowserRouter extends React$Component {
     props: {
       basename?: string,
       forceRefresh?: boolean,
       getUserConfirmation?: GetUserConfirmation,
       keyLength?: number,
-      children?: React$Element<*>,
-    }
-  }
-
-  declare export class HashRouter extends React$Component {
-    props: {
-      basename?: string,
-      getUserConfirmation?: GetUserConfirmation,
-      hashType?: 'slash' | 'noslash' | 'hashbang',
-      children?: React$Element<*>,
-    }
-  }
-
-  declare export class Link extends React$Component {
-    props: {
-      to: string | LocationShape,
-      replace?: boolean,
       children?: React$Element<*>,
     }
   }
@@ -139,16 +138,14 @@ declare module 'react-router-dom' {
     }
   }
 
-  declare export class Route extends React$Component {
-    props: {
-      component?: ReactClass<*>,
-      render?: (router: ContextRouter) => React$Element<*>,
-      children?: (router: ContextRouter) => React$Element<*>,
-      path?: string,
-      exact?: bool,
-      strict?: bool,
-    }
-  }
+  declare export class Route extends React$Component<{
+    component?: any,
+    render?: (router: ContextRouter) => React$Element<*>,
+    children?: (router: ContextRouter) => React$Element<*>,
+    path?: string,
+    exact?: bool,
+    strict?: bool,
+  }> {}
 
   declare export class Switch extends React$Component {
     props: {
@@ -157,8 +154,8 @@ declare module 'react-router-dom' {
   }
 
   declare type FunctionComponent<P> = (props: P) => ?React$Element<any>;
-  declare type ClassComponent<D, P, S> = Class<React$Component<D, P, S>>;
-  declare export function withRouter<P, S>(Component: ClassComponent<void, P, S> | FunctionComponent<P>): ClassComponent<void, $Diff<P, ContextRouter>, S>;
+  declare type ClassComponent<P, S> = Class<React$Component<P, S>>;
+  declare export function withRouter<P, S>(Component: ClassComponent<P, S> | FunctionComponent<P>): ClassComponent<$Diff<P, ContextRouter>, S>;
 
   declare type MatchPathOptions = {
     path: string,

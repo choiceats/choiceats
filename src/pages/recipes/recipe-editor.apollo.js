@@ -10,7 +10,7 @@ import { setRecipeStatus } from '../../state/action-creators'
 
 import type { Recipe, Ingredient, Unit } from 'types'
 
-type RecipeApolloData = {
+type RecipeEditorApolloProps = {
   data: {
     recipe: Recipe,
     ingredients: Ingredient[],
@@ -23,9 +23,7 @@ type RecipeApolloData = {
   dispatch: any => Object
 }
 
-export class RecipeEditorApollo extends Component {
-  props: RecipeApolloData
-
+export class RecipeEditorApollo extends Component<RecipeEditorApolloProps> {
   onSave(recipe: Recipe) {
     const { mutate, history, dispatch } = this.props
     const cleanRecipe = stripOutTypenames(recipe)

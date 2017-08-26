@@ -1,5 +1,5 @@
 // @flow
-import React from 'react'
+import * as React from 'react'
 import { compose, gql, graphql } from 'react-apollo'
 import RecipeDetail from './recipe-detail'
 import { connect } from 'react-redux'

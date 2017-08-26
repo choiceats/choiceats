@@ -11,7 +11,7 @@ type RichEditorState = {
   editorState: EditorState
 }
 
-export default class RichEditor extends Component {
+export default class RichEditor extends Component<void, RichEditorState> {
   focus: () => void
   handleKeyCommand: (command: string) => string
   onTab: (event: KeyboardEvent) => void
@@ -19,24 +19,22 @@ export default class RichEditor extends Component {
   toggleInlineStyle: (type: string) => void
   onChange: (state: EditorState) => void
 
-  state: RichEditorState
-
-  constructor (props: {}) {
-    super(props)
+  constructor() {
+    super()
     this.state = {
       editorState: EditorState.createEmpty()
     }
 
     this.focus = () => this.refs.editor.focus()
-    this.onChange = (editorState) => this.setState(() => ({editorState}))
+    this.onChange = editorState => this.setState(() => ({ editorState }))
 
-    this.handleKeyCommand = (command) => this._handleKeyCommand(command)
-    this.onTab = (e) => this._onTab(e)
-    this.toggleBlockType = (type) => this._toggleBlockType(type)
-    this.toggleInlineStyle = (style) => this._toggleInlineStyle(style)
+    this.handleKeyCommand = command => this._handleKeyCommand(command)
+    this.onTab = e => this._onTab(e)
+    this.toggleBlockType = type => this._toggleBlockType(type)
+    this.toggleInlineStyle = style => this._toggleInlineStyle(style)
   }
 
-  _handleKeyCommand (command: string) {
+  _handleKeyCommand(command: string) {
     const newState = RichUtils.handleKeyCommand(this.state.editorState, command)
     if (newState) {
       this.onChange(newState)
@@ -45,42 +43,34 @@ export default class RichEditor extends Component {
     return 'not-handled'
   }
 
-  _onTab (e: KeyboardEvent) {
+  _onTab(e: KeyboardEvent) {
     const maxDepth = 4
     this.onChange(RichUtils.onTab(e, this.state.editorState, maxDepth))
   }
 
-  _toggleBlockType (blockType: string) {
+  _toggleBlockType(blockType: string) {
+    this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType))
+  }
+
+  _toggleInlineStyle(inlineStyle: string) {
     this.onChange(
-      RichUtils.toggleBlockType(
-        this.state.editorState,
-        blockType
-      )
+      RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
     )
   }
 
-  _toggleInlineStyle (inlineStyle: string) {
-    this.onChange(
-      RichUtils.toggleInlineStyle(
-        this.state.editorState,
-        inlineStyle
-      )
-    )
-  }
-
-  render () {
+  render() {
     const { editorState } = this.state
     return (
-      <EditorContainer className='RichEditor-root'>
+      <EditorContainer className="RichEditor-root">
         <BlockStyleControls
           editorState={editorState}
           onToggle={this.toggleBlockType}
-              />
+        />
         <InlineStyleControls
           editorState={editorState}
           onToggle={this.toggleInlineStyle}
-              />
-        <div className='RichEditor-editor'>
+        />
+        <div className="RichEditor-editor">
           <Editor
             editorState={editorState}
             onChange={this.onChange}
@@ -92,18 +82,23 @@ export default class RichEditor extends Component {
   }
 }
 
-class StyleButton extends React.Component {
+type StyleButtonProps = {
+  onToggle: string => void,
+  style: string,
+  label: string
+}
+class StyleButton extends Component<StyleButtonProps> {
   onToggle: (e: MouseEvent) => void
 
-  constructor () {
+  constructor() {
     super()
-    this.onToggle = (e) => {
+    this.onToggle = e => {
       e.preventDefault()
       this.props.onToggle(this.props.style)
     }
   }
 
-  render () {
+  render() {
     let className = 'RichEditor-styleButton'
     if (this.props.active) {
       className += ' RichEditor-activeButton'
@@ -117,48 +112,48 @@ class StyleButton extends React.Component {
 }
 
 const BLOCK_TYPES = [
-  {label: 'H1', style: 'header-one'},
-  {label: 'H2', style: 'header-two'},
-  {label: 'H3', style: 'header-three'},
-  {label: 'Blockquote', style: 'blockquote'},
-  {label: 'UL', style: 'unordered-list-item'},
-  {label: 'OL', style: 'ordered-list-item'},
-  {label: 'Code Block', style: 'code-block'}
+  { label: 'H1', style: 'header-one' },
+  { label: 'H2', style: 'header-two' },
+  { label: 'H3', style: 'header-three' },
+  { label: 'Blockquote', style: 'blockquote' },
+  { label: 'UL', style: 'unordered-list-item' },
+  { label: 'OL', style: 'ordered-list-item' },
+  { label: 'Code Block', style: 'code-block' }
 ]
 
-const BlockStyleControls = (props) => {
-  const {editorState} = props
+const BlockStyleControls = props => {
+  const { editorState } = props
   const selection = editorState.getSelection()
   const blockType = editorState
-          .getCurrentContent()
-          .getBlockForKey(selection.getStartKey())
-          .getType()
+    .getCurrentContent()
+    .getBlockForKey(selection.getStartKey())
+    .getType()
   return (
-    <div className='RichEditor-controls'>
-      {BLOCK_TYPES.map((type) =>
+    <div className="RichEditor-controls">
+      {BLOCK_TYPES.map(type =>
         <StyleButton
           key={type.label}
           active={type.style === blockType}
           label={type.label}
           onToggle={props.onToggle}
           style={type.style}
-              />
-            )}
+        />
+      )}
     </div>
   )
 }
 
 var INLINE_STYLES = [
-  {label: 'Bold', style: 'BOLD'},
-  {label: 'Italic', style: 'ITALIC'},
-  {label: 'Underline', style: 'UNDERLINE'},
-  {label: 'Monospace', style: 'CODE'}
+  { label: 'Bold', style: 'BOLD' },
+  { label: 'Italic', style: 'ITALIC' },
+  { label: 'Underline', style: 'UNDERLINE' },
+  { label: 'Monospace', style: 'CODE' }
 ]
 
-const InlineStyleControls = (props) => {
+const InlineStyleControls = props => {
   var currentStyle = props.editorState.getCurrentInlineStyle()
   return (
-    <div className='RichEditor-controls'>
+    <div className="RichEditor-controls">
       {INLINE_STYLES.map(type =>
         <StyleButton
           key={type.label}
@@ -166,8 +161,8 @@ const InlineStyleControls = (props) => {
           label={type.label}
           onToggle={props.onToggle}
           style={type.style}
-              />
-            )}
+        />
+      )}
     </div>
   )
 }

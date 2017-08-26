@@ -16,9 +16,7 @@ type RecipeEditorNewData = {
   mutate: any => window.Promise
 }
 
-export class RecipeEditorNewApollo extends Component {
-  props: RecipeEditorNewData
-
+export class RecipeEditorNewApollo extends Component<RecipeEditorNewData> {
   onSave(recipe: Recipe) {
     const { mutate, history } = this.props
     const cleanRecipe = stripOutTypenames(recipe)

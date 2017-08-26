@@ -1,8 +1,8 @@
 // @flow
-import React from 'react'
+import * as React from 'react'
 import styled, { keyframes } from 'styled-components'
 import { Link } from 'react-router-dom'
-import { Button, Card, Modal, Icon, Loader } from 'semantic-ui-react'
+import { Button, Card, Modal, Icon, Loader, Image } from 'semantic-ui-react'
 import {
   selectRecipeToDelete,
   setRecipeStatus,
@@ -46,7 +46,7 @@ type HigherOrderProps = {
 
 export const RecipeDetail: (
   RecipeProps & OtherProps & HigherOrderProps
-) => React.Element<*> = ({
+) => React.Node = ({
   goToRecipeList,
   dispatch,
   recipe,
@@ -61,6 +61,7 @@ export const RecipeDetail: (
 }) =>
   <RecipeCard style={{ paddingBottom: '3px' }}>
     <Card fluid>
+      <Image src={recipe.imageUrl} />
       <Card.Content>
         <Card.Header>
           {recipe.name}
@@ -98,7 +99,7 @@ export const RecipeDetail: (
             />
             {!!recipe.likes &&
               <span>
-                Likes: {recipe.likes} {recipe.youLike && '(including you)'}
+                Likes: {recipe.likes} {!!recipe.youLike && '(including you)'}
               </span>}
             {!recipe.likes && <span>Be the first to like this</span>}
           </span>

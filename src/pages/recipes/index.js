@@ -8,7 +8,13 @@ import RecipeDetail from './recipe-detail.apollo'
 import RecipeEditor from './recipe-editor.apollo'
 import RecipeEditorNew from './recipe-editor-new.apollo'
 
-export default class RecipeRoute extends Component {
+type Props = {
+  match: {
+    url: string
+  }
+}
+
+export default class RecipeRoute extends Component<Props, void> {
   render() {
     const { match } = this.props
     return (
@@ -36,7 +42,6 @@ export default class RecipeRoute extends Component {
 }
 
 const RecipesBody = styled.div`
-  padding: 0 25px;
   margin: auto;
   max-width: 1000px;
   margin-top: 10px;

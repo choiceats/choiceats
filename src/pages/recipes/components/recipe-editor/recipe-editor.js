@@ -8,11 +8,11 @@ import { Input, Form, TextArea, Button, Loader } from 'semantic-ui-react'
 import RecipeIngredientsEditor from './recipe-ingredients-editor'
 import { DEFAULT_RECIPE } from '../../../../defaults'
 
-import type { Recipe, Ingredient } from 'types'
+import type { Recipe, RecipeIngredient } from 'types'
 
 import './recipe-editor.css'
 
-type RecipeEditorProps = {
+type PROPS = {
   recipe: ?Recipe,
   units: any,
   ingredients: any,
@@ -21,14 +21,11 @@ type RecipeEditorProps = {
   recipeSaveError?: boolean
 }
 
-type RecipeEditorState = {
+type STATE = {
   editingRecipe: Recipe
 }
 
-export default class RecipeEditor extends Component {
-  props: RecipeEditorProps
-  state: RecipeEditorState
-
+export default class RecipeEditor extends Component<PROPS, STATE> {
   componentWillMount() {
     const { recipe } = this.props
     this.setState(() => ({
@@ -36,7 +33,7 @@ export default class RecipeEditor extends Component {
     }))
   }
 
-  updateIngredients(newIngredients: Ingredient[]) {
+  updateIngredients(newIngredients: RecipeIngredient[]) {
     const { editingRecipe } = this.state
     const newRecipe = {
       ...editingRecipe,

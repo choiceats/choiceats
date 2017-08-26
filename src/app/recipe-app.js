@@ -15,14 +15,12 @@ import type { ConnectedProps } from 'types'
 
 const NON_RESTRICTED_PATHS = ['/login', '/login/sign-up']
 
-type RecipeAppProps = ConnectedProps &
+type PROPS = ConnectedProps &
   ContextRouter & {
     userToken: string
   }
 
-export class RecipeApp extends Component {
-  props: RecipeAppProps
-
+export class RecipeApp extends Component<PROPS> {
   render() {
     const { userToken, location } = this.props
     const isRestrictedPath =
@@ -64,7 +62,7 @@ const AppContainer = styled.div`
 `
 
 const TopRouteContainer = styled.div`
-  max-height: calc(100vh - ${HEADER_HEIGHT}px);
+  height: calc(100vh - ${HEADER_HEIGHT}px);
   overflow: auto;
   padding: 20px;
 `

@@ -5,20 +5,11 @@ import { Button, Dropdown } from 'semantic-ui-react'
 import styled from 'styled-components'
 
 import RecipeComponent from '../recipes/recipe'
-import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import NotFound from '../shared-components/not-found'
 import Loading from '../shared-components/loading'
 
 import type { Recipe } from 'types'
-
-type ApolloRecipeProps = {
-  data: {
-    loading: boolean,
-    randomRecipe: Recipe,
-    refetch: any => void
-  }
-}
 
 const FILTER_OPTIONS = [
   { key: 'my', text: 'My Recipes', value: 'my' },
@@ -28,9 +19,20 @@ const FILTER_OPTIONS = [
 
 const DEFAULT_FILTER = 'all'
 
-export class RecipeDetailApollo extends Component {
-  props: ApolloRecipeProps
-  state: { searchFilter: string } = { searchFilter: DEFAULT_FILTER }
+type PROPS = {
+  data: {
+    loading: boolean,
+    randomRecipe: Recipe,
+    refetch: (filter: { searchFilter: string }) => void
+  }
+}
+
+type STATE = {
+  searchFilter: string
+}
+
+export class RecipeDetailApollo extends Component<PROPS, STATE> {
+  state = { searchFilter: DEFAULT_FILTER }
 
   getAnotherRecipe() {
     const { data } = this.props

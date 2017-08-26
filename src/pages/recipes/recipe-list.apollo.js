@@ -19,9 +19,7 @@ type RecipeListProps = {
   searchText: string
 }
 
-export class RecipeListApollo extends Component {
-  props: RecipeListProps
-
+export class RecipeListApollo extends Component<RecipeListProps> {
   render() {
     const { data, isLoggedIn, userId } = this.props
     if (!data) return <Loading />

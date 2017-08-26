@@ -9,24 +9,21 @@ import { logout } from '../../state/action-creators'
 import type { ContextRouter } from 'react-router-dom'
 import type { ConnectedProps } from 'types'
 
-export class LogoutButton extends Component {
-  props: ConnectedProps & ContextRouter
+type PROPS = ConnectedProps & ContextRouter
+
+export class LogoutButton extends Component<PROPS> {
   onClick: () => void
 
-  constructor (props: ConnectedProps & ContextRouter) {
+  constructor(props: ConnectedProps & ContextRouter) {
     super(props)
     this.onClick = this._onClick.bind(this)
   }
 
-  render () {
-    return (
-      <Button onClick={this.onClick}>
-        Logout
-      </Button>
-    )
+  render() {
+    return <Button onClick={this.onClick}>Logout</Button>
   }
 
-  _onClick () {
+  _onClick() {
     const { history, dispatch } = this.props
     dispatch(logout())
     history.push('/login')

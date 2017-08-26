@@ -18,6 +18,7 @@ describe('Recipe: Recipe Editor::', () => {
   beforeEach(() => {
     fakeRecipe = {
       id: null,
+      imageUrl: '',
       author: 'Some dude',
       name: 'Cool Recipe',
       instructions: '1. Mix well',
