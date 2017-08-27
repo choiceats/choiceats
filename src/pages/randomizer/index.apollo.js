@@ -1,16 +1,16 @@
 // @flow
 import React, { Component } from 'react'
 import { compose, gql, graphql } from 'react-apollo'
-import { Button, Dropdown } from 'semantic-ui-react'
 import styled from 'styled-components'
 
 import RecipeComponent from '../recipes/recipe'
 import { withRouter } from 'react-router-dom'
 import NotFound from '../shared-components/not-found'
 import Loading from '../shared-components/loading'
-import Randomfilter from './components/random-button-filter'
+import RandomButton from './components/random-button-filter'
+import FilterSelector from './components/filter'
 
-import { DEFAULT_FILTER, FILTER_OPTIONS } from './consts'
+import { DEFAULT_FILTER } from './consts'
 
 import type { Recipe } from 'types'
 
@@ -35,8 +35,8 @@ export class RecipeDetailApollo extends Component<PROPS, STATE> {
     data.refetch({ searchFilter })
   }
 
-  updateFilter(e: MouseEvent, data: { value: string }) {
-    this.setState(() => ({ searchFilter: data.value }))
+  updateFilter(value: string) {
+    this.setState(() => ({ searchFilter: value }))
   }
 
   render() {
@@ -50,12 +50,12 @@ export class RecipeDetailApollo extends Component<PROPS, STATE> {
     } else {
       return (
         <RandomizerBody>
-          <RecipeComponent recipe={recipe} />
-          <Randomfilter
+          <FilterSelector
             updateFilter={this.updateFilter.bind(this)}
-            getAnotherRecipe={this.getAnotherRecipe.bind(this)}
             selectedFilter={searchFilter}
           />
+          <RecipeComponent recipe={recipe} />
+          <RandomButton getAnotherRecipe={this.getAnotherRecipe.bind(this)} />
         </RandomizerBody>
       )
     }
