@@ -15,12 +15,12 @@ const FILTER_OPTIONS = [
 
 const DEFAULT_FILTER = 'all'
 
-type SearchState = {
+type STATE = {
   searchText: string,
   searchFilter: string
 }
 
-export default class RecipeSearch extends Component<void, SearchState> {
+export default class RecipeSearch extends Component<void, STATE> {
   state = {
     searchText: '',
     searchFilter: DEFAULT_FILTER

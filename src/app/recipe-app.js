@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import Login from '../pages/login'
 import Signup from '../pages/signup'
 import RecipeList from '../pages/recipes'
-import Randomizer from '../pages/randomizer'
+import Randomizer from '../pages/randomizer/index.apollo'
 import Navbar from './components/navbar'
 
 import type { ContextRouter } from 'react-router-dom'

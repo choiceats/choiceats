@@ -8,16 +8,11 @@ import RecipeComponent from '../recipes/recipe'
 import { withRouter } from 'react-router-dom'
 import NotFound from '../shared-components/not-found'
 import Loading from '../shared-components/loading'
+import Randomfilter from './components/random-button-filter'
+
+import { DEFAULT_FILTER, FILTER_OPTIONS } from './consts'
 
 import type { Recipe } from 'types'
-
-const FILTER_OPTIONS = [
-  { key: 'my', text: 'My Recipes', value: 'my' },
-  { key: 'fav', text: 'Favorite', value: 'fav' },
-  { key: 'all', text: 'All', value: 'all' }
-]
-
-const DEFAULT_FILTER = 'all'
 
 type PROPS = {
   data: {
@@ -56,17 +51,11 @@ export class RecipeDetailApollo extends Component<PROPS, STATE> {
       return (
         <RandomizerBody>
           <RecipeComponent recipe={recipe} />
-          <RandomButton>
-            <Button primary onClick={e => this.getAnotherRecipe()}>
-              NEW IDEA!
-            </Button>
-            <Dropdown
-              selection
-              options={FILTER_OPTIONS}
-              defaultValue={searchFilter}
-              onChange={(e, d) => this.updateFilter(e, d)}
-            />
-          </RandomButton>
+          <Randomfilter
+            updateFilter={this.updateFilter.bind(this)}
+            getAnotherRecipe={this.getAnotherRecipe.bind(this)}
+            selectedFilter={searchFilter}
+          />
         </RandomizerBody>
       )
     }
@@ -74,12 +63,6 @@ export class RecipeDetailApollo extends Component<PROPS, STATE> {
 }
 
 const RandomizerBody = styled.div`align: center;`
-
-const RandomButton = styled.div`
-  width: 100%;
-  text-align: center;
-  margin-top: 15px;
-`
 
 const recipeQuery = gql`
   query RandomRecipe($searchFilter: String) {

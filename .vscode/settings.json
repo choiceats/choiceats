@@ -3,7 +3,11 @@
   "standard.enable": true,
   "standard.autoFixOnSave": true,
   "editor.minimap.enabled":false,
+  "editor.formatOnSave": true,
   "javascript.validate.enable": false,
   "typescript.validate.enable": false,
-  "flowide.useCodeSnippetsOnFunctionSuggest": false
+  "flowide.useCodeSnippetsOnFunctionSuggest": false,
+  "prettier.semi": false,
+  "prettier.singleQuote": true,
+  "prettier.parser": "flow"
 }
