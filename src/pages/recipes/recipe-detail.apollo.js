@@ -97,6 +97,7 @@ const recipeQuery = gql`
           abbr
         }
         quantity
+        displayQuantity
       }
       likes
       youLike

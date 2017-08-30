@@ -24,8 +24,17 @@ DONE
 * Authentication
 * Delete recipes
 * Filter recipes by likes (youlike and then overall)
+* Server side converter to display fractions instead of decimals
 
-## Something Missing?
+## Backlog
+* Dictionary of plural/single ingredients on server side (i.e. eggs);
 
 ### Missing Ingredients
 * Ground pork
+
+### Ingredients to fix
+* apple slices. large apples, sliced
+* unitless ingredients may need to display quantity sometimes but not other times. e.g. ketchup would not show quantity, but eggs would
+
+## Something Missing?
+

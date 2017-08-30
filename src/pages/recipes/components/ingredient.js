@@ -2,12 +2,12 @@ import React from 'react'
 import styled from 'styled-components'
 
 export default ({ ingredient, showQuantity = true }) => {
-  const { name, quantity, unit } = ingredient
+  const { name, displayQuantity, unit } = ingredient
   return (
     <IngredientContainer>
-      { showQuantity && `${quantity} ` }
-      { unit && unit.abbr ? `${unit.abbr} ` : '' }
-      { name }
+      {showQuantity && `${displayQuantity} `}
+      {unit && unit.abbr ? `${unit.abbr} ` : ''}
+      {name}
     </IngredientContainer>
   )
 }
