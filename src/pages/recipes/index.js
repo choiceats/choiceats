@@ -3,18 +3,18 @@ import React, { Component } from 'react'
 import { Route, Switch } from 'react-router-dom'
 import styled from 'styled-components'
 
-import RecipeSearch from './recipe-search'
+import RecipeSearch from './recipe-search.apollo'
 import RecipeDetail from './recipe-detail.apollo'
 import RecipeEditor from './recipe-editor.apollo'
 import RecipeEditorNew from './recipe-editor-new.apollo'
 
-type Props = {
+type PROPS = {
   match: {
     url: string
   }
 }
 
-export default class RecipeRoute extends Component<Props, void> {
+export default class RecipeRoute extends Component<PROPS, void> {
   render() {
     const { match } = this.props
     return (

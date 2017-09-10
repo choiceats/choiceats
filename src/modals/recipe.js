@@ -49,6 +49,7 @@ type Query {
   recipe: Recipe
   units: [Unit]
   ingredients: [Ingredient]
+  tags: [Tag]
 }
 
 type Mutation {

@@ -15,15 +15,21 @@ const FILTER_OPTIONS = [
 
 const DEFAULT_FILTER = 'all'
 
-type STATE = {
-  searchText: string,
-  searchFilter: string
+type PROPS = {
+  tags: Array<{ id: number, name: string }>
 }
 
-export default class RecipeSearch extends Component<void, STATE> {
+type STATE = {
+  searchText: string,
+  searchFilter: string,
+  searchTags: any[]
+}
+
+export default class RecipeSearch extends Component<PROPS, STATE> {
   state = {
     searchText: '',
-    searchFilter: DEFAULT_FILTER
+    searchFilter: DEFAULT_FILTER,
+    searchTags: []
   }
 
   updateSearch(e: KeyboardEvent) {
@@ -37,8 +43,14 @@ export default class RecipeSearch extends Component<void, STATE> {
     this.setState(() => ({ searchFilter: data.value }))
   }
 
+  handleTagChange({ value }: { value: string[] }) {
+    this.setState(() => ({ searchTags: value }))
+  }
+
   render() {
-    const { searchText, searchFilter } = this.state
+    const { tags } = this.props
+    const { searchText, searchFilter, searchTags } = this.state
+    const options = tags.map(t => ({ text: t.name, value: t.id }))
     return (
       <SearchContainer>
         <SearchInput>
@@ -66,8 +78,18 @@ export default class RecipeSearch extends Component<void, STATE> {
             fluid
             onChange={e => this.updateSearch(e)}
           />
+          <Dropdown
+            selection
+            closeOnChange
+            options={options}
+            onChange={(e, d) => this.handleTagChange(d)}
+          />
         </SearchInput>
-        <RecipeListApollo searchText={searchText} searchFilter={searchFilter} />
+        <RecipeListApollo
+          searchText={searchText}
+          searchTags={searchTags}
+          searchFilter={searchFilter}
+        />
       </SearchContainer>
     )
   }

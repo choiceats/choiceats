@@ -16,11 +16,13 @@ type RecipeListProps = {
   },
   userId: number,
   isLoggedIn: boolean,
-  searchText: string
+  searchText: string,
+  searchTags: any
 }
 
 export class RecipeListApollo extends Component<RecipeListProps> {
   render() {
+    console.log('rendering?')
     const { data, isLoggedIn, userId } = this.props
     if (!data) return <Loading />
 
@@ -42,8 +44,16 @@ export class RecipeListApollo extends Component<RecipeListProps> {
 }
 
 const recipesQuery = gql`
-  query RecipeQuery($searchText: String, $searchFilter: String) {
-    recipes(searchText: $searchText, searchFilter: $searchFilter) {
+  query RecipeQuery(
+    $searchText: String
+    $searchFilter: String
+    $searchTags: [Int]
+  ) {
+    recipes(
+      searchText: $searchText
+      searchFilter: $searchFilter
+      searchTags: $searchTags
+    ) {
       id
       author
       authorId
@@ -53,13 +63,18 @@ const recipesQuery = gql`
       likes
       youLike
     }
+    tags {
+      id
+      name
+    }
   }
 `
 
-const options = ({ searchText, searchFilter }) => ({
+const options = ({ searchText, searchFilter, searchTags }) => ({
   variables: {
     searchText,
-    searchFilter
+    searchFilter,
+    searchTags
   }
 })
 
