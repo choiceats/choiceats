@@ -90,6 +90,10 @@ const recipeQuery = gql`
       imageUrl
       name
       instructions
+      tags {
+        id
+        name
+      }
       ingredients {
         name
         unit {

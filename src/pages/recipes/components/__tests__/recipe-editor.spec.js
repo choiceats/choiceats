@@ -23,7 +23,8 @@ describe('Recipe: Recipe Editor::', () => {
       name: 'Cool Recipe',
       instructions: '1. Mix well',
       ingredients: [],
-      description: ''
+      description: '',
+      tags: []
     }
 
     ingredients = []

@@ -58,28 +58,26 @@ export const RecipeDetail: (
   likeRecipe,
   deleteRecipe,
   userId = 0
-}) =>
+}) => (
   <RecipeCard style={{ paddingBottom: '3px' }}>
     <Card fluid>
       <Image src={recipe.imageUrl} />
       <Card.Content>
-        <Card.Header>
-          {recipe.name}
-        </Card.Header>
+        <Card.Header>{recipe.name}</Card.Header>
+        <Card.Meta>{recipe.author}</Card.Meta>
         <Card.Meta>
-          {recipe.author}
+          <TagList>
+            {recipe.tags.map(tag => <Tag key={tag.id} name={tag.name} />)}
+          </TagList>
         </Card.Meta>
         <Card.Description>
           {recipe.id &&
-            userId === recipe.authorId &&
-            <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link>}
-          <Description>
-            {recipe.description}
-          </Description>
+          userId === recipe.authorId && (
+            <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link>
+          )}
+          <Description>{recipe.description}</Description>
           <IngredientList ingredients={recipe.ingredients || []} />
-          <Directions>
-            {recipe.instructions}
-          </Directions>
+          <Directions>{recipe.instructions}</Directions>
         </Card.Description>
         <Card.Description
           style={{
@@ -97,28 +95,32 @@ export const RecipeDetail: (
               onClick={() =>
                 _handleLikeClick(dispatch, likeRecipe, recipe.id, userId)}
             />
-            {!!recipe.likes &&
+            {!!recipe.likes && (
               <span>
                 Likes: {recipe.likes} {!!recipe.youLike && '(including you)'}
-              </span>}
+              </span>
+            )}
             {!recipe.likes && <span>Be the first to like this</span>}
           </span>
           {userId === recipe.authorId &&
-            (!isDeletingRecipe
-              ? <Button
-                  negative
-                  onClick={() => {
-                    dispatch(selectRecipeToDelete(recipe.id || null))
-                  }}
-                >
-                  Delete
-                </Button>
-              : <Loader inline active size="tiny">
-                  Deleting
-                </Loader>)}
+            (!isDeletingRecipe ? (
+              <Button
+                negative
+                onClick={() => {
+                  dispatch(selectRecipeToDelete(recipe.id || null))
+                }}
+              >
+                Delete
+              </Button>
+            ) : (
+              <Loader inline active size="tiny">
+                Deleting
+              </Loader>
+            ))}
         </Card.Description>
-        {deleteRecipeError &&
-          <DeleteError>Unable to delete recipe.</DeleteError>}
+        {deleteRecipeError && (
+          <DeleteError>Unable to delete recipe.</DeleteError>
+        )}
       </Card.Content>
       <Modal
         open={recipeIdToDelete && recipeIdToDelete === recipe.id}
@@ -147,6 +149,24 @@ export const RecipeDetail: (
       />
     </Card>
   </RecipeCard>
+)
+
+const Tag = ({ name }) => <TagBody>{name}</TagBody>
+
+const TagList = styled.div`
+  display: flex;
+  margin-top: 5px;
+`
+
+const TagBody = styled.div`
+  display: inline-flex;
+  background-color: indianred;
+  border-radius: 2px;
+  height: 24px;
+  padding: 2px 4px;
+  font-size: 12px;
+  font-weight: bold;
+`
 
 const slideIn = keyframes`
   from {
@@ -158,7 +178,7 @@ const slideIn = keyframes`
   }
 `
 
-const RecipeCard = styled.div`animation: ${slideIn} .25s linear;`
+const RecipeCard = styled.div`animation: ${slideIn} 0.25s linear;`
 
 const Description = styled.div`
   margin-top: 15px;

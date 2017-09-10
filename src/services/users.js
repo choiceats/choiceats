@@ -25,12 +25,13 @@ export const setUser = (user: any) => {
   return user
 }
 
-export const login = (email: string, password: string) => {
+export const login = (
+  email: string,
+  password: string
+): Promise<{ id: number, token: string }> => {
   return fetch(`${baseUrl}/auth`, {
     method: 'post',
-    headers: {
-      'content-type': 'application/json'
-    },
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       email,
       password
@@ -64,7 +65,7 @@ type RegisterParams = {
   password: string
 }
 
-export const register = (params: RegisterParams) => {
+export const register = (params: RegisterParams): Promise<void> => {
   return fetch(`${baseUrl}/user`, {
     method: 'post',
     headers: {
@@ -83,7 +84,10 @@ export const register = (params: RegisterParams) => {
       }
       return response.json()
     })
-    .then(responseJson => {
+    .then((responseJson: any): any => {
       console.log('login now?')
+    })
+    .catch(() => {
+      throw Error('Issues loggin in')
     })
 }

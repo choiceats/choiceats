@@ -1,5 +1,4 @@
 /* eslint-env jest */
-// @flow
 
 export const promises = {
   login: []

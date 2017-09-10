@@ -1,12 +1,14 @@
-// Place your settings in this file to overwrite default and user settings.
 {
+  // Place your settings in this file to overwrite default and user settings.
   "standard.enable": true,
   "standard.autoFixOnSave": true,
-  "editor.minimap.enabled":false,
+  "editor.minimap.enabled": false,
   "editor.formatOnSave": true,
   "javascript.validate.enable": false,
   "typescript.validate.enable": false,
-  "flowide.useCodeSnippetsOnFunctionSuggest": false,
+  "flow.enabled": true,
+  "flow.runOnEdit": true,
+  "flow.showStatus": true,
   "prettier.semi": false,
   "prettier.singleQuote": true,
   "prettier.parser": "flow"

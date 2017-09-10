@@ -1,4 +1,3 @@
-
 export const typeDefs = `
   type Unit {
     name: String
@@ -17,11 +16,17 @@ export const typeDefs = `
     quantity: Float!
   }
 
+  type Tag {
+    id: ID
+    name: String!
+  }
+
   type Recipe {
     id: ID
     author: String
     authorId: String
     ingredients: [RecipeIngredient]
+    tags: [Tag]
     instructions: String
     name: String
   }

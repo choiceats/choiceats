@@ -8,7 +8,8 @@ export const DEFAULT_RECIPE: Recipe = {
   imageUrl: '',
   instructions: '',
   ingredients: [],
-  description: ''
+  description: '',
+  tags: []
 }
 
 export const DEFAULT_RECIPE_INGREDIENT: RecipeIngredient = {
