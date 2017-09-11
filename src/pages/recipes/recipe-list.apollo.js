@@ -22,7 +22,6 @@ type RecipeListProps = {
 
 export class RecipeListApollo extends Component<RecipeListProps> {
   render() {
-    console.log('rendering?')
     const { data, isLoggedIn, userId } = this.props
     if (!data) return <Loading />
 

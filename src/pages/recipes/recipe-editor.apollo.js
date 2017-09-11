@@ -8,13 +8,14 @@ import { connect } from 'react-redux'
 import { UPDATE, SUCCESS, PENDING, FAIL } from '../../state/action-types'
 import { setRecipeStatus } from '../../state/action-creators'
 
-import type { Recipe, Ingredient, Unit } from 'types'
+import type { Recipe, Ingredient, Unit, RecipeTag } from 'types'
 
-type RecipeEditorApolloProps = {
+type PROPS = {
   data: {
     recipe: Recipe,
     ingredients: Ingredient[],
-    units: Unit[]
+    units: Unit[],
+    tags: RecipeTag[]
   },
   history: any,
   recipeStatus: Object,
@@ -23,7 +24,7 @@ type RecipeEditorApolloProps = {
   dispatch: any => Object
 }
 
-export class RecipeEditorApollo extends Component<RecipeEditorApolloProps> {
+export class RecipeEditorApollo extends Component<PROPS> {
   onSave(recipe: Recipe) {
     const { mutate, history, dispatch } = this.props
     const cleanRecipe = stripOutTypenames(recipe)
@@ -62,7 +63,7 @@ export class RecipeEditorApollo extends Component<RecipeEditorApolloProps> {
 
   render() {
     const { data, userId, recipeStatus } = this.props
-    console.log(recipeStatus)
+    console.log(this.props)
     if (data.loading) {
       return <Loading />
     }
@@ -96,6 +97,7 @@ export class RecipeEditorApollo extends Component<RecipeEditorApolloProps> {
         onSave={this.onSave.bind(this)}
         units={data.units}
         ingredients={data.ingredients}
+        tags={data.tags}
         recipe={recipe}
         isSavingRecipe={isSavingRecipe}
         recipeSaveError={recipeSaveError}
@@ -153,6 +155,10 @@ const recipeQuery = gql`
         }
         quantity
       }
+      tags {
+        id
+        name
+      }
       likes
     }
     units {
@@ -161,6 +167,10 @@ const recipeQuery = gql`
       abbr
     }
     ingredients {
+      id
+      name
+    }
+    tags {
       id
       name
     }
@@ -186,6 +196,9 @@ const gqlStuff = gql`
           abbr
         }
         quantity
+      }
+      tags {
+        id
       }
       likes
     }

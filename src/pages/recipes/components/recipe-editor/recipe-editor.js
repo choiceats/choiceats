@@ -3,12 +3,19 @@
 import React, { Component } from 'react'
 import styled, { keyframes } from 'styled-components'
 import cloneDeep from 'lodash.clonedeep'
-import { Input, Form, TextArea, Button, Loader } from 'semantic-ui-react'
+import {
+  Input,
+  Form,
+  TextArea,
+  Button,
+  Loader,
+  Dropdown
+} from 'semantic-ui-react'
 
 import RecipeIngredientsEditor from './recipe-ingredients-editor'
 import { DEFAULT_RECIPE } from '../../../../defaults'
 
-import type { Recipe, RecipeIngredient } from 'types'
+import type { Recipe, RecipeIngredient, RecipeTag } from 'types'
 
 import './recipe-editor.css'
 
@@ -16,13 +23,14 @@ type PROPS = {
   recipe: ?Recipe,
   units: any,
   ingredients: any,
+  tags: RecipeTag[],
   onSave: Recipe => void,
   isSavingRecipe?: boolean,
   recipeSaveError?: boolean
 }
 
 type STATE = {
-  editingRecipe: Recipe
+  editingRecipe: any
 }
 
 export default class RecipeEditor extends Component<PROPS, STATE> {
@@ -56,6 +64,16 @@ export default class RecipeEditor extends Component<PROPS, STATE> {
     }
   }
 
+  updateTags({ value }: { value: string[] }) {
+    const { editingRecipe } = this.state
+    const newRecipe = {
+      ...editingRecipe,
+      tags: value
+    }
+
+    this.setState(() => ({ editingRecipe: newRecipe }))
+  }
+
   onSave(e: Event, recipe: Recipe) {
     const { onSave } = this.props
     e.preventDefault()
@@ -68,8 +86,13 @@ export default class RecipeEditor extends Component<PROPS, STATE> {
       ingredients,
       isSavingRecipe = false,
       recipeSaveError,
-      units
+      units,
+      tags
     } = this.props
+    const options = tags.map(t => ({ text: t.name, value: t.id }))
+    const defaultValue = editingRecipe.tags.map(t => t.id)
+
+    console.log(defaultValue)
 
     return (
       <RecipeEditorContainer>
@@ -100,6 +123,16 @@ export default class RecipeEditor extends Component<PROPS, STATE> {
           />
 
           <Form.Field>
+            <label>Tags</label>
+            <Dropdown
+              selection
+              multiple
+              defaultValue={defaultValue}
+              options={options}
+              onChange={(e, d) => this.updateTags(d)}
+            />
+          </Form.Field>
+          <Form.Field>
             <label>Instructions</label>
             <TextArea
               onChange={e => this.updateProp(e, 'instructions')}
@@ -107,11 +140,13 @@ export default class RecipeEditor extends Component<PROPS, STATE> {
             />
           </Form.Field>
 
-          {!isSavingRecipe
-            ? <Button onClick={e => this.onSave(e, editingRecipe)}>Save</Button>
-            : <Loader inline active size="tiny">
-                Saving
-              </Loader>}
+          {!isSavingRecipe ? (
+            <Button onClick={e => this.onSave(e, editingRecipe)}>Save</Button>
+          ) : (
+            <Loader inline active size="tiny">
+              Saving
+            </Loader>
+          )}
           {recipeSaveError && <SaveError>Unable to save recipe.</SaveError>}
         </Form>
       </RecipeEditorContainer>
@@ -130,7 +165,7 @@ const slideIn = keyframes`
 `
 
 const RecipeEditorContainer = styled.div`
-  animation: ${slideIn} .25s linear;
+  animation: ${slideIn} 0.25s linear;
   min-width: 260px;
 `
 

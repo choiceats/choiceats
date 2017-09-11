@@ -51,6 +51,7 @@ export default class RecipeSearch extends Component<PROPS, STATE> {
     const { tags } = this.props
     const { searchText, searchFilter, searchTags } = this.state
     const options = tags.map(t => ({ text: t.name, value: t.id }))
+
     return (
       <SearchContainer>
         <SearchInput>
@@ -80,7 +81,7 @@ export default class RecipeSearch extends Component<PROPS, STATE> {
           />
           <Dropdown
             selection
-            closeOnChange
+            multiple
             options={options}
             onChange={(e, d) => this.handleTagChange(d)}
           />

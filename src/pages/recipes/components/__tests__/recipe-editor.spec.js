@@ -34,6 +34,7 @@ describe('Recipe: Recipe Editor::', () => {
       recipe: fakeRecipe,
       ingredients,
       units,
+      tags: [],
       onSave: () => {},
       isSavingRecipe: false,
       recipeSaveError: false

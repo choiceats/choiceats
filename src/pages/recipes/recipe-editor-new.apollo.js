@@ -5,12 +5,13 @@ import RecipeEditor from './components/recipe-editor/recipe-editor'
 import { DEFAULT_RECIPE } from '../../defaults'
 import Loading from '../shared-components/loading'
 
-import type { Recipe, Ingredient, Unit } from 'types'
+import type { Recipe, Ingredient, Unit, RecipeTag } from 'types'
 
 type RecipeEditorNewData = {
   data: {
     ingredients: Ingredient[],
-    units: Unit[]
+    units: Unit[],
+    tags: RecipeTag[]
   },
   history: any,
   mutate: any => window.Promise
@@ -40,6 +41,7 @@ export class RecipeEditorNewApollo extends Component<RecipeEditorNewData> {
         onSave={this.onSave.bind(this)}
         units={data.units}
         ingredients={data.ingredients}
+        tags={data.tags}
         recipe={DEFAULT_RECIPE}
       />
     )
@@ -86,6 +88,10 @@ const unitsAndIngredientsQuery = gql`
       id
       name
     }
+    tags {
+      id
+      name
+    }
   }
 `
 
@@ -108,6 +114,10 @@ const gqlStuff = gql`
           abbr
         }
         quantity
+      }
+      tags {
+        id
+        name
       }
       likes
     }
