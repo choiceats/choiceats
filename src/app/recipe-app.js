@@ -7,8 +7,10 @@ import styled from 'styled-components'
 import Login from '../pages/login'
 import Signup from '../pages/signup'
 import RecipeList from '../pages/recipes'
-import Randomizer from '../pages/randomizer/index.apollo'
 import Navbar from './components/navbar'
+import { Randomizer } from '../pages/randomizer/Randomizer.elm'
+import Elm from '../pages/shared-components/react-elm/elm'
+import { getUser } from '../services/users'
 
 import type { ContextRouter } from 'react-router-dom'
 import type { ConnectedProps } from 'types'
@@ -19,6 +21,8 @@ type PROPS = ConnectedProps &
   ContextRouter & {
     userToken: string
   }
+
+const userInfo = getUser() || {}
 
 export class RecipeApp extends Component<PROPS> {
   render() {
@@ -38,7 +42,13 @@ export class RecipeApp extends Component<PROPS> {
           <Switch>
             <Route exact path="/login/sign-up" component={Signup} />
             <Route exact path="/login" component={Login} />
-            <Route exact path="/random" component={Randomizer} />
+            <Route
+              exact
+              path="/random"
+              component={() => (
+                <Elm src={Randomizer} flags={{ token: userInfo.token || '' }} />
+              )}
+            />
             <Route path="/" component={RecipeList} />
           </Switch>
         </TopRouteContainer>
@@ -66,4 +76,6 @@ const TopRouteContainer = styled.div`
   overflow: auto;
   padding: 20px;
 `
-const NavContainer = styled.div`height: ${HEADER_HEIGHT}px;`
+const NavContainer = styled.div`
+  height: ${HEADER_HEIGHT}px;
+`

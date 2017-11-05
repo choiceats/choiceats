@@ -10,6 +10,9 @@
 /build
 /server/build
 
+# Elm
+/elm-stuff
+
 # misc
 .DS_Store
 .env.local

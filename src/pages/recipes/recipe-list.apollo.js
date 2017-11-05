@@ -43,16 +43,8 @@ export class RecipeListApollo extends Component<RecipeListProps> {
 }
 
 const recipesQuery = gql`
-  query RecipeQuery(
-    $searchText: String
-    $searchFilter: String
-    $searchTags: [Int]
-  ) {
-    recipes(
-      searchText: $searchText
-      searchFilter: $searchFilter
-      searchTags: $searchTags
-    ) {
+  query RecipeQuery($searchText: String, $searchFilter: String) {
+    recipes(searchText: $searchText, searchFilter: $searchFilter) {
       id
       author
       authorId
@@ -68,6 +60,33 @@ const recipesQuery = gql`
     }
   }
 `
+
+//const recipesQuery = gql`
+//  query RecipeQuery(
+//    $searchText: String
+//    $searchFilter: String
+//    $searchTags: [Int]
+//  ) {
+//    recipes(
+//      searchText: $searchText
+//      searchFilter: $searchFilter
+//      searchTags: $searchTags
+//    ) {
+//      id
+//      author
+//      authorId
+//      description
+//      imageUrl
+//      name
+//      likes
+//      youLike
+//    }
+//    tags {
+//      id
+//      name
+//    }
+//  }
+//`
 
 const options = ({ searchText, searchFilter, searchTags }) => ({
   variables: {

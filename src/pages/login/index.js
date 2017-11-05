@@ -5,6 +5,9 @@ import { connect } from 'react-redux'
 
 import { Button, Form, Input } from 'semantic-ui-react'
 
+import Elm from '../shared-components/react-elm/elm'
+import { ElmButton } from '../../app/components/login-button.elm'
+
 import { login as loginAction } from '../../state/action-creators'
 import { login } from '../../services/users'
 
@@ -79,18 +82,19 @@ export class Login extends Component<PROPS, STATE> {
           </Form.Field>
 
           <br />
-          <Button primary type="submit">
+          <Elm src={ElmButton} />
+          {/*<Button primary type="submit">
             Login
-          </Button>
+          </Button>*/}
 
           <br />
           <br />
           <Button>
             <Link to={`${match.url}/sign-up`}>Sign up</Link>
           </Button>
-          {this.state.error
-            ? <Error id="form-error">BAD PASSWORD!</Error>
-            : null}
+          {this.state.error ? (
+            <Error id="form-error">BAD PASSWORD!</Error>
+          ) : null}
         </Form>
       </FormContainer>
     )
