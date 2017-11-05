@@ -67,7 +67,6 @@ viewAll model = div []
   [ viewFilterButtons model
   , viewRecipeSummary model.mRecipeSummary
   , viewGetNewRecipe model
-  , div [] [ text model.flags.token ]
   ]
 
 -- GOOD
