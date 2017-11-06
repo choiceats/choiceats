@@ -22,20 +22,20 @@ import EffectsRandomizer as Effects exposing (sendRecipeQuery)
 
 main =
   Html.programWithFlags
-  { update = update
-  , view = viewAll
-  , init = init
+  { update        = update
+  , view          = viewAll
+  , init          = init
   , subscriptions = subscriptions
   }
 
 initialFilterType : TR.ButtonFilter
 initialFilterType = TR.All
 
-init : TR.Flags -> (Model, Cmd TR.Msg)
+init : TR.Flags -> (TR.Model, Cmd TR.Msg)
 init initFlags = 
   ({ currentFilter = initialFilterType
   , mRecipeSummary = Nothing
-  , flags = initFlags
+  , flags          = initFlags
   }, sendRecipeQuery initFlags.token initialFilterType)
 
 
@@ -69,7 +69,6 @@ viewAll model = div []
   , viewGetNewRecipe model
   ]
 
--- GOOD
 -- Apollo GraphQL looks like this
 
 -- "query RandomRecipe($searchFilter: String) {
@@ -87,7 +86,6 @@ viewAll model = div []
 -- }
 -- "
 
--- BAD
 -- My elm-graphql usage so far looks like this, but it gets the data back :)
 
 -- "query ($searchFilter: String!) {

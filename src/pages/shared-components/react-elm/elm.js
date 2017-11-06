@@ -10,11 +10,15 @@ export default class Elm extends Component {
     }
   }
 
+  componentDidMount() {
+    this.initialize.bind(this)(this.mountNode)
+  }
+
   shouldComponentUpdate(prevProps) {
     return false
   }
 
   render() {
-    return React.createElement('div', { ref: this.initialize.bind(this) })
+    return <div ref={mountNode => (this.mountNode = mountNode)} />
   }
 }

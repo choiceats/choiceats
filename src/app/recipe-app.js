@@ -7,24 +7,44 @@ import styled from 'styled-components'
 import Login from '../pages/login'
 import Signup from '../pages/signup'
 import RecipeList from '../pages/recipes'
-import Navbar from './components/navbar'
+import { Navbar } from './components/Navbar.elm'
 import { Randomizer } from '../pages/randomizer/Randomizer.elm'
 import Elm from '../pages/shared-components/react-elm/elm'
-import { getUser } from '../services/users'
+import { logout } from '../state/action-creators'
 
 import type { ContextRouter } from 'react-router-dom'
 import type { ConnectedProps } from 'types'
 
 const NON_RESTRICTED_PATHS = ['/login', '/login/sign-up']
+const HEADER_HEIGHT = 50
 
 type PROPS = ConnectedProps &
   ContextRouter & {
     userToken: string
   }
 
-const userInfo = getUser() || {}
+type PORTS = {
+  requestLogout: {
+    subscribe: any,
+    unsubscribe: any
+  },
 
-export class RecipeApp extends Component<PROPS> {
+  readReactState: {
+    send: (msg: string) => any
+  }
+}
+
+type STATE = {
+  ports: ?PORTS
+}
+
+export class RecipeApp extends Component<PROPS, STATE> {
+  componentWillReceiveProps(newProps: PROPS) {
+    if (newProps.userToken !== this.props.userToken) {
+      this.updateElmHeader.bind(this)(this.props.userToken ? 'true' : 'false')
+    }
+  }
+
   render() {
     const { userToken, location } = this.props
     const isRestrictedPath =
@@ -35,9 +55,11 @@ export class RecipeApp extends Component<PROPS> {
 
     return (
       <AppContainer>
-        <NavContainer>
-          <Navbar isLoggedIn={userToken !== null} />
-        </NavContainer>
+        <Elm
+          src={Navbar}
+          flags={{ headerHeight: HEADER_HEIGHT.toString() }}
+          ports={this.setupNavbarPorts.bind(this)}
+        />
         <TopRouteContainer>
           <Switch>
             <Route exact path="/login/sign-up" component={Signup} />
@@ -46,7 +68,7 @@ export class RecipeApp extends Component<PROPS> {
               exact
               path="/random"
               component={() => (
-                <Elm src={Randomizer} flags={{ token: userInfo.token || '' }} />
+                <Elm src={Randomizer} flags={{ token: userToken || '' }} />
               )}
             />
             <Route path="/" component={RecipeList} />
@@ -54,6 +76,28 @@ export class RecipeApp extends Component<PROPS> {
         </TopRouteContainer>
       </AppContainer>
     )
+  }
+
+  onClickLogoutHandler() {
+    const { history, dispatch } = this.props
+    dispatch(logout())
+    history.push('/login')
+  }
+
+  setupNavbarPorts(ports: PORTS) {
+    var self = this
+    this.setState.bind(this)(() => ({ ports }: { ports: PORTS }))
+
+    console.log(ports)
+    ports.requestLogout.subscribe(() => self.onClickLogoutHandler.bind(self)())
+
+    ports.readReactState.send(this.props.userToken ? 'true' : 'false')
+  }
+
+  updateElmHeader(userTokenBoolString: 'true' | 'false') {
+    if (this.state && this.state.ports) {
+      this.state.ports.readReactState.send.bind(this)(userTokenBoolString)
+    }
   }
 }
 
@@ -63,7 +107,6 @@ export default withRouter(
   }))(RecipeApp)
 )
 
-const HEADER_HEIGHT = 50
 const AppContainer = styled.div`
   display: flex;
   height: 100vh;
@@ -75,7 +118,4 @@ const TopRouteContainer = styled.div`
   height: calc(100vh - ${HEADER_HEIGHT}px);
   overflow: auto;
   padding: 20px;
-`
-const NavContainer = styled.div`
-  height: ${HEADER_HEIGHT}px;
 `

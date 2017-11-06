@@ -89,9 +89,9 @@ export class Login extends Component<PROPS, STATE> {
 
           <br />
           <br />
-          <Button>
-            <Link to={`${match.url}/sign-up`}>Sign up</Link>
-          </Button>
+          <Link to={`${match.url}/sign-up`}>
+            <Button type="button">Sign up</Button>
+          </Link>
           {this.state.error ? (
             <Error id="form-error">BAD PASSWORD!</Error>
           ) : null}
