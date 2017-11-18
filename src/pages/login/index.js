@@ -13,10 +13,10 @@ import { login } from '../../services/users'
 
 import { FormContainer, FormHeader, Error } from '../form-styles'
 
-import type { ContextRouter } from 'react-router-dom'
-import type { ConnectedProps } from 'types'
+// import type { ContextRouter } from 'react-router-dom'
+// import type { ConnectedProps } from 'types'
 
-type PROPS = ContextRouter & ConnectedProps
+type PROPS = any // ContextRouter & ConnectedProps
 type STATE = {
   error: boolean,
   message?: string
@@ -30,7 +30,7 @@ export class Login extends Component<PROPS, STATE> {
   email: string
   password: string
 
-  constructor(props: ContextRouter & ConnectedProps) {
+  constructor(props: PROPS) {
     super(props)
     this.state = {
       error: false,
