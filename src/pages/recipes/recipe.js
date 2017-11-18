@@ -9,6 +9,8 @@ import type { RecipeProps } from './prop-types.flow'
 export default class Recipe extends Component<RecipeProps> {
   render() {
     const { recipe } = this.props
+    const likesCount: number =
+      (recipe && recipe.likes && (recipe.likes.length: number)) || 0
     if (!recipe.id) {
       return null
     }
@@ -18,25 +20,20 @@ export default class Recipe extends Component<RecipeProps> {
         <Card fluid style={{ marginBottom: 15 }}>
           <Image src={recipe.imageUrl} />
           <Card.Content>
-            <Card.Header>
-              {recipe.name}
-            </Card.Header>
-            <Card.Meta>
-              {recipe.author}
-            </Card.Meta>
-            {!!recipe.likes &&
+            <Card.Header>{recipe.name}</Card.Header>
+            <Card.Meta>{recipe.author}</Card.Meta>
+            {!!recipe.likes && (
               <Card.Meta>
                 <Icon
                   name="favorite"
                   size="large"
                   color={recipe.youLike ? 'teal' : 'grey'}
                 />
-                {recipe.likes} like{recipe.likes > 1 ? 's' : ''}
-              </Card.Meta>}
+                {likesCount} like{likesCount > 1 ? 's' : ''}
+              </Card.Meta>
+            )}
             <Card.Description>
-              <Description>
-                {recipe.description}
-              </Description>
+              <Description>{recipe.description}</Description>
             </Card.Description>
           </Card.Content>
         </Card>

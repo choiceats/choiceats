@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 
 -- APPLICATION CODE
 import TypesRandomizer as TR exposing (..)
---import Randomizer exposing (sendRecipeQuery)
+-- import Randomizer exposing (sendRecipeQuery)
 
 viewGetNewRecipe : TR.Model -> Html TR.Msg
 viewGetNewRecipe model =

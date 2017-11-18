@@ -2,7 +2,6 @@ port module Randomizer exposing (..)
 
 -- ELM-LANG MODULES
 import Html exposing (Html, div, text)
-import Html.Events exposing (onClick)
 import Json.Decode exposing (decodeString, int, string, field, bool)
 import Json.Encode exposing (encode, object)
 import Result exposing (withDefault)

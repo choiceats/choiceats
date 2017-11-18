@@ -97,14 +97,20 @@ const options = ({ searchText, searchFilter, searchTags }) => ({
 })
 
 const sortRecipes = (a, b) => {
-  const nameALTB =
-    (a.name && a.name.toLowerCase()) < (b.name && b.name.toLowerCase())
-  const nameAGTB =
-    (a.name && a.name.toLowerCase()) > (b.name && b.name.toLowerCase())
+  const aLikes = (a && a.likes && a.likes.length) || 0
+  const bLikes = (b && b.likes && b.likes.length) || 0
+
+  const aLowerName = a.name && a.name.toLowerCase()
+  const bLowerName = b.name && b.name.toLowerCase()
+
+  const nameALTB = aLowerName < bLowerName
+  const nameAGTB = aLowerName > bLowerName
+
   const youLikeAGTB = !!(a.youLike || false) && !(b.youLike || false)
   const youLikeALTB = !(a.youLike || false) && !!(b.youLike || false)
-  const allLikeAGTB = (a.likes || 0) > (b.likes || 0)
-  const allLikeALTB = (a.likes || 0) < (b.likes || 0)
+
+  const allLikeAGTB = aLikes > bLikes
+  const allLikeALTB = aLikes < bLikes
 
   switch (true) {
     case youLikeAGTB:

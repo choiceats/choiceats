@@ -41,7 +41,7 @@ export type Recipe = {
   instructions: string,
   name: string,
   description: string,
-  likes?: number,
+  likes?: [number],
   imageUrl: string,
   tags: RecipeTag[]
 }

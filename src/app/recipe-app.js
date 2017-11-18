@@ -5,23 +5,25 @@ import { Route, Redirect, Switch, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Login from '../pages/login'
-import Signup from '../pages/signup'
+// import Signup from '../pages/signup'
 import RecipeList from '../pages/recipes'
 import { Navbar } from './components/Navbar.elm'
 import { Randomizer } from '../pages/randomizer/Randomizer.elm'
+import { ViewSignup } from '../pages/signup/ViewSignup.elm'
 import Elm from '../pages/shared-components/react-elm/elm'
 import { logout } from '../state/action-creators'
 
-import type { ContextRouter } from 'react-router-dom'
-import type { ConnectedProps } from 'types'
+// import type { ContextRouter } from 'react-router-dom'
+// import type { ConnectedProps } from 'types'
 
 const NON_RESTRICTED_PATHS = ['/login', '/login/sign-up']
 const HEADER_HEIGHT = 50
 
-type PROPS = ConnectedProps &
-  ContextRouter & {
-    userToken: string
-  }
+type PROPS = any
+// type PROPS = ConnectedProps &
+//   ContextRouter & {
+//     userToken: string
+//   }
 
 type PORTS = {
   requestLogout: {
@@ -31,6 +33,10 @@ type PORTS = {
 
   readReactState: {
     send: (msg: string) => any
+  },
+
+  recordSignup: {
+    subscribe: any
   }
 }
 
@@ -62,7 +68,13 @@ export class RecipeApp extends Component<PROPS, STATE> {
         />
         <TopRouteContainer>
           <Switch>
-            <Route exact path="/login/sign-up" component={Signup} />
+            <Route
+              exact
+              path="/login/sign-up"
+              component={() => (
+                <Elm src={ViewSignup} flags={{ token: userToken || '' }} />
+              )}
+            />
             <Route exact path="/login" component={Login} />
             <Route
               exact
@@ -82,6 +94,13 @@ export class RecipeApp extends Component<PROPS, STATE> {
     const { history, dispatch } = this.props
     dispatch(logout())
     history.push('/login')
+  }
+
+  setupSignupPorts(ports: PORTS) {
+    ports.recordSignup.subscribe(a => {
+      console.log(a)
+      window.history.push('/')
+    })
   }
 
   setupNavbarPorts(ports: PORTS) {
