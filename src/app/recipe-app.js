@@ -5,25 +5,18 @@ import { Route, Redirect, Switch, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Login from '../pages/login'
-// import Signup from '../pages/signup'
 import RecipeList from '../pages/recipes'
 import { Navbar } from './components/Navbar.elm'
 import { Randomizer } from '../pages/randomizer/Randomizer.elm'
 import { ViewSignup } from '../pages/signup/ViewSignup.elm'
 import Elm from '../pages/shared-components/react-elm/elm'
 import { logout } from '../state/action-creators'
-
-// import type { ContextRouter } from 'react-router-dom'
-// import type { ConnectedProps } from 'types'
+import { setUser } from '../services/users'
 
 const NON_RESTRICTED_PATHS = ['/login', '/login/sign-up']
 const HEADER_HEIGHT = 50
 
 type PROPS = any
-// type PROPS = ConnectedProps &
-//   ContextRouter & {
-//     userToken: string
-//   }
 
 type PORTS = {
   requestLogout: {
@@ -71,9 +64,16 @@ export class RecipeApp extends Component<PROPS, STATE> {
             <Route
               exact
               path="/login/sign-up"
-              component={() => (
-                <Elm src={ViewSignup} flags={{ token: userToken || '' }} />
-              )}
+              component={() =>
+                userToken && userToken.length > 0 ? (
+                  <Redirect to="/" />
+                ) : (
+                  <Elm
+                    src={ViewSignup}
+                    flags={{ token: userToken || '' }}
+                    ports={this.setupSignupPorts.bind(this)}
+                  />
+                )}
             />
             <Route exact path="/login" component={Login} />
             <Route
@@ -98,8 +98,8 @@ export class RecipeApp extends Component<PROPS, STATE> {
 
   setupSignupPorts(ports: PORTS) {
     ports.recordSignup.subscribe(a => {
-      console.log(a)
-      window.history.push('/')
+      setUser(JSON.parse(a))
+      window.location.href = '/'
     })
   }
 
@@ -107,7 +107,6 @@ export class RecipeApp extends Component<PROPS, STATE> {
     var self = this
     this.setState.bind(this)(() => ({ ports }: { ports: PORTS }))
 
-    console.log(ports)
     ports.requestLogout.subscribe(() => self.onClickLogoutHandler.bind(self)())
 
     ports.readReactState.send(this.props.userToken ? 'true' : 'false')

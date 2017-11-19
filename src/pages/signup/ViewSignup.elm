@@ -5,7 +5,7 @@ import Html exposing (Html, div, text, label, input, button, h1, form)
 import Html.Attributes exposing (disabled, type_, class, style, value, for, id)
 import Html.Events exposing (onWithOptions, onClick, onInput)
 import Http exposing (..)
-import Json.Decode exposing (decodeString, int, string, field, bool)
+import Json.Decode exposing (decodeString, int, string, field, bool, map4)
 import Json.Encode exposing (..)
 
 main =
@@ -23,7 +23,15 @@ type Msg
   | Password String
   | PasswordCheck String
   | RequestAccount
-  | ReceiveResponse (Result Http.Error Int)
+  | ReceiveResponse (Result Http.Error Session)
+
+type alias Session =
+  {
+    userId: Int,
+    email: String,
+    name: String,
+    token: String
+  }
 
 type alias Flags = { token: String }
 
@@ -80,7 +88,7 @@ init initFlags =
     , buttonEnabled = True
     , loggedIn = False
     , formFeedback = ""
-  }, Cmd.none)
+  }, Cmd.none )
 
 setEmail : String -> SignupFields -> SignupFields
 setEmail str fields =
@@ -128,10 +136,24 @@ update msg model =
       (model, requestAccount model)
 
     ReceiveResponse (Ok user)->
-      ({model | loggedIn = True }, Cmd.none)
+      ({model | loggedIn = True }, recordSignup <| stringifySession user)
 
     ReceiveResponse (Err err)->
       ({model | formFeedback = toString err}, Cmd.none)
+
+stringifySession : Session -> String
+stringifySession session = 
+  """ { "userId": """ ++ (toString session.userId) ++ """
+  , "email": \"""" ++ session.email ++ """\" 
+  , "name": \"""" ++ session.name ++ """\" 
+  , "token": \"""" ++ session.token ++ """\" }"""
+
+--  toString <| Json.Encode.object
+--  [ ("userId", Json.Encode.string (toString session.userId))
+--  , ("email", Json.Encode.string session.email)
+--  , ("name", Json.Encode.string session.name)
+--  , ("token", Json.Encode.string session.token)
+--  ]
 
 requestAccount : Model -> Cmd Msg
 requestAccount model =
@@ -151,8 +173,26 @@ requestAccount model =
         <| Json.Encode.encode 0
         <| Json.Encode.object body
       )
-      <| field "user" Json.Decode.int
+      <| sessionDecoder
+         
+         
+         
+         
   )
+
+-- { userId = field "userId" Json.Decode.string
+-- , email = field "email" Json.Decode.string
+-- , name = field "name" Json.Decode.string
+-- , token = field "token" Json.Decode.string
+-- }
+
+sessionDecoder : Json.Decode.Decoder Session
+sessionDecoder =
+  map4 Session
+    (field "userId" Json.Decode.int)
+    (field "email" Json.Decode.string)
+    (field "name" Json.Decode.string)
+    (field "token" Json.Decode.string)
 
 port recordSignup : String -> Cmd msg
 
