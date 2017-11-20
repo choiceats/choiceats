@@ -4,9 +4,10 @@ port module ViewSignup exposing (main)
 import Html exposing (Html, div, text, label, input, button, h1, form)
 import Html.Attributes exposing (disabled, type_, class, style, value, for, id)
 import Html.Events exposing (onWithOptions, onClick, onInput)
-import Http exposing (..)
-import Json.Decode exposing (decodeString, int, string, field, bool, map4)
-import Json.Encode exposing (..)
+import Http exposing (Error, send, post, stringBody)
+import Json.Decode as JD exposing (int, string, field, map4)
+import Json.Encode as JE exposing (object, string, encode)
+import Regex exposing (regex, caseInsensitive)
 
 main =
   Html.programWithFlags
@@ -35,96 +36,216 @@ type alias Session =
 
 type alias Flags = { token: String }
 
-type alias SignupFields =
-  { email: String
-  , firstName: String
-  , lastName: String
-  , password: String
-  , passwordCheck: String
+-- type UserInput = Int | String | Number
+-- had problems getting union types to play nicely with things that expected a String. TODO: Make this type work as it generalizes better to different form field types
+
+type alias UserInput = String
+
+type alias FormField =
+  { userInput: UserInput
+  , isValid: Bool
+  , message: String
   }
 
-type alias ValidationRecord = 
-  { isValid: Bool
-  , message: String
+type alias SignupFields =
+  { email: FormField
+  , firstName: FormField
+  , lastName: FormField
+  , password: FormField
+  , passwordCheck: FormField
   }
 
 type alias Model =
   { formFields: SignupFields
   , loggedIn: Bool
   , flags: Flags
-  , formFieldsValidation:
-    { email: ValidationRecord
-    , firstName: ValidationRecord
-    , lastName: ValidationRecord
-    , password: ValidationRecord
-    , passwordCheck: ValidationRecord
-    }
-  , formFeedback : String
-  , buttonEnabled: Bool
+  , serverFeedback : String
+  , canSubmitForm: Bool
   }
 
-initial_validation =
-  { isValid = False
+emptyUserData =
+  { userInput = ""
+  , isValid = True
   , message = ""
   }
 
 init : Flags -> (Model, Cmd Msg)
 init initFlags = 
   ({formFields =
-      { email = ""
-      , firstName = ""
-      , lastName = ""
-      , password = ""
-      , passwordCheck = ""
-      }
-    , formFieldsValidation =
-      { email = initial_validation
-      , firstName = initial_validation
-      , lastName = initial_validation
-      , password = initial_validation
-      , passwordCheck = initial_validation
+      { email = emptyUserData
+      , firstName = emptyUserData
+      , lastName = emptyUserData
+      , password = emptyUserData
+      , passwordCheck = emptyUserData
       }
     , flags = initFlags
-    , buttonEnabled = True
+    , canSubmitForm = False
     , loggedIn = False
-    , formFeedback = ""
+    , serverFeedback = ""
   }, Cmd.none )
 
+emailRegex = caseInsensitive (regex "^\\S+@\\S+\\.\\S+$")
+  
+validateEmail : String -> Bool
+validateEmail email =
+    Regex.contains emailRegex email
+
 setEmail : String -> SignupFields -> SignupFields
-setEmail str fields =
-  {fields | email = str}
+setEmail emailInput fields =
+  let
+    hasInput = not (String.isEmpty emailInput)
+    isValidEmail = validateEmail emailInput
+
+    message =
+
+      if not hasInput
+
+        then "Enter an email address."
+
+      else if not isValidEmail
+
+        then "Enter a valid email address."
+
+      else ""
+
+  in
+    { fields | email =
+      { userInput = emailInput
+      , message = message
+      , isValid = hasInput && isValidEmail
+      }
+    }
 
 setFirstName : String -> SignupFields -> SignupFields
-setFirstName str fields =
-  {fields | firstName = str}
+setFirstName firstNameInput fields =
+  let
+    hasInput = not (String.isEmpty firstNameInput)
+
+  in
+    { fields | firstName =
+      { userInput = firstNameInput
+      , message = if hasInput then "" else "Enter a first name."
+      , isValid = hasInput
+      }
+    }
 
 setLastName : String -> SignupFields -> SignupFields
-setLastName str fields =
-  {fields | lastName = str}
+setLastName lastNameInput fields =
+  let
+    hasInput = not (String.isEmpty lastNameInput)
 
+  in
+    { fields | lastName =
+      { userInput = lastNameInput
+      , message = if hasInput then "" else "Enter a last name."
+      , isValid = hasInput
+      }
+    }
+
+createWordRegex word = caseInsensitive (regex ("^.*" ++ word ++ ".*$"))
+
+passwordRegex = createWordRegex "password"
+  
 setPassword : String -> SignupFields -> SignupFields
-setPassword str fields =
-  {fields | password = str}
+setPassword passwordInput fields =
+  let
+    hasInput = not (String.isEmpty passwordInput)
+
+    passwordIsPassword = Regex.contains passwordRegex passwordInput
+
+    passwordIsName =
+      ( Regex.contains (createWordRegex fields.firstName.userInput) passwordInput
+      || Regex.contains (createWordRegex fields.lastName.userInput) passwordInput 
+      )
+
+    minimum_password_length = 6
+
+    passwordIsLongEnough = String.length passwordInput >= minimum_password_length
+
+    message =
+      if not hasInput
+        then "Enter a password."
+
+      else if passwordIsPassword
+        then "You can do better than \"password\" for a password."
+
+      else if passwordIsName
+        then "You can do better than using your name for a password."
+
+      else if not passwordIsLongEnough
+        then "Password must be at least " ++ (toString minimum_password_length) ++ " characters long."
+
+      else ""
+
+  in
+    {fields | password = { userInput = passwordInput
+    , message = message
+    , isValid =
+      ( hasInput
+      && (not passwordIsPassword)
+      && passwordIsLongEnough
+      && not passwordIsName
+      )
+    }}
+
 
 setPasswordCheck : String -> SignupFields -> SignupFields
-setPasswordCheck str fields =
-  {fields | passwordCheck = str}
+setPasswordCheck passwordCheckInput fields =
+  let
+    isValid = if fields.password.userInput == passwordCheckInput then True else False
 
-getCanUpdate : Model -> Bool
-getCanUpdate model = True
+  in
+    { fields | passwordCheck =
+      { userInput = passwordCheckInput
+      , message = if isValid then "" else "Passwords must match."
+      , isValid = isValid
+      }
+    }
 
+notEmpty : String -> Bool
+notEmpty str =
+  not <| String.isEmpty str
+
+getCanSubmitForm : SignupFields -> Bool
+getCanSubmitForm f =
+     (f.email.isValid         && notEmpty f.email.userInput        )
+  && (f.firstName.isValid     && notEmpty f.firstName.userInput    )
+  && (f.lastName.isValid      && notEmpty f.lastName.userInput     )
+  && (f.password.isValid      && notEmpty f.password.userInput     )
+  && (f.passwordCheck.isValid && notEmpty f.passwordCheck.userInput)
+ 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
   case msg of
 
     Email str ->
-      ({model | formFields = setEmail str model.formFields }, Cmd.none)
+      let
+        newFields = setEmail str model.formFields
+
+      in
+        ({ model | formFields = newFields
+        , canSubmitForm = getCanSubmitForm newFields
+        }, Cmd.none)
 
     FirstName str ->
-      ({model | formFields = setFirstName str model.formFields }, Cmd.none)
+      let
+        newFields = setFirstName str model.formFields
+          |> (setPassword model.formFields.password.userInput)
+
+      in
+        ({model | formFields = newFields
+        , canSubmitForm = getCanSubmitForm newFields
+        }, Cmd.none)
 
     LastName str ->
-      ({model | formFields = setLastName str model.formFields }, Cmd.none)
+      let
+        newFields = setLastName str model.formFields
+          |> (setPassword model.formFields.password.userInput)
+
+      in
+        ({model | formFields = newFields
+        , canSubmitForm = getCanSubmitForm newFields
+        }, Cmd.none)
 
     Password str ->
       ({model | formFields = setPassword str model.formFields }, Cmd.none)
@@ -139,7 +260,7 @@ update msg model =
       ({model | loggedIn = True }, recordSignup <| stringifySession user)
 
     ReceiveResponse (Err err)->
-      ({model | formFeedback = toString err}, Cmd.none)
+      ({model | serverFeedback = toString err}, Cmd.none)
 
 stringifySession : Session -> String
 stringifySession session = 
@@ -147,21 +268,22 @@ stringifySession session =
   , "email": \"""" ++ session.email ++ """\" 
   , "name": \"""" ++ session.name ++ """\" 
   , "token": \"""" ++ session.token ++ """\" }"""
+-- TODO: Find a better way to stringify this object
 
---  toString <| Json.Encode.object
---  [ ("userId", Json.Encode.string (toString session.userId))
---  , ("email", Json.Encode.string session.email)
---  , ("name", Json.Encode.string session.name)
---  , ("token", Json.Encode.string session.token)
+--  toString <| JE.object
+--  [ ("userId", JE.string (toString session.userId))
+--  , ("email", JE.string session.email)
+--  , ("name", JE.string session.name)
+--  , ("token", JE.string session.token)
 --  ]
 
 requestAccount : Model -> Cmd Msg
 requestAccount model =
   let body =
-  [ ("email", Json.Encode.string model.formFields.email)
-  , ("firstName", Json.Encode.string model.formFields.firstName)
-  , ("lastName", Json.Encode.string model.formFields.lastName)
-  , ("password", Json.Encode.string model.formFields.password)
+  [ ("email", JE.string model.formFields.email.userInput)
+  , ("firstName", JE.string model.formFields.firstName.userInput)
+  , ("lastName", JE.string model.formFields.lastName.userInput)
+  , ("password", JE.string model.formFields.password.userInput)
   ]
 
   in
@@ -170,29 +292,19 @@ requestAccount model =
       "http://localhost:4000/user"
       (Http.stringBody
         "application/json; charset=utf-8"
-        <| Json.Encode.encode 0
-        <| Json.Encode.object body
+        <| JE.encode 0
+        <| JE.object body
       )
       <| sessionDecoder
-         
-         
-         
-         
   )
 
--- { userId = field "userId" Json.Decode.string
--- , email = field "email" Json.Decode.string
--- , name = field "name" Json.Decode.string
--- , token = field "token" Json.Decode.string
--- }
-
-sessionDecoder : Json.Decode.Decoder Session
+sessionDecoder : JD.Decoder Session
 sessionDecoder =
   map4 Session
-    (field "userId" Json.Decode.int)
-    (field "email" Json.Decode.string)
-    (field "name" Json.Decode.string)
-    (field "token" Json.Decode.string)
+    (field "userId" JD.int)
+    (field "email" JD.string)
+    (field "name" JD.string)
+    (field "token" JD.string)
 
 port recordSignup : String -> Cmd msg
 
@@ -203,7 +315,7 @@ subscriptions model =
 viewSignup : Model -> Html Msg
 viewSignup model =
   let
-    (f) = model.formFields
+    f = model.formFields
 
   in
     div [style [("max-width", "500px"), ("margin", "auto")]]
@@ -220,13 +332,13 @@ viewSignup model =
       , button
         [ type_ "submit"
         , class "ui primary button"
-        , disabled <| not model.buttonEnabled
+        , disabled <| not model.canSubmitForm
         , onWithOptions
             "click"
             { stopPropagation = True
             , preventDefault = True
             }
-            (Json.Decode.succeed RequestAccount)
+            (JD.succeed RequestAccount)
         ]
         [text "Signup"]
       , div [] [text <| toString model]
@@ -235,7 +347,6 @@ viewSignup model =
 
 type alias LabelName = String
 type alias InputAttr = String
-type alias FormValue = String
 
 notDash : Char -> Bool
 notDash char = char /= '-'
@@ -246,10 +357,11 @@ notSpace char = char /= ' '
 isIdChar : Char -> Bool
 isIdChar char = notDash char && notSpace char
 
-viewInput : FormValue -> LabelName -> InputAttr -> (String -> Msg) -> Html Msg
-viewInput formValue labelName inputAttr inputType = 
+viewInput : FormField -> LabelName -> InputAttr -> (String -> Msg) -> Html Msg
+viewInput formField labelName inputAttr inputType = 
   let
     idName = (String.filter isIdChar labelName)
+
   in
     div [class "field"]
     [ label [for idName] [text labelName]
@@ -257,32 +369,18 @@ viewInput formValue labelName inputAttr inputType =
       [
         input [ type_ inputAttr
               , onInput inputType
-              , value formValue
+              , value formField.userInput
               , id idName
               ]
         []
       ]
+    , viewError formField
     ]
 
--- response body is currently (asof 20171116)
--- {user: 34}
 
--- but it needs to be:
+viewError : FormField -> Html Msg
+viewError field =
+  div [class <| "ui error message " ++ (if field.isValid then "hidden" else "visible")]
+    [ div [class "header"] [text field.message] ]
 
--- email: "aa@aa.aa"
--- name: "aa aa"
--- token: "6tt5iyzpqo265jq8wjotude7vitkbbe"
--- userId: 3
-
--- So that login and redirect can work correctly
-
--- The flow will be - send a signup request.
--- If the signup request is successful,
---    write the request to localStorage
---    redirect the user to home page AFTER localStorage successfully written (it is async, so you'll probably need to send AND receive messages via ports
--- 
--- If the signup fails, tell them why.
-
-
--- import { register } from '../../services/users'
---       return <Redirect to={{ pathname: '/' }} />
+-- can add ui [class "list"] [li[] [text var]] or p [] [text var] if need secondary error parts
