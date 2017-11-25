@@ -153,10 +153,8 @@ setPassword passwordInput fields =
 
     passwordIsPassword = Regex.contains passwordRegex passwordInput
 
-    passwordIsName =
-      ( Regex.contains (createWordRegex fields.firstName.userInput) passwordInput
-      || Regex.contains (createWordRegex fields.lastName.userInput) passwordInput 
-      )
+    passwordIsName = (String.length fields.firstName.userInput > 0 && Regex.contains (createWordRegex fields.firstName.userInput) passwordInput)
+    || (String.length fields.lastName.userInput > 0 && Regex.contains (createWordRegex fields.lastName.userInput) passwordInput)
 
     minimum_password_length = 6
 
@@ -376,7 +374,6 @@ viewInput formField labelName inputAttr inputType =
       ]
     , viewError formField
     ]
-
 
 viewError : FormField -> Html Msg
 viewError field =

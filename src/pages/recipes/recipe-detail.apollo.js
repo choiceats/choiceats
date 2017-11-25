@@ -1,12 +1,14 @@
 // @flow
 import * as React from 'react'
 import { compose, gql, graphql } from 'react-apollo'
-import RecipeDetail from './recipe-detail'
+// import RecipeDetail from './recipe-detail'
+import { RecipeDetail } from './RecipeDetail.elm'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import NotFound from '../shared-components/not-found'
 import Loading from '../shared-components/loading'
 import { UPDATE, DELETE, PENDING, FAIL } from '../../state/action-types'
+import Elm from '../shared-components/react-elm/elm'
 
 import type { Recipe } from 'types'
 
@@ -25,7 +27,9 @@ type ApolloRecipeProps = {
   recipeLikeStatus?: Object,
   recipeStatus?: Object,
   selectedRecipeId: string,
-  userId?: string
+  userId?: string,
+  token?: string,
+  match?: Object
 }
 
 export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
@@ -38,7 +42,9 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
   recipeLikeStatus = {},
   recipeStatus = {},
   selectedRecipeId,
-  userId
+  userId,
+  token,
+  match
 }) => {
   const recipe = data.recipe || {}
 
@@ -62,7 +68,23 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
       recipeStatus.operation === DELETE &&
       recipeStatus.status === FAIL
 
+    const recipeId =
+      (match &&
+        match.params &&
+        match.params.recipeId &&
+        parseInt(match.params.recipeId, 10)) ||
+      0
+
     return (
+      <Elm
+        src={RecipeDetail}
+        flags={{
+          token,
+          userId,
+          recipeId
+        }}
+      />
+      /*
       <RecipeDetail
         recipe={recipe}
         selectedRecipeId={selectedRecipeId}
@@ -76,6 +98,7 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
         userId={userId}
         goToRecipeList={() => history.push('/')}
       />
+      */
     )
   }
 }
@@ -143,7 +166,8 @@ const mapStateToProps = state => ({
   recipeIdToDelete: state.ui.recipeIdToDelete,
   recipeStatus: state.ui.recipeStatus,
   recipeLikeStatus: state.ui.recipeLikeStatus,
-  userId: state.user.userId || null
+  userId: state.user.userId || null,
+  token: state.user.token || null
 })
 
 export default connect(mapStateToProps)(
