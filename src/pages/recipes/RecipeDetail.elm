@@ -21,6 +21,7 @@ main =
 type alias Flags =
   { token: String
   , recipeId: Int
+  , userId: Int
   }
 
 type alias Model =
@@ -164,17 +165,6 @@ recipeRequest =
   in
       GqlB.queryDocument queryRoot
 
-
--- type alias Ingredient =
---   { quantity: Float
---   , displayQuantity: String
---   , name: String
---   , unit:
---     { name: String
---     , abbr: String
---     }
---   }
-
 viewDetail : Model -> Html Msg
 viewDetail model =
   case model.mRecipe of
@@ -204,11 +194,10 @@ viewDetailSuccess r =
     ("margin-top", "10px")
     ]]
     [ div [style [("margin-top", "25px")]]
-      [ div [ style [
-          ("padding-bottom", "3px"),
-          ("-webkit-animation", "jsQNij 0.25s linear"),
-          ("animation", "jsQNij 0.25s linear")
-        ] ]
+      [ div
+        [ class "slideInLeft"
+        , style [ ("padding-bottom", "3px") ] 
+        ]
         [ div [class "ui fluid card"]
           [ img [class "ui image", src "/zorak-picture.jpg"] []
           , div [class "content"]
@@ -262,14 +251,3 @@ viewIngredient ingredientText =
 -- See if you like the recipe.
 -- Click on the like recipe star
 -- Click to delete the recipe
-
--- Right now this lives elsewhere, which is saving you.
--- But you need to provide it in a stylesheet or something.
--- @keyframes jsQNij
--- 0% {
---     margin-left: 100%;
--- }
--- 
--- 100% {
---     margin-left: 0%;
--- }

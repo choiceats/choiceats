@@ -80,7 +80,7 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
         src={RecipeDetail}
         flags={{
           token,
-          userId,
+          userId: parseInt(userId, 10) || 0,
           recipeId
         }}
       />
