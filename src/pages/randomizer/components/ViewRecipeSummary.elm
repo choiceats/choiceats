@@ -30,6 +30,6 @@ viewRecipeSummary mRecipeSummary =
             , div [class "description"] [ text recipeDescription ]
             ]
           ]
-        (Err r) -> div [] [text ("ruh roh, you has err: " ++ (toString r))]
+        (Err r) -> div [] [text ("ruh rohr, you has err: " ++ (toString r))]
 
     (Nothing) -> viewLoading

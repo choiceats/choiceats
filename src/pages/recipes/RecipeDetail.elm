@@ -10,6 +10,7 @@ import Html.Attributes exposing (src, style, class)
 import Http
 import Task exposing (Task)
 
+main : Program Flags Model Msg
 main =
   Html.programWithFlags
   { update        = update
@@ -30,7 +31,7 @@ type alias Model =
   }
 
 type alias RecipeTag =
-  { id: Int
+  { id: String
   , name: String
   }
 
@@ -42,7 +43,7 @@ type alias RecipeFull =
   , imageUrl: String
   , ingredients: List Ingredient
   , instructions: String
-  , likes: List Int
+  , likes: Int
   , name: String
   , tags: List RecipeTag
   , youLike: Bool
@@ -132,7 +133,7 @@ recipeRequest =
 
     builtTag = 
       GqlB.object RecipeTag
-        |> GqlB.with (GqlB.field "id"   [] GqlB.int)
+        |> GqlB.with (GqlB.field "id"   [] GqlB.string)
         |> GqlB.with (GqlB.field "name" [] GqlB.string)
 
     builtIngredient = 
@@ -151,7 +152,7 @@ recipeRequest =
         |> GqlB.with (GqlB.field "imageUrl"     [] GqlB.string)
         |> GqlB.with (GqlB.field "ingredients"  [] (GqlB.list builtIngredient))
         |> GqlB.with (GqlB.field "instructions" [] GqlB.string)
-        |> GqlB.with (GqlB.field "likes"        [] (GqlB.list GqlB.int))
+        |> GqlB.with (GqlB.field "likes"        [] GqlB.int)
         |> GqlB.with (GqlB.field "name"         [] GqlB.string)
         |> GqlB.with (GqlB.field "tags"         [] (GqlB.list builtTag))
         |> GqlB.with (GqlB.field "youLike"      [] GqlB.bool)
@@ -176,7 +177,7 @@ viewDetail model =
           , div [] [text <| toString res]
           ]
 
-        (Err r) -> text ("ruh roh, you has err: " ++ (toString r))
+        (Err r) -> text ("asf, you has err: " ++ (toString r))
     (Nothing) ->
       text "loading..."
 
@@ -223,7 +224,7 @@ viewDetailSuccess r =
             [
               span []
               [ i [class <| "favorite big icon " ++ (if r.youLike then "teal" else "grey" )][]
-              , span [] [text ("Likes: " ++ toString (List.length r.likes))]
+              , span [] [text ("Likes: " ++ toString r.likes)]
               ]
             ]
           ]

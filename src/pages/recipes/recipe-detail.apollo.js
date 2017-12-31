@@ -1,7 +1,6 @@
 // @flow
 import * as React from 'react'
 import { compose, gql, graphql } from 'react-apollo'
-// import RecipeDetail from './recipe-detail'
 import { RecipeDetail } from './RecipeDetail.elm'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
@@ -84,21 +83,6 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
           recipeId
         }}
       />
-      /*
-      <RecipeDetail
-        recipe={recipe}
-        selectedRecipeId={selectedRecipeId}
-        recipeIdToDelete={recipeIdToDelete}
-        likeRecipe={likeRecipe}
-        deleteRecipe={deleteRecipe}
-        dispatch={dispatch}
-        isDeletingRecipe={isDeletingRecipe}
-        isChangingLike={isChangingLike}
-        deleteRecipeError={deleteRecipeError}
-        userId={userId}
-        goToRecipeList={() => history.push('/')}
-      />
-      */
     )
   }
 }
