@@ -1,11 +1,11 @@
-/* global KeyboardEvent, HTMLInputElement, MouseEvent */
-// @flow
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import { Input, Button, Dropdown } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import RecipeListApollo from './recipe-list.apollo'
+import Elm from '../shared-components/react-elm/elm'
+import { Recipes } from './RecipeList.elm'
 
 const FILTER_OPTIONS = [
   { key: 'my', text: 'My Recipes', value: 'my' },
@@ -25,7 +25,7 @@ type STATE = {
   searchTags: any[]
 }
 
-export default class RecipeSearch extends Component<PROPS, STATE> {
+export class RecipeSearch extends Component<PROPS, STATE> {
   state = {
     searchText: '',
     searchFilter: DEFAULT_FILTER,
@@ -48,7 +48,7 @@ export default class RecipeSearch extends Component<PROPS, STATE> {
   }
 
   render() {
-    const { tags } = this.props
+    const { tags, userId, token } = this.props
     const { searchText, searchFilter, searchTags } = this.state
     const options = tags.map(t => ({ text: t.name, value: t.id }))
 
@@ -86,15 +86,29 @@ export default class RecipeSearch extends Component<PROPS, STATE> {
             onChange={(e, d) => this.handleTagChange(d)}
           />
         </SearchInput>
-        <RecipeListApollo
-          searchText={searchText}
-          searchTags={searchTags}
-          searchFilter={searchFilter}
+        <Elm
+          src={Recipes.RecipeList}
+          flags={{
+            userId: userId,
+            isLoggedIn: !!token,
+            token: token,
+            searchText: searchText,
+            searchTags: searchTags,
+            searchFilter: searchFilter
+          }}
         />
       </SearchContainer>
     )
   }
 }
+
+const mapStateToProps = state => {
+  return {
+    token: state.user.token,
+    userId: state.user.userId
+  }
+}
+export default connect(mapStateToProps)(RecipeSearch)
 
 const SearchContainer = styled.div`
   max-width: 500px;

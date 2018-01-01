@@ -8,8 +8,16 @@ import Recipes.Types exposing (..)
 import Recipes.RecipeList_Effects as Effects exposing (sendRecipesQuery)
 
 
+initialFilterType : ButtonFilter
 initialFilterType =
     All
+
+
+type alias Flags =
+    { userId : String
+    , isLoggedIn : Bool
+    , token : String
+    }
 
 
 type alias Model =
@@ -20,7 +28,7 @@ type alias Model =
     }
 
 
-main : Program Model Model RecipeMsg
+main : Program Flags Model RecipeMsg
 main =
     Html.programWithFlags
         { update = update
@@ -45,9 +53,9 @@ update recipeMsg model =
             ( model, Cmd.none )
 
 
-init : Model -> ( Model, Cmd RecipeMsg )
+init : Flags -> ( Model, Cmd RecipeMsg )
 init flags =
-    ( { recipes = flags.recipes
+    ( { recipes = Nothing
       , isLoggedIn = flags.isLoggedIn
       , userId = flags.userId
       , token = flags.token
@@ -59,5 +67,19 @@ init flags =
 view : Model -> Html RecipeMsg
 view model =
     -- TODO: We ended here, using the Maybe type
-    div [ class "afaadfsa" ]
-        (map recipeCard model.recipes)
+    let
+        recipeCards =
+            case model.recipes of
+                Just res ->
+                    case res of
+                        Ok r ->
+                            (map recipeCard r)
+
+                        Err r ->
+                            [ text ("ERROR: " ++ (toString r)) ]
+
+                Nothing ->
+                    [ text "no recipes" ]
+    in
+        div [ class "list" ]
+            recipeCards
