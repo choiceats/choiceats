@@ -1,9 +1,8 @@
-// @flow
 import React, { Component } from 'react'
 import { gql, graphql, compose } from 'react-apollo'
 import { connect } from 'react-redux'
-
-import RecipeList from './recipe-list'
+import Elm from '../shared-components/react-elm/elm'
+import { Recipes } from './RecipeList.elm'
 import Loading from '../shared-components/loading'
 
 import type { Recipe as TRecipe } from 'types'
@@ -32,10 +31,14 @@ export class RecipeListApollo extends Component<RecipeListProps> {
 
     if (recipes) {
       return (
-        <RecipeList
-          recipes={recipes.slice().sort(sortRecipes)}
-          userId={userId}
-          isLoggedIn={isLoggedIn}
+        <Elm
+          src={Recipes.RecipeList}
+          flags={{
+            recipes: recipes.slice().sort(sortRecipes),
+            userId: userId,
+            isLoggedIn: !!isLoggedIn,
+            token: isLoggedIn
+          }}
         />
       )
     }

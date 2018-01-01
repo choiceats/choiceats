@@ -6,7 +6,7 @@ export default class Elm extends Component {
     const app = this.props.src.embed.bind(this)(node, this.props.flags)
 
     if (typeof this.props.ports !== 'undefined') {
-      this.props.ports.bind(this)(app.ports)
+      this.props.ports.bind(this, app.ports)
     }
   }
 

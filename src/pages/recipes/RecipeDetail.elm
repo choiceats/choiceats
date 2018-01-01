@@ -9,6 +9,12 @@ import Html exposing (Html, div, text, button, h1, ul, li, img, i, span)
 import Html.Attributes exposing (src, style, class)
 import Http
 import Task exposing (Task)
+import Recipes.Types exposing(..)
+
+type alias Model =
+  { mRecipe: Maybe RecipeFullResponse
+  , flags: Flags
+  }
 
 main : Program Flags Model Msg
 main =
@@ -17,48 +23,6 @@ main =
   , view          = viewDetail
   , init          = init
   , subscriptions = subscriptions
-  }
-
-type alias Flags =
-  { token: String
-  , recipeId: Int
-  , userId: Int
-  }
-
-type alias Model =
-  { mRecipe: Maybe RecipeFullResponse
-  , flags: Flags
-  }
-
-type alias RecipeTag =
-  { id: String
-  , name: String
-  }
-
-type alias RecipeFull = 
-  { author: String
-  , authorId: String
-  , description: String
-  , id: String
-  , imageUrl: String
-  , ingredients: List Ingredient
-  , instructions: String
-  , likes: Int
-  , name: String
-  , tags: List RecipeTag
-  , youLike: Bool
-  }
-
-type alias Ingredient =
-  { quantity: Float
-  , displayQuantity: String
-  , name: String
-  , unit: IngredientUnit
-  }
-
-type alias IngredientUnit =
-  { name: String
-  , abbr: String
   }
 
 init : Flags -> (Model, Cmd Msg)
@@ -80,9 +44,6 @@ update msg model =
     (ReceiveRecipeFull res) ->
       ({ model | mRecipe = Just res }, Cmd.none)
 
-
-type alias RecipeFullResponse =
-  Result GraphQLClient.Error RecipeFull
 
 type Msg
   = NoOp
