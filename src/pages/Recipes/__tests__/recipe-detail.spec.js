@@ -8,7 +8,9 @@ import IngredientList from '../components/ingredient-list'
 
 describe('Recipe Detail', () => {
   it('should render ingredients', () => {
-    const wrapper = shallow(<RecipeDetail recipe={{ recipe: DEFAULT_RECIPE }} />)
+    const wrapper = shallow(
+      <RecipeDetail recipe={{ recipe: DEFAULT_RECIPE }} />
+    )
     expect(wrapper.find(IngredientList).length).toBe(1)
   })
 })

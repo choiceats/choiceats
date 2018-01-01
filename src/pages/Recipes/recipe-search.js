@@ -121,5 +121,9 @@ const NewLink = styled.div`
   right: 0px;
 `
 
-const SearchInput = styled.div`position: relative;`
-const SearchHeader = styled.h2`margin-bottom: 8px;`
+const SearchInput = styled.div`
+  position: relative;
+`
+const SearchHeader = styled.h2`
+  margin-bottom: 8px;
+`

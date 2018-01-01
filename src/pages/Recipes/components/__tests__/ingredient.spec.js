@@ -5,7 +5,7 @@ import { shallow } from 'enzyme'
 import Ingredient from '../ingredient'
 
 describe('Recipe Ingredient', () => {
-  it('should render an ingredient\'s info', () => {
+  it("should render an ingredient's info", () => {
     const ingredient = {
       name: 'Sugar',
       quantity: 13,

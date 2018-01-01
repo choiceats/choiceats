@@ -118,7 +118,8 @@ export default class RecipeEditor extends Component<PROPS, STATE> {
             recipeIngredients={editingRecipe.ingredients}
             ingredients={ingredients}
             updateIngredients={newIngredients =>
-              this.updateIngredients(newIngredients)}
+              this.updateIngredients(newIngredients)
+            }
             units={units}
           />
 
@@ -169,5 +170,7 @@ const RecipeEditorContainer = styled.div`
   min-width: 260px;
 `
 
-const SaveError = styled.div`color: red;`
+const SaveError = styled.div`
+  color: red;
+`
 // based off 50px padding and 10px margin to give 320px look, supporting iPhone5 and wider

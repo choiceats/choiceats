@@ -17,7 +17,7 @@ export default class RecipeList extends React.Component<RecipeListProps, void> {
     const { recipes, userId, isLoggedIn } = this.props
     return (
       <ListContainer>
-        {recipes.map(recipe =>
+        {recipes.map(recipe => (
           <Recipe
             key={recipe.id}
             recipe={recipe}
@@ -27,7 +27,7 @@ export default class RecipeList extends React.Component<RecipeListProps, void> {
             userId={userId}
             isLoggedIn={isLoggedIn}
           />
-        )}
+        ))}
       </ListContainer>
     )
   }
@@ -45,7 +45,7 @@ to {
 
 const PAGE_PADDING = 50
 const ListContainer = styled.div`
-  animation: ${slideIn} .125s linear;
+  animation: ${slideIn} 0.125s linear;
   padding-top: 30px;
   min-width: ${320 - PAGE_PADDING}px;
   max-width: 500px;

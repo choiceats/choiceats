@@ -72,9 +72,9 @@ export const RecipeDetail: (
         </Card.Meta>
         <Card.Description>
           {recipe.id &&
-          userId === recipe.authorId && (
-            <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link>
-          )}
+            userId === recipe.authorId && (
+              <Link to={`/recipe/${recipe.id}/edit`}>Edit</Link>
+            )}
           <Description>{recipe.description}</Description>
           <IngredientList ingredients={recipe.ingredients || []} />
           <Directions>{recipe.instructions}</Directions>
@@ -93,7 +93,8 @@ export const RecipeDetail: (
               loading={isChangingLike}
               color={recipe.youLike ? 'teal' : 'grey'}
               onClick={() =>
-                _handleLikeClick(dispatch, likeRecipe, recipe.id, userId)}
+                _handleLikeClick(dispatch, likeRecipe, recipe.id, userId)
+              }
             />
             {!!recipe.likes && (
               <span>
@@ -140,7 +141,8 @@ export const RecipeDetail: (
                 dispatch,
                 goToRecipeList,
                 deleteRecipe
-              )}
+              )
+            }
           >
             Yes
           </Button>
@@ -178,7 +180,9 @@ const slideIn = keyframes`
   }
 `
 
-const RecipeCard = styled.div`animation: ${slideIn} 0.25s linear;`
+const RecipeCard = styled.div`
+  animation: ${slideIn} 0.25s linear;
+`
 
 const Description = styled.div`
   margin-top: 15px;
@@ -190,7 +194,9 @@ const Directions = styled.div`
   white-space: pre-wrap;
 `
 
-const DeleteError = styled.div`color: red;`
+const DeleteError = styled.div`
+  color: red;
+`
 
 export default RecipeDetail
 

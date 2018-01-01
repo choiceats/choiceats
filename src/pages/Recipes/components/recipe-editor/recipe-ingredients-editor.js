@@ -47,7 +47,7 @@ export default class RecipeIngredientsEditor extends Component<PROPS> {
     return (
       <div>
         <label>Ingredients</label>
-        {recipeIngredients.map((ingredient, index) =>
+        {recipeIngredients.map((ingredient, index) => (
           <RecipeIngredientEditor
             key={index}
             index={index}
@@ -57,7 +57,7 @@ export default class RecipeIngredientsEditor extends Component<PROPS> {
             update={this.updatedIngredient.bind(this)}
             remove={this.removeIngredient.bind(this)}
           />
-        )}
+        ))}
         <Form.Field>
           <Button primary onClick={e => this.addIngredient(e)}>
             Add Ingredient

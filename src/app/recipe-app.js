@@ -5,7 +5,7 @@ import { Route, Redirect, Switch, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Login from '../pages/login'
-import RecipeList from '../pages/recipes'
+import RecipeList from '../pages/Recipes'
 import { Navbar } from './components/Navbar.elm'
 import { Randomizer } from '../pages/randomizer/Randomizer.elm'
 import { ViewSignup } from '../pages/signup/ViewSignup.elm'
@@ -73,7 +73,8 @@ export class RecipeApp extends Component<PROPS, STATE> {
                     flags={{ token: userToken || '' }}
                     ports={this.setupSignupPorts.bind(this)}
                   />
-                )}
+                )
+              }
             />
             <Route exact path="/login" component={Login} />
             <Route

@@ -46,4 +46,6 @@ const RecipesBody = styled.div`
   max-width: 1000px;
   margin-top: 10px;
 `
-const RecipesContent = styled.div`margin-top: 25px;`
+const RecipesContent = styled.div`
+  margin-top: 25px;
+`
