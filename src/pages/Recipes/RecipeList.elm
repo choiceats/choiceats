@@ -57,7 +57,7 @@ init : Flags -> ( Model, Cmd RecipeMsg )
 init flags =
     ( { recipes = Nothing
       , isLoggedIn = flags.isLoggedIn
-      , userId = flags.userId
+      , userId = toString flags.userId
       , token = flags.token
       }
     , sendRecipesQuery flags.token initialFilterType [] "he"

@@ -3,15 +3,15 @@ import React, { Component } from 'react'
 export default class Elm extends Component {
   initialize(node) {
     if (node === null) return
-    const app = this.props.src.embed.bind(this)(node, this.props.flags)
+    const app = this.props.src.embed.call(this, node, this.props.flags)
 
     if (typeof this.props.ports !== 'undefined') {
-      this.props.ports.bind(this, app.ports)
+      this.props.ports.call(this, app.ports)
     }
   }
 
   componentDidMount() {
-    this.initialize.bind(this)(this.mountNode)
+    this.initialize.call(this, this.mountNode)
   }
 
   shouldComponentUpdate(prevProps) {

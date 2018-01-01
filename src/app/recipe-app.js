@@ -8,7 +8,7 @@ import Login from '../pages/login'
 import RecipeList from '../pages/Recipes'
 import { Navbar } from './components/Navbar.elm'
 import { Randomizer } from '../pages/randomizer/Randomizer.elm'
-import { ViewSignup } from '../pages/signup/ViewSignup.elm'
+import { Signup } from '../pages/Signup/Signup.elm'
 import Elm from '../pages/shared-components/react-elm/elm'
 import { logout } from '../state/action-creators'
 import { setUser } from '../services/users'
@@ -40,7 +40,7 @@ type STATE = {
 export class RecipeApp extends Component<PROPS, STATE> {
   componentWillReceiveProps(newProps: PROPS) {
     if (newProps.userToken !== this.props.userToken) {
-      this.updateElmHeader.bind(this)(this.props.userToken ? 'true' : 'false')
+      this.updateElmHeader.call(this, this.props.userToken ? 'true' : 'false')
     }
   }
 
@@ -69,7 +69,7 @@ export class RecipeApp extends Component<PROPS, STATE> {
                   <Redirect to="/" />
                 ) : (
                   <Elm
-                    src={ViewSignup}
+                    src={Signup}
                     flags={{ token: userToken || '' }}
                     ports={this.setupSignupPorts.bind(this)}
                   />
@@ -106,16 +106,16 @@ export class RecipeApp extends Component<PROPS, STATE> {
 
   setupNavbarPorts(ports: PORTS) {
     var self = this
-    this.setState.bind(this)(() => ({ ports }: { ports: PORTS }))
+    this.setState.call(this, () => ({ ports }: { ports: PORTS }))
 
-    ports.requestLogout.subscribe(() => self.onClickLogoutHandler.bind(self)())
+    ports.requestLogout.subscribe(() => self.onClickLogoutHandler.call(self))
 
     ports.readReactState.send(this.props.userToken ? 'true' : 'false')
   }
 
   updateElmHeader(userTokenBoolString: 'true' | 'false') {
     if (this.state && this.state.ports) {
-      this.state.ports.readReactState.send.bind(this)(userTokenBoolString)
+      this.state.ports.readReactState.send.call(this, userTokenBoolString)
     }
   }
 }

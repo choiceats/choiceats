@@ -1,4 +1,4 @@
-port module ViewSignup exposing (main)
+port module Signup exposing (main)
 
 -- ELM-LANG MODULES
 import Html exposing (Html, div, text, label, input, button, h1, form)
@@ -9,6 +9,9 @@ import Json.Decode as JD exposing (int, string, field, map4)
 import Json.Encode as JE exposing (object, string, encode)
 import Regex exposing (regex, caseInsensitive)
 
+-- APP MODULES
+import Signup.Types as T exposing (..)
+
 main =
   Html.programWithFlags
   { update        = update
@@ -17,59 +20,7 @@ main =
   , subscriptions = subscriptions
   }
 
-type Msg
-  = Email String
-  | FirstName String
-  | LastName String
-  | Password String
-  | PasswordCheck String
-  | RequestAccount
-  | ReceiveResponse (Result Http.Error Session)
-
-type alias Session =
-  {
-    userId: Int,
-    email: String,
-    name: String,
-    token: String
-  }
-
-type alias Flags = { token: String }
-
--- type UserInput = Int | String | Number
--- had problems getting union types to play nicely with things that expected a String. TODO: Make this type work as it generalizes better to different form field types
-
-type alias UserInput = String
-
-type alias FormField =
-  { userInput: UserInput
-  , isValid: Bool
-  , message: String
-  }
-
-type alias SignupFields =
-  { email: FormField
-  , firstName: FormField
-  , lastName: FormField
-  , password: FormField
-  , passwordCheck: FormField
-  }
-
-type alias Model =
-  { formFields: SignupFields
-  , loggedIn: Bool
-  , flags: Flags
-  , serverFeedback : String
-  , canSubmitForm: Bool
-  }
-
-emptyUserData =
-  { userInput = ""
-  , isValid = True
-  , message = ""
-  }
-
-init : Flags -> (Model, Cmd Msg)
+init : T.Flags -> (T.Model, Cmd T.Msg)
 init initFlags = 
   ({formFields =
       { email = emptyUserData
@@ -90,10 +41,10 @@ validateEmail : String -> Bool
 validateEmail email =
     Regex.contains emailRegex email
 
-setEmail : String -> SignupFields -> SignupFields
+setEmail : String -> T.SignupFields -> T.SignupFields
 setEmail emailInput fields =
   let
-    hasInput = not (String.isEmpty emailInput)
+    hasInput = hasLength emailInput
     isValidEmail = validateEmail emailInput
 
     message =
@@ -116,10 +67,10 @@ setEmail emailInput fields =
       }
     }
 
-setFirstName : String -> SignupFields -> SignupFields
+setFirstName : String -> T.SignupFields -> T.SignupFields
 setFirstName firstNameInput fields =
   let
-    hasInput = not (String.isEmpty firstNameInput)
+    hasInput = hasLength firstNameInput
 
   in
     { fields | firstName =
@@ -129,10 +80,10 @@ setFirstName firstNameInput fields =
       }
     }
 
-setLastName : String -> SignupFields -> SignupFields
+setLastName : String -> T.SignupFields -> T.SignupFields
 setLastName lastNameInput fields =
   let
-    hasInput = not (String.isEmpty lastNameInput)
+    hasInput = hasLength lastNameInput
 
   in
     { fields | lastName =
@@ -146,22 +97,37 @@ createWordRegex word = caseInsensitive (regex ("^.*" ++ word ++ ".*$"))
 
 passwordRegex = createWordRegex "password"
   
-setPassword : String -> SignupFields -> SignupFields
+setPassword : String -> T.SignupFields -> T.SignupFields
 setPassword passwordInput fields =
   let
-    hasInput = not (String.isEmpty passwordInput)
+    hasInput = hasLength passwordInput
 
     passwordIsPassword = Regex.contains passwordRegex passwordInput
 
-    passwordIsName = (String.length fields.firstName.userInput > 0 && Regex.contains (createWordRegex fields.firstName.userInput) passwordInput)
-    || (String.length fields.lastName.userInput > 0 && Regex.contains (createWordRegex fields.lastName.userInput) passwordInput)
+    passwordIsName =
+      (
+        ( String.length fields.firstName.userInput > 0
+        && Regex.contains (createWordRegex fields.firstName.userInput) passwordInput
+        )
+        ||
+        ( String.length fields.lastName.userInput > 0
+        && Regex.contains (createWordRegex fields.lastName.userInput) passwordInput
+        )
+      )
 
     minimum_password_length = 6
 
     passwordIsLongEnough = String.length passwordInput >= minimum_password_length
 
+    passwordsMatch = fields.passwordCheck.userInput == passwordInput
+
+    passwordCheckHasInput = hasLength fields.passwordCheck.userInput
+
+    bothPasswordsHaveInput = hasInput && passwordCheckHasInput 
+
+
     message =
-      if not hasInput
+      if False
         then "Enter a password."
 
       else if passwordIsPassword
@@ -170,8 +136,11 @@ setPassword passwordInput fields =
       else if passwordIsName
         then "You can do better than using your name for a password."
 
-      else if not passwordIsLongEnough
+      else if hasInput && not passwordIsLongEnough
         then "Password must be at least " ++ (toString minimum_password_length) ++ " characters long."
+
+      else if bothPasswordsHaveInput && not passwordsMatch
+        then "Passwords must match."
 
       else ""
 
@@ -183,40 +152,38 @@ setPassword passwordInput fields =
       && (not passwordIsPassword)
       && passwordIsLongEnough
       && not passwordIsName
+      && passwordsMatch
       )
     }}
 
 
-setPasswordCheck : String -> SignupFields -> SignupFields
+setPasswordCheck : String -> T.SignupFields -> T.SignupFields
 setPasswordCheck passwordCheckInput fields =
-  let
-    isValid = if fields.password.userInput == passwordCheckInput then True else False
-
-  in
-    { fields | passwordCheck =
-      { userInput = passwordCheckInput
-      , message = if isValid then "" else "Passwords must match."
-      , isValid = isValid
-      }
+  -- Keep the password checking logic in the setPassword method
+  { fields | passwordCheck =
+    { userInput = passwordCheckInput
+    , message = ""
+    , isValid = True
     }
+  }
 
-notEmpty : String -> Bool
-notEmpty str =
+hasLength : String -> Bool
+hasLength str =
   not <| String.isEmpty str
 
-getCanSubmitForm : SignupFields -> Bool
+getCanSubmitForm : T.SignupFields -> Bool
 getCanSubmitForm f =
-     (f.email.isValid         && notEmpty f.email.userInput        )
-  && (f.firstName.isValid     && notEmpty f.firstName.userInput    )
-  && (f.lastName.isValid      && notEmpty f.lastName.userInput     )
-  && (f.password.isValid      && notEmpty f.password.userInput     )
-  && (f.passwordCheck.isValid && notEmpty f.passwordCheck.userInput)
+     (f.email.isValid         && hasLength f.email.userInput        )
+  && (f.firstName.isValid     && hasLength f.firstName.userInput    )
+  && (f.lastName.isValid      && hasLength f.lastName.userInput     )
+  && (f.password.isValid      && hasLength f.password.userInput     )
+  && (f.passwordCheck.isValid && hasLength f.passwordCheck.userInput)
  
-update : Msg -> Model -> (Model, Cmd Msg)
+update : T.Msg -> T.Model -> (T.Model, Cmd T.Msg)
 update msg model = 
   case msg of
 
-    Email str ->
+    T.Email str ->
       let
         newFields = setEmail str model.formFields
 
@@ -225,19 +192,41 @@ update msg model =
         , canSubmitForm = getCanSubmitForm newFields
         }, Cmd.none)
 
-    FirstName str ->
+    T.FirstName str ->
       let
         newFields = setFirstName str model.formFields
           |> (setPassword model.formFields.password.userInput)
+          |> (setPasswordCheck model.formFields.passwordCheck.userInput)
 
       in
         ({model | formFields = newFields
         , canSubmitForm = getCanSubmitForm newFields
         }, Cmd.none)
 
-    LastName str ->
+    T.LastName str ->
       let
         newFields = setLastName str model.formFields
+          |> (setPassword model.formFields.password.userInput)
+          |> (setPasswordCheck model.formFields.passwordCheck.userInput)
+
+      in
+        ({model | formFields = newFields
+        , canSubmitForm = getCanSubmitForm newFields
+        }, Cmd.none)
+
+    T.Password str ->
+      let
+        newFields = setPassword str model.formFields
+          |> (setPasswordCheck model.formFields.passwordCheck.userInput)
+
+      in
+        ({model | formFields = newFields
+        , canSubmitForm = getCanSubmitForm newFields
+        }, Cmd.none)
+
+    T.PasswordCheck str ->
+      let
+        newFields = setPasswordCheck str model.formFields
           |> (setPassword model.formFields.password.userInput)
 
       in
@@ -245,19 +234,13 @@ update msg model =
         , canSubmitForm = getCanSubmitForm newFields
         }, Cmd.none)
 
-    Password str ->
-      ({model | formFields = setPassword str model.formFields }, Cmd.none)
-
-    PasswordCheck str ->
-      ({model | formFields = setPasswordCheck str model.formFields }, Cmd.none)
-
-    RequestAccount ->
+    T.RequestAccount ->
       (model, requestAccount model)
 
-    ReceiveResponse (Ok user)->
+    T.ReceiveResponse (Ok user)->
       ({model | loggedIn = True }, recordSignup <| stringifySession user)
 
-    ReceiveResponse (Err err)->
+    T.ReceiveResponse (Err err)->
       ({model | serverFeedback = toString err}, Cmd.none)
 
 stringifySession : Session -> String
@@ -275,7 +258,7 @@ stringifySession session =
 --  , ("token", JE.string session.token)
 --  ]
 
-requestAccount : Model -> Cmd Msg
+requestAccount : T.Model -> Cmd T.Msg
 requestAccount model =
   let body =
   [ ("email", JE.string model.formFields.email.userInput)
@@ -306,11 +289,11 @@ sessionDecoder =
 
 port recordSignup : String -> Cmd msg
 
-subscriptions : Model -> Sub Msg
+subscriptions : T.Model -> Sub T.Msg
 subscriptions model =
   Sub.none
 
-viewSignup : Model -> Html Msg
+viewSignup : T.Model -> Html T.Msg
 viewSignup model =
   let
     f = model.formFields
@@ -343,9 +326,6 @@ viewSignup model =
       ]
     ]
 
-type alias LabelName = String
-type alias InputAttr = String
-
 notDash : Char -> Bool
 notDash char = char /= '-'
 
@@ -355,7 +335,7 @@ notSpace char = char /= ' '
 isIdChar : Char -> Bool
 isIdChar char = notDash char && notSpace char
 
-viewInput : FormField -> LabelName -> InputAttr -> (String -> Msg) -> Html Msg
+viewInput : T.FormField -> LabelName -> InputAttr -> (String -> T.Msg) -> Html T.Msg
 viewInput formField labelName inputAttr inputType = 
   let
     idName = (String.filter isIdChar labelName)
@@ -375,9 +355,9 @@ viewInput formField labelName inputAttr inputType =
     , viewError formField
     ]
 
-viewError : FormField -> Html Msg
+viewError : T.FormField -> Html T.Msg
 viewError field =
-  div [class <| "ui error message " ++ (if field.isValid then "hidden" else "visible")]
+  div [class <| "ui error message " ++ (if hasLength field.message && (not field.isValid) then "visible" else "hidden")]
     [ div [class "header"] [text field.message] ]
 
 -- can add ui [class "list"] [li[] [text var]] or p [] [text var] if need secondary error parts
