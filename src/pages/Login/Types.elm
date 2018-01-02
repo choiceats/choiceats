@@ -4,10 +4,7 @@ import Http exposing (Error)
 
 type Msg
   = Email String
-  | FirstName String
-  | LastName String
   | Password String
-  | PasswordCheck String
   | RequestAccount
   | ReceiveResponse (Result Http.Error Session)
 
@@ -30,7 +27,7 @@ type alias FormField =
   , message: String
   }
 
-type alias SignupFields =
+type alias LoginFields =
   { email: FormField
   , firstName: FormField
   , lastName: FormField
@@ -39,18 +36,14 @@ type alias SignupFields =
   }
 
 type alias Model =
-  { formFields: SignupFields
+  { emailInput: String
+  , passwordInput: String
   , loggedIn: Bool
   , flags: Flags
   , serverFeedback : String
-  , canSubmitForm: Bool
   }
 
-emptyUserData =
-  { userInput = ""
-  , isValid = True
-  , message = ""
-  }
 
 type alias LabelName = String
 type alias InputAttr = String
+

@@ -5,7 +5,7 @@ import Html exposing (Html, div, text, label, input, button, h1, form)
 import Html.Attributes exposing (disabled, type_, class, style, value, for, id)
 import Html.Events exposing (onWithOptions, onClick, onInput)
 import Http exposing (Error, send, post, stringBody)
-import Json.Decode as JD exposing (int, string, field, map4)
+import Json.Decode as JD exposing (string, field, map4)
 import Json.Encode as JE exposing (object, string, encode)
 import Regex exposing (regex, caseInsensitive)
 
@@ -282,7 +282,7 @@ requestAccount model =
 sessionDecoder : JD.Decoder Session
 sessionDecoder =
   map4 Session
-    (field "userId" JD.int)
+    (field "userId" JD.string)
     (field "email" JD.string)
     (field "name" JD.string)
     (field "token" JD.string)

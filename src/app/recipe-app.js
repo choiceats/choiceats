@@ -30,6 +30,10 @@ type PORTS = {
 
   recordSignup: {
     subscribe: any
+  },
+
+  recordLogin: {
+    subscribe: any
   }
 }
 
@@ -76,7 +80,11 @@ export class RecipeApp extends Component<PROPS, STATE> {
                 )
               }
             />
-            <Route exact path="/login" component={Login} />
+            <Route
+              exact
+              path="/login"
+              component={Login /*TODO: Replace with Login.elm*/}
+            />
             <Route
               exact
               path="/random"
@@ -99,6 +107,13 @@ export class RecipeApp extends Component<PROPS, STATE> {
 
   setupSignupPorts(ports: PORTS) {
     ports.recordSignup.subscribe(a => {
+      setUser(JSON.parse(a))
+      window.location.href = '/'
+    })
+  }
+
+  setupLoginPorts(ports: PORTS) {
+    ports.recordLogin.subscribe(a => {
       setUser(JSON.parse(a))
       window.location.href = '/'
     })
