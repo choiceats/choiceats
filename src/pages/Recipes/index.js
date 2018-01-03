@@ -2,7 +2,8 @@
 import React, { Component } from 'react'
 import { Route, Switch } from 'react-router-dom'
 import styled from 'styled-components'
-
+import { Elm } from '../shared-components/react-elm/elm'
+import { Recipe } from './RecipeSearch.elm'
 import RecipeSearch from './recipe-search.apollo'
 import RecipeDetail from './recipe-detail.apollo'
 import RecipeEditor from './recipe-editor.apollo'
@@ -33,7 +34,7 @@ export default class RecipeRoute extends Component<PROPS, void> {
               path={`${match.url}recipe/:recipeId`}
               component={RecipeDetail}
             />
-            <Route path={match.url} component={RecipeSearch} />
+            <Route path={match.url} component={<Elm src={Recipe.RecipeList} flags={{token: } />
           </Switch>
         </RecipesContent>
       </RecipesBody>
