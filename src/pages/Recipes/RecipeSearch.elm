@@ -3,9 +3,10 @@ port module Recipes.RecipeSearch exposing (main)
 import Html exposing (Html, div, text, a, img, i)
 import Html.Attributes exposing (class, style, href, src)
 import List exposing (map)
-import Recipes.RecipeList exposing (recipeListView)
 import Recipes.Types exposing (..)
-import Recipes.RecipeList_Effects as Effects exposing (sendRecipesQuery)
+import Recipes.Recipe exposing (recipeCard)
+import Recipes.Types exposing (..)
+import Recipes.Recipe_Effects as Effects exposing (sendRecipesQuery)
 
 
 initialFilterType : ButtonFilter
@@ -28,7 +29,6 @@ type alias Model =
     }
 
 
-main : Program Flags Model RecipeMsg
 main =
     Html.programWithFlags
         { update = update
@@ -52,6 +52,9 @@ update recipeMsg model =
         GetRecipes ->
             ( model, Cmd.none )
 
+        GetTagsResponse tagRes ->
+            ( model, Cmd.none )
+
 
 init : Flags -> ( Model, Cmd RecipeMsg )
 init flags =
@@ -64,7 +67,40 @@ init flags =
     )
 
 
+
+-- The below code will work with elm-reactor if you find your access_token in postgres
+-- init : ( Model, Cmd RecipeMsg )
+-- init =
+--     ( { recipes = Nothing
+--       , isLoggedIn = True
+--       , userId = "1"
+--       , token = "nyfehfnz1uemy31zdg7528tazsfle6p"
+--       }
+--     , sendRecipesQuery "nyfehfnz1uemy31zdg7528tazsfle6p" initialFilterType [] "he"
+--     )
+
+
 view : Model -> Html RecipeMsg
 view model =
     div [ class "search" ]
         [ recipeListView model ]
+
+
+recipeListView : Model -> Html RecipeMsg
+recipeListView model =
+    let
+        recipeCards =
+            case model.recipes of
+                Just res ->
+                    case res of
+                        Ok r ->
+                            (map recipeCard r)
+
+                        Err r ->
+                            [ text ("ERROR: " ++ (toString r)) ]
+
+                Nothing ->
+                    [ text "no recipes" ]
+    in
+        div [ class "list" ]
+            recipeCards

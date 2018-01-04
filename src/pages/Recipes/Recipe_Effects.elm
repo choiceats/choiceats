@@ -1,4 +1,4 @@
-module Recipes.RecipeList_Effects exposing (..)
+module Recipes.Recipe_Effects exposing (..)
 
 -- ELM-LANG MODULES
 
@@ -7,16 +7,24 @@ import Http
 
 -- THIRD PARTY MODULES
 
+import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import GraphQL.Client.Http as GraphQLClient
 import Task exposing (Task)
 
 
 -- APPLICATION MODULES
 
 import Recipes.Types exposing (..)
+
+
+type alias AuthToken =
+    String
+
+
+
+-- Recipe Graphql Requests
 
 
 recipesRequest : GqlB.Document GqlB.Query (List RecipeSummary) { vars | searchFilter : String, tags : List String, searchText : String }
@@ -76,10 +84,6 @@ recipesQueryRequest buttonFilter tags searchText =
             }
 
 
-type alias AuthToken =
-    String
-
-
 sendQueryRequest : AuthToken -> GqlB.Request GqlB.Query a -> Task GraphQLClient.Error a
 sendQueryRequest authToken request =
     GraphQLClient.customSendQuery (requestOptions authToken) request
@@ -89,3 +93,32 @@ sendRecipesQuery : AuthToken -> ButtonFilter -> List String -> String -> Cmd Rec
 sendRecipesQuery authToken buttonFilter tags searchText =
     sendQueryRequest authToken (recipesQueryRequest buttonFilter tags searchText)
         |> Task.attempt GetRecipesResponse
+
+
+tagsRequest : GqlB.Document GqlB.Query (List RecipeTag) {}
+tagsRequest =
+    let
+        tagDescriptor =
+            GqlB.list
+                (GqlB.object RecipeTag
+                    |> GqlB.with (GqlB.field "id" [] GqlB.string)
+                    |> GqlB.with (GqlB.field "name" [] GqlB.string)
+                )
+
+        queryRoot =
+            GqlB.extract
+                (GqlB.field "tags" [] tagDescriptor)
+    in
+        GqlB.queryDocument queryRoot
+
+
+tagsQueryRequest : ButtonFilter -> List String -> String -> GqlB.Request GqlB.Query (List RecipeTag)
+tagsQueryRequest buttonFilter tags searchText =
+    tagsRequest
+        |> GqlB.request {}
+
+
+sendTagsQuery : AuthToken -> ButtonFilter -> List String -> String -> Cmd RecipeMsg
+sendTagsQuery authToken buttonFilter tags searchText =
+    sendQueryRequest authToken (tagsQueryRequest buttonFilter tags searchText)
+        |> Task.attempt GetTagsResponse
