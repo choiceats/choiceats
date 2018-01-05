@@ -48,7 +48,7 @@ type alias RecipeFull =
     , imageUrl : String
     , ingredients : List Ingredient
     , instructions : String
-    , likes : Int
+    , likes : List Int
     , name : String
     , tags : List RecipeTag
     , youLike : Bool
