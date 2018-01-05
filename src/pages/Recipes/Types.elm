@@ -79,6 +79,7 @@ type RecipeMsg
     = GetRecipes
     | GetRecipesResponse RecipesResponse
     | GetTagsResponse TagsResponse
+    | SearchTextChange String
 
 
 mapFilterTypeToString : ButtonFilter -> String

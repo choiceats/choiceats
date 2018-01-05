@@ -1,7 +1,8 @@
 port module Recipes.RecipeSearch exposing (main)
 
-import Html exposing (Html, div, text, a, img, i)
-import Html.Attributes exposing (class, style, href, src)
+import Html exposing (Html, div, input, text, a, img, i)
+import Html.Attributes exposing (class, style, href, src, placeholder)
+import Html.Events exposing (onInput)
 import List exposing (map)
 import Recipes.Types exposing (..)
 import Recipes.Recipe exposing (recipeCard)
@@ -9,9 +10,11 @@ import Recipes.Types exposing (..)
 import Recipes.Recipe_Effects as Effects exposing (sendRecipesQuery)
 
 
-initialFilterType : ButtonFilter
-initialFilterType =
-    All
+type alias SearchParams =
+    { text : String
+    , tags : List String
+    , filter : ButtonFilter
+    }
 
 
 type alias Flags =
@@ -26,6 +29,20 @@ type alias Model =
     , userId : String
     , isLoggedIn : Bool
     , token : String
+    , search : SearchParams
+    }
+
+
+initialFilterType : ButtonFilter
+initialFilterType =
+    All
+
+
+defaultSearchParams : SearchParams
+defaultSearchParams =
+    { text = ""
+    , tags = []
+    , filter = All
     }
 
 
@@ -55,6 +72,19 @@ update recipeMsg model =
         GetTagsResponse tagRes ->
             ( model, Cmd.none )
 
+        SearchTextChange text ->
+            let
+                searchParams =
+                    model.search
+
+                updatedSearchParms =
+                    { searchParams | text = text }
+
+                command =
+                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
+            in
+                ( { model | search = updatedSearchParms }, command )
+
 
 init : Flags -> ( Model, Cmd RecipeMsg )
 init flags =
@@ -62,35 +92,34 @@ init flags =
       , isLoggedIn = flags.isLoggedIn
       , userId = toString flags.userId
       , token = flags.token
+      , search = defaultSearchParams
       }
     , sendRecipesQuery flags.token initialFilterType [] "he"
     )
 
 
-
--- The below code will work with elm-reactor if you find your access_token in postgres
--- init : ( Model, Cmd RecipeMsg )
--- init =
---     ( { recipes = Nothing
---       , isLoggedIn = True
---       , userId = "1"
---       , token = "nyfehfnz1uemy31zdg7528tazsfle6p"
---       }
---     , sendRecipesQuery "nyfehfnz1uemy31zdg7528tazsfle6p" initialFilterType [] "he"
---     )
-
-
 view : Model -> Html RecipeMsg
 view model =
     div [ class "search" ]
-        [ recipeListView model ]
+        [ searchBar model.search
+        , recipeListView model.recipes
+        ]
 
 
-recipeListView : Model -> Html RecipeMsg
-recipeListView model =
+searchBar : SearchParams -> Html RecipeMsg
+searchBar searchParams =
+    div [ class "searchBar" ]
+        [ input
+            [ placeholder "Search Title or Ingredents", onInput SearchTextChange ]
+            []
+        ]
+
+
+recipeListView : Maybe Recipes.Types.RecipesResponse -> Html RecipeMsg
+recipeListView recipes =
     let
         recipeCards =
-            case model.recipes of
+            case recipes of
                 Just res ->
                     case res of
                         Ok r ->
