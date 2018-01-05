@@ -96,42 +96,46 @@ recipeQueryRequest recipeId =
         |> GqlB.request { recipeId = recipeId }
 
 
+builtUnit =
+    GqlB.object IngredientUnit
+        |> GqlB.with (GqlB.field "abbr" [] GqlB.string)
+        |> GqlB.with (GqlB.field "name" [] GqlB.string)
+
+
+builtTag =
+    GqlB.object RecipeTag
+        |> GqlB.with (GqlB.field "id" [] GqlB.string)
+        |> GqlB.with (GqlB.field "name" [] GqlB.string)
+
+
+builtIngredient =
+    GqlB.object Ingredient
+        |> GqlB.with (GqlB.field "quantity" [] GqlB.float)
+        |> GqlB.with (GqlB.field "displayQuantity" [] GqlB.string)
+        |> GqlB.with (GqlB.field "name" [] GqlB.string)
+        |> GqlB.with (GqlB.field "unit" [] builtUnit)
+
+
+recFull =
+    GqlB.object RecipeFull
+        |> GqlB.with (GqlB.field "author" [] GqlB.string)
+        |> GqlB.with (GqlB.field "authorId" [] GqlB.string)
+        |> GqlB.with (GqlB.field "description" [] GqlB.string)
+        |> GqlB.with (GqlB.field "id" [] GqlB.string)
+        |> GqlB.with (GqlB.field "imageUrl" [] GqlB.string)
+        |> GqlB.with (GqlB.field "ingredients" [] (GqlB.list builtIngredient))
+        |> GqlB.with (GqlB.field "instructions" [] GqlB.string)
+        |> GqlB.with (GqlB.field "likes" [] (GqlB.list GqlB.int))
+        |> GqlB.with (GqlB.field "name" [] GqlB.string)
+        |> GqlB.with (GqlB.field "tags" [] (GqlB.list builtTag))
+        |> GqlB.with (GqlB.field "youLike" [] GqlB.bool)
+
+
 recipeRequest : GqlB.Document GqlB.Query RecipeFull { vars | recipeId : Int }
 recipeRequest =
     let
         recipeIdVar =
             Var.required "recipeId" .recipeId Var.int
-
-        builtUnit =
-            GqlB.object IngredientUnit
-                |> GqlB.with (GqlB.field "abbr" [] GqlB.string)
-                |> GqlB.with (GqlB.field "name" [] GqlB.string)
-
-        builtTag =
-            GqlB.object RecipeTag
-                |> GqlB.with (GqlB.field "id" [] GqlB.string)
-                |> GqlB.with (GqlB.field "name" [] GqlB.string)
-
-        builtIngredient =
-            GqlB.object Ingredient
-                |> GqlB.with (GqlB.field "quantity" [] GqlB.float)
-                |> GqlB.with (GqlB.field "displayQuantity" [] GqlB.string)
-                |> GqlB.with (GqlB.field "name" [] GqlB.string)
-                |> GqlB.with (GqlB.field "unit" [] builtUnit)
-
-        recFull =
-            GqlB.object RecipeFull
-                |> GqlB.with (GqlB.field "author" [] GqlB.string)
-                |> GqlB.with (GqlB.field "authorId" [] GqlB.string)
-                |> GqlB.with (GqlB.field "description" [] GqlB.string)
-                |> GqlB.with (GqlB.field "id" [] GqlB.string)
-                |> GqlB.with (GqlB.field "imageUrl" [] GqlB.string)
-                |> GqlB.with (GqlB.field "ingredients" [] (GqlB.list builtIngredient))
-                |> GqlB.with (GqlB.field "instructions" [] GqlB.string)
-                |> GqlB.with (GqlB.field "likes" [] (GqlB.list GqlB.int))
-                |> GqlB.with (GqlB.field "name" [] GqlB.string)
-                |> GqlB.with (GqlB.field "tags" [] (GqlB.list builtTag))
-                |> GqlB.with (GqlB.field "youLike" [] GqlB.bool)
 
         queryRoot =
             GqlB.extract
