@@ -1,26 +1,18 @@
-// @flow
 import React, { Component } from 'react'
 import { Route, Switch } from 'react-router-dom'
 import styled from 'styled-components'
 
-import RecipeSearch from './recipe-search.apollo'
+import { connect } from 'react-redux'
+
+import Elm from '../shared-components/react-elm/elm'
+import { Recipes } from './RecipeSearch.elm'
 import RecipeDetail from './recipe-detail.apollo'
 import RecipeEditor from './recipe-editor.apollo'
 import RecipeEditorNew from './recipe-editor-new.apollo'
 
-type PROPS = {
-  match: {
-    url: string
-  }
-}
-
 export default class RecipeRoute extends Component<PROPS, void> {
   render() {
     const { match, userId, token = '' } = this.props
-
-    const DecoratedRecipeSearch = props => {
-      return <RecipeSearch userId={userId} token={token} {...props} />
-    }
 
     return (
       <RecipesBody>
@@ -38,7 +30,15 @@ export default class RecipeRoute extends Component<PROPS, void> {
               path={`${match.url}recipe/:recipeId`}
               component={RecipeDetail}
             />
-            <Route path={match.url} render={DecoratedRecipeSearch} />
+            <Route
+              path={match.url}
+              component={() => (
+                <Elm
+                  src={Recipes.RecipeSearch}
+                  flags={{ token: token, userId: userId, isLoggedIn: !!token }}
+                />
+              )}
+            />
           </Switch>
         </RecipesContent>
       </RecipesBody>

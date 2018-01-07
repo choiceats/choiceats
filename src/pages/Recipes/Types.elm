@@ -11,6 +11,10 @@ type alias RecipesResponse =
     Result GraphQLClient.Error (List RecipeSummary)
 
 
+type alias TagsResponse =
+    Result GraphQLClient.Error (List RecipeTag)
+
+
 type alias Flags =
     { token : String
     , recipeId : Int
@@ -44,7 +48,7 @@ type alias RecipeFull =
     , imageUrl : String
     , ingredients : List Ingredient
     , instructions : String
-    , likes : Int
+    , likes : List Int
     , name : String
     , tags : List RecipeTag
     , youLike : Bool
@@ -74,6 +78,8 @@ type ButtonFilter
 type RecipeMsg
     = GetRecipes
     | GetRecipesResponse RecipesResponse
+    | GetTagsResponse TagsResponse
+    | SearchTextChange String
 
 
 mapFilterTypeToString : ButtonFilter -> String
