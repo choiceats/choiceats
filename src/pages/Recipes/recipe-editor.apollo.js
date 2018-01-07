@@ -216,8 +216,7 @@ const options: RecipeQueryOptions = ({ match }) => ({
 })
 
 const mapStateToProps = state => ({
-  recipeStatus: state.ui.recipeStatus,
-  userId: state.user.userId || null
+  recipeStatus: state.ui.recipeStatus
 })
 
 export default connect(mapStateToProps)(

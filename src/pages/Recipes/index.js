@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import { Route, Switch } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { connect } from 'react-redux'
-
 import Elm from '../shared-components/react-elm/elm'
 import { Recipes } from './RecipeSearch.elm'
 import RecipeDetail from './recipe-detail.apollo'
@@ -12,7 +10,11 @@ import RecipeEditorNew from './recipe-editor-new.apollo'
 
 export default class RecipeRoute extends Component<PROPS, void> {
   render() {
-    const { match, userId, token = '' } = this.props
+    const { match, userId = null, token = '' } = this.props
+
+    const DecoratedRecipeEditor = props => {
+      return <RecipeEditor userId={userId} {...props} />
+    }
 
     return (
       <RecipesBody>
@@ -24,7 +26,7 @@ export default class RecipeRoute extends Component<PROPS, void> {
             />
             <Route
               path={`${match.url}recipe/:recipeId/edit`}
-              component={RecipeEditor}
+              render={DecoratedRecipeEditor}
             />
             <Route
               path={`${match.url}recipe/:recipeId`}
