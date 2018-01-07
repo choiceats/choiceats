@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
 import { Input, Button, Dropdown } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -48,7 +47,7 @@ export class RecipeSearch extends Component<PROPS, STATE> {
   }
 
   render() {
-    const { tags, userId, token } = this.props
+    const { tags, userId = '', token = '' } = this.props
     const { searchText, searchFilter, searchTags } = this.state
     const options = tags.map(t => ({ text: t.name, value: t.id }))
 
@@ -91,7 +90,7 @@ export class RecipeSearch extends Component<PROPS, STATE> {
           flags={{
             userId: userId,
             isLoggedIn: !!token,
-            token: token,
+            token: token || '',
             searchText: searchText,
             searchTags: searchTags,
             searchFilter: searchFilter
@@ -102,13 +101,7 @@ export class RecipeSearch extends Component<PROPS, STATE> {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    token: state.user.token,
-    userId: state.user.userId
-  }
-}
-export default connect(mapStateToProps)(RecipeSearch)
+export default RecipeSearch
 
 const SearchContainer = styled.div`
   max-width: 500px;

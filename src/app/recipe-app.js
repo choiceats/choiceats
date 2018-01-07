@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
 import { Route, Redirect, Switch, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -21,18 +20,25 @@ export class RecipeApp extends Component {
     const userState = getUser()
 
     this.state = {
-      userToken: userState && userState.token,
+      user: userState,
       ports: null
     }
   }
 
   render() {
     const { location } = this.props
-    const { userToken } = this.state
+    const { user = {} } = this.state
 
     const isRestrictedPath =
       NON_RESTRICTED_PATHS.indexOf(location.pathname) === -1
-    if (userToken === null && isRestrictedPath) {
+
+    const DecoratedRecipeList = props => {
+      return (
+        <RecipeList userId={user.userId} token={user.token || ''} {...props} />
+      )
+    }
+
+    if (user.token === null && isRestrictedPath) {
       return <Redirect to="/login" />
     }
 
@@ -49,12 +55,12 @@ export class RecipeApp extends Component {
               exact
               path="/login/sign-up"
               component={() =>
-                userToken && userToken.length > 0 ? (
+                user.token && user.token.length > 0 ? (
                   <Redirect to="/" />
                 ) : (
                   <Elm
                     src={Signup}
-                    flags={{ token: userToken || '' }}
+                    flags={{ token: user.token || '' }}
                     ports={this.setupSignupPorts.bind(this)}
                   />
                 )
@@ -66,7 +72,7 @@ export class RecipeApp extends Component {
               component={() => (
                 <Elm
                   src={Login}
-                  flags={{ token }}
+                  flags={{ user: user.token || '' }}
                   ports={this.setupLoginPorts.bind(this)}
                 />
               )}
@@ -74,9 +80,11 @@ export class RecipeApp extends Component {
             <Route
               exact
               path="/random"
-              component={() => <Elm src={Randomizer} flags={{ token }} />}
+              component={() => (
+                <Elm src={Randomizer} flags={{ user: user.token || '' }} />
+              )}
             />
-            <Route path="/" component={RecipeList} />
+            <Route path="/" render={DecoratedRecipeList} />
           </Switch>
         </TopRouteContainer>
       </AppContainer>
@@ -88,7 +96,7 @@ export class RecipeApp extends Component {
 
     clearUser()
 
-    this.setState(() => ({ userToken: null }))
+    this.setState(() => ({ user: null }))
     this.updateElmHeader.call(this, 'false')
 
     history.push('/login')
@@ -100,7 +108,7 @@ export class RecipeApp extends Component {
 
       setUser(user)
 
-      this.setState(() => ({ userToken: user.token }))
+      this.setState(() => ({ user }))
       this.updateElmHeader.call(this, 'true')
 
       window.location.href = '/'
@@ -126,7 +134,9 @@ export class RecipeApp extends Component {
 
     ports.requestLogout.subscribe(() => self.onClickLogoutHandler.call(self))
 
-    ports.readReactState.send(this.state.userToken ? 'true' : 'false')
+    ports.readReactState.send(
+      this.state.user && this.state.user.token ? 'true' : 'false'
+    )
   }
 
   updateElmHeader(userTokenBoolString) {

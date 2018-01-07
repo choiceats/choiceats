@@ -16,7 +16,12 @@ type PROPS = {
 
 export default class RecipeRoute extends Component<PROPS, void> {
   render() {
-    const { match } = this.props
+    const { match, userId, token = '' } = this.props
+
+    const DecoratedRecipeSearch = props => {
+      return <RecipeSearch userId={userId} token={token} {...props} />
+    }
+
     return (
       <RecipesBody>
         <RecipesContent>
@@ -33,7 +38,7 @@ export default class RecipeRoute extends Component<PROPS, void> {
               path={`${match.url}recipe/:recipeId`}
               component={RecipeDetail}
             />
-            <Route path={match.url} component={RecipeSearch} />
+            <Route path={match.url} render={DecoratedRecipeSearch} />
           </Switch>
         </RecipesContent>
       </RecipesBody>

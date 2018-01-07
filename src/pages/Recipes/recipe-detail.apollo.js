@@ -42,7 +42,7 @@ export const RecipeDetailApollo: ApolloRecipeProps => React.Element<any> = ({
   recipeStatus = {},
   selectedRecipeId,
   userId,
-  token,
+  token = '',
   match
 }) => {
   const recipe = data.recipe || {}
@@ -149,9 +149,7 @@ const mapStateToProps = state => ({
   selectedRecipeId: state.ui.selectedRecipeId,
   recipeIdToDelete: state.ui.recipeIdToDelete,
   recipeStatus: state.ui.recipeStatus,
-  recipeLikeStatus: state.ui.recipeLikeStatus,
-  userId: state.user.userId || null,
-  token: state.user.token || null
+  recipeLikeStatus: state.ui.recipeLikeStatus
 })
 
 export default connect(mapStateToProps)(
