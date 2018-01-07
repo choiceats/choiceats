@@ -38,7 +38,7 @@ export class RecipeApp extends Component {
       )
     }
 
-    if (user.token === null && isRestrictedPath) {
+    if ((!user || user.token === null) && isRestrictedPath) {
       return <Redirect to="/login" />
     }
 
@@ -72,7 +72,7 @@ export class RecipeApp extends Component {
               component={() => (
                 <Elm
                   src={Login}
-                  flags={{ user: user.token || '' }}
+                  flags={{ token: user.token || '' }}
                   ports={this.setupLoginPorts.bind(this)}
                 />
               )}
@@ -81,7 +81,7 @@ export class RecipeApp extends Component {
               exact
               path="/random"
               component={() => (
-                <Elm src={Randomizer} flags={{ user: user.token || '' }} />
+                <Elm src={Randomizer} flags={{ token: user.token || '' }} />
               )}
             />
             <Route path="/" render={DecoratedRecipeList} />
