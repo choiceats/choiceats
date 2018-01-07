@@ -1,8 +1,8 @@
 [ignore]
 .*/node_modules/.*
 src/app/recipe-app.js
-src/pages/Recipes/recipe-search.apollo.js
-src/pages/Recipes/index.js
+.*/src/pages/Recipes/recipe-search.apollo.js
+.*/src/pages/Recipes/index.js
 
 [include]
 
