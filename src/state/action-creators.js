@@ -1,26 +1,11 @@
 // @flow
 import {
-  LOGIN,
-  LOGOUT,
   SELECT_RECIPE,
   SELECT_RECIPE_TO_DELETE,
   SET_RECIPE_STATUS,
   SET_RECIPE_LIKE_STATUS
 } from './action-types'
-import type { User, Action } from 'types'
-
-export const logout: () => Action = () => {
-  return {
-    type: LOGOUT
-  }
-}
-
-export const login: User => Action = userInfo => {
-  return {
-    type: LOGIN,
-    payload: userInfo
-  }
-}
+import type { Action } from 'types'
 
 export const selectRecipe: (
   recipeId: number

@@ -1,8 +1,8 @@
-port module Signup exposing (main)
+port module Login exposing (main)
 
 -- ELM-LANG MODULES
 import Html exposing (Html, div, text, label, input, button, h1, form, br, a)
-import Html.Attributes exposing (disabled, type_, class, style, value, for, id)
+import Html.Attributes exposing (disabled, type_, class, style, value, for, id, href)
 import Html.Events exposing (onWithOptions, onClick, onInput)
 import Http exposing (Error, send, post, stringBody)
 import Json.Decode as JD exposing (string, field, map4)
@@ -15,7 +15,7 @@ import Login.Types as T exposing (..)
 main =
   Html.programWithFlags
   { update        = update
-  , view          = viewSignup
+  , view          = view
   , init          = init
   , subscriptions = subscriptions
   }
@@ -29,33 +29,21 @@ init initFlags =
   , serverFeedback = ""
   }, Cmd.none )
 
-setEmail : String -> T.LoginFields -> T.LoginFields
-setEmail emailInput fields =
-  let
-    hasInput = hasLength emailInput
-
-  in
-    { fields | email =
-      { userInput = emailInput
-      , message = ""
-      , isValid = hasInput
-      }
-    }
-
-setPassword : String -> T.LoginFields -> T.LoginFields
-setPassword passwordInput fields =
-  let
-    hasInput = hasLength passwordInput
-
-  in
-    {fields | password = { userInput = passwordInput
-    , message = message
-    , isValid = hasInput
-    }}
-
 hasLength : String -> Bool
 hasLength str =
   not <| String.isEmpty str
+
+mapStatusCodeToMessage : Int -> String
+mapStatusCodeToMessage code =
+  case code of
+    401 ->
+      "Unable to verify username or password."
+    403 ->
+      "You are not authorized for that."
+    404 ->
+      "Nothing's there (404)."
+    _   ->
+      "Unrecognized error code. " ++ toString code
 
 update : T.Msg -> T.Model -> (T.Model, Cmd T.Msg)
 update msg model = 
@@ -69,14 +57,29 @@ update msg model =
         ({model | passwordInput = str
         }, Cmd.none)
 
-    T.RequestAccount ->
+    T.AttemptLogin ->
       (model, requestAccount model)
 
     T.ReceiveResponse (Ok user)->
-      ({model | loggedIn = True }, recordLogin <| stringifySession user)
+      ({model | loggedIn = True, serverFeedback = "" }, recordLogin <| stringifySession user)
 
-    T.ReceiveResponse (Err err)->
-      ({model | serverFeedback = toString err}, Cmd.none)
+    T.ReceiveResponse (Err (Http.BadStatus message)) ->
+          ({model | serverFeedback = mapStatusCodeToMessage message.status.code}, Cmd.none)
+
+    T.ReceiveResponse (Err (Http.BadUrl message)) ->
+          ({model | serverFeedback = toString message}, Cmd.none)
+
+    T.ReceiveResponse (Err (Http.Timeout)) ->
+          ({model | serverFeedback = "Unable to contact server, it took too long to respond"}, Cmd.none)
+
+    T.ReceiveResponse (Err (Http.NetworkError)) ->
+          ({model | serverFeedback = "Error in the network"}, Cmd.none)
+          -- Happens if server is offline.
+
+    T.ReceiveResponse (Err (Http.BadPayload message response)) ->
+          ({model | serverFeedback = toString message}, Cmd.none)
+
+
 
 stringifySession : Session -> String
 stringifySession session = 
@@ -96,8 +99,8 @@ stringifySession session =
 requestAccount : T.Model -> Cmd T.Msg
 requestAccount model =
   let body =
-  [ ("email", JE.string model.formFields.email.userInput)
-  , ("password", JE.string model.formFields.password.userInput)
+  [ ("email", JE.string model.emailInput)
+  , ("password", JE.string model.passwordInput)
   ]
 
   in
@@ -152,21 +155,10 @@ viewInput userInput labelName inputAttr inputType =
       ]
     ]
 
--- This can replace the current "Bad Password" element.
--- viewError : T.FormField -> Html T.Msg
--- viewError field =
---   div [class <| "ui error message " ++ (if hasLength field.message && (not field.isValid) then "visible" else "hidden")]
---     [ div [class "header"] [text field.message] ]
-
--- can add ui [class "list"] [li[] [text var]] or p [] [text var] if need secondary error parts
-
-￼    
-￼    
-￼    
 view : T.Model -> Html T.Msg
 view model =
   div
-  [[style [("height", "calc(100vh - 50px)"), ("overflow", "auto"), ("padding", "20px")]]]
+  [style [("height", "calc(100vh - 50px)"), ("overflow", "auto"), ("padding", "20px")]]
   [ div 
     [ style [("max-width", "500px"), ("margin", "auto")] ]
     [ form [class "ui form"]
@@ -178,6 +170,12 @@ view model =
                    [ type_ "submit"
                    , class "ui primary button"
                    , disabled (not (hasLength model.emailInput) || not (hasLength model.passwordInput))
+                   , onWithOptions
+                     "click"
+                     { stopPropagation = True
+                     , preventDefault = True
+                     }
+                     (JD.succeed T.AttemptLogin)
                    ]
                    [text "Login"]]
       , br [] []
@@ -186,24 +184,13 @@ view model =
         [ button
             [ type_ "button"
             , class "ui button"
-            , role "button"
+            --, role "button" TODO: Find out how to assign role attribute
             ]
-            ["Sign up"]
+            [text "Sign up"]
         ]
       ]
     ]
+  , div
+    [class <| "ui error message " ++ (if hasLength model.serverFeedback then "visible" else "hidden")]
+    [text model.serverFeedback]
   ]
-
--- These will be the button options
---       , button
---         [ type_ "submit"
---         , class "ui primary button"
---         , disabled <| 
---         , onWithOptions
---             "click"
---             { stopPropagation = True
---             , preventDefault = True
---             }
---             (JD.succeed RequestAccount)
---         ]
- 

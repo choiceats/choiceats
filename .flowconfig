@@ -1,5 +1,6 @@
 [ignore]
 .*/node_modules/.*
+src/app/recipe-app.js
 
 [include]
 

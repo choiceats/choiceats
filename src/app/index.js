@@ -5,13 +5,12 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 
 import { client } from '../services/apollo-client'
-import { user, ui } from '../state/reducers'
+import { ui } from '../state/reducers'
 
 import RecipeApp from './recipe-app'
 
 const store = createStore(
   combineReducers({
-    user,
     ui,
     apollo: client.reducer()
   }),
