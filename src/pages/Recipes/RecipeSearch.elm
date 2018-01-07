@@ -1,7 +1,7 @@
 port module Recipes.RecipeSearch exposing (main)
 
-import Html exposing (Html, div, input, text, a, img, i)
-import Html.Attributes exposing (class, style, href, src, placeholder)
+import Html exposing (Html, div, input, text, a, img, i, option, select)
+import Html.Attributes exposing (class, style, href, src, placeholder, value)
 import Html.Events exposing (onInput)
 import List exposing (map)
 import Recipes.Types exposing (..)
@@ -13,7 +13,7 @@ import Recipes.Recipe_Effects as Effects exposing (sendRecipesQuery)
 type alias SearchParams =
     { text : String
     , tags : List String
-    , filter : ButtonFilter
+    , filter : SearchFilter
     }
 
 
@@ -33,7 +33,7 @@ type alias Model =
     }
 
 
-initialFilterType : ButtonFilter
+initialFilterType : SearchFilter
 initialFilterType =
     All
 
@@ -85,6 +85,21 @@ update recipeMsg model =
             in
                 ( { model | search = updatedSearchParms }, command )
 
+        SearchFilterChange filter ->
+            -- TODO: This is very simular to the SearchTextChange,
+            -- I wonder how we can best refactor this?
+            let
+                searchParams =
+                    model.search
+
+                updatedSearchParms =
+                    { searchParams | filter = filter }
+
+                command =
+                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
+            in
+                ( { model | search = updatedSearchParms }, command )
+
 
 init : Flags -> ( Model, Cmd RecipeMsg )
 init flags =
@@ -96,6 +111,16 @@ init flags =
       }
     , sendRecipesQuery flags.token initialFilterType [] "he"
     )
+
+
+filterOption filter =
+    option [ value (toString filter) ] [ text (toString filter) ]
+
+
+filterOptions =
+    List.map
+        filterOption
+        [ All, Fav, My ]
 
 
 view : Model -> Html RecipeMsg
@@ -112,7 +137,25 @@ searchBar searchParams =
         [ input
             [ placeholder "Search Title or Ingredents", onInput SearchTextChange ]
             []
+        , select
+            [ onInput onFilterChange ]
+            filterOptions
         ]
+
+
+onFilterChange filter =
+    case filter of
+        "My" ->
+            SearchFilterChange My
+
+        "All" ->
+            SearchFilterChange All
+
+        "Fav" ->
+            SearchFilterChange Fav
+
+        _ ->
+            SearchFilterChange All
 
 
 recipeListView : Maybe Recipes.Types.RecipesResponse -> Html RecipeMsg

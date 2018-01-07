@@ -74,11 +74,11 @@ requestOptions token =
     }
 
 
-recipesQueryRequest : ButtonFilter -> List String -> String -> GqlB.Request GqlB.Query (List RecipeSummary)
-recipesQueryRequest buttonFilter tags searchText =
+recipesQueryRequest : SearchFilter -> List String -> String -> GqlB.Request GqlB.Query (List RecipeSummary)
+recipesQueryRequest searchFilter tags searchText =
     recipesRequest
         |> GqlB.request
-            { searchFilter = (mapFilterTypeToString buttonFilter)
+            { searchFilter = (mapFilterTypeToString searchFilter)
             , tags = tags
             , searchText = searchText
             }
@@ -89,9 +89,9 @@ sendQueryRequest authToken request =
     GraphQLClient.customSendQuery (requestOptions authToken) request
 
 
-sendRecipesQuery : AuthToken -> ButtonFilter -> List String -> String -> Cmd RecipeMsg
-sendRecipesQuery authToken buttonFilter tags searchText =
-    sendQueryRequest authToken (recipesQueryRequest buttonFilter tags searchText)
+sendRecipesQuery : AuthToken -> SearchFilter -> List String -> String -> Cmd RecipeMsg
+sendRecipesQuery authToken searchFilter tags searchText =
+    sendQueryRequest authToken (recipesQueryRequest searchFilter tags searchText)
         |> Task.attempt GetRecipesResponse
 
 
@@ -112,13 +112,13 @@ tagsRequest =
         GqlB.queryDocument queryRoot
 
 
-tagsQueryRequest : ButtonFilter -> List String -> String -> GqlB.Request GqlB.Query (List RecipeTag)
-tagsQueryRequest buttonFilter tags searchText =
+tagsQueryRequest : SearchFilter -> List String -> String -> GqlB.Request GqlB.Query (List RecipeTag)
+tagsQueryRequest searchFilter tags searchText =
     tagsRequest
         |> GqlB.request {}
 
 
-sendTagsQuery : AuthToken -> ButtonFilter -> List String -> String -> Cmd RecipeMsg
-sendTagsQuery authToken buttonFilter tags searchText =
-    sendQueryRequest authToken (tagsQueryRequest buttonFilter tags searchText)
+sendTagsQuery : AuthToken -> SearchFilter -> List String -> String -> Cmd RecipeMsg
+sendTagsQuery authToken searchFilter tags searchText =
+    sendQueryRequest authToken (tagsQueryRequest searchFilter tags searchText)
         |> Task.attempt GetTagsResponse

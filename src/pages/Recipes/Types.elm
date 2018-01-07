@@ -69,7 +69,7 @@ type alias IngredientUnit =
     }
 
 
-type ButtonFilter
+type SearchFilter
     = My
     | Fav
     | All
@@ -80,9 +80,10 @@ type RecipeMsg
     | GetRecipesResponse RecipesResponse
     | GetTagsResponse TagsResponse
     | SearchTextChange String
+    | SearchFilterChange SearchFilter
 
 
-mapFilterTypeToString : ButtonFilter -> String
+mapFilterTypeToString : SearchFilter -> String
 mapFilterTypeToString filterType =
     case filterType of
         My ->
