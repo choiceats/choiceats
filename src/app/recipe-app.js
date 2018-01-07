@@ -1,58 +1,44 @@
-// @flow
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
 import { Route, Redirect, Switch, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Login from '../pages/login'
+import { Login } from '../pages/Login/Login.elm'
 import RecipeList from '../pages/Recipes'
 import { Navbar } from './components/Navbar.elm'
 import { Randomizer } from '../pages/randomizer/Randomizer.elm'
 import { Signup } from '../pages/Signup/Signup.elm'
 import Elm from '../pages/shared-components/react-elm/elm'
-import { logout } from '../state/action-creators'
-import { setUser } from '../services/users'
+import { setUser, getUser, clearUser } from '../services/users'
 
 const NON_RESTRICTED_PATHS = ['/login', '/login/sign-up']
 const HEADER_HEIGHT = 50
 
-type PROPS = any
+export class RecipeApp extends Component {
+  constructor() {
+    super()
 
-type PORTS = {
-  requestLogout: {
-    subscribe: any,
-    unsubscribe: any
-  },
+    const userState = getUser()
 
-  readReactState: {
-    send: (msg: string) => any
-  },
-
-  recordSignup: {
-    subscribe: any
-  },
-
-  recordLogin: {
-    subscribe: any
-  }
-}
-
-type STATE = {
-  ports: ?PORTS
-}
-
-export class RecipeApp extends Component<PROPS, STATE> {
-  componentWillReceiveProps(newProps: PROPS) {
-    if (newProps.userToken !== this.props.userToken) {
-      this.updateElmHeader.call(this, this.props.userToken ? 'true' : 'false')
+    this.state = {
+      user: userState,
+      ports: null
     }
   }
 
   render() {
-    const { userToken, location } = this.props
+    const { location } = this.props
+    const { user = {} } = this.state
+
     const isRestrictedPath =
       NON_RESTRICTED_PATHS.indexOf(location.pathname) === -1
-    if (userToken === null && isRestrictedPath) {
+
+    const DecoratedRecipeList = props => {
+      return (
+        <RecipeList userId={user.userId} token={user.token || ''} {...props} />
+      )
+    }
+
+    if ((!user || user.token === null) && isRestrictedPath) {
       return <Redirect to="/login" />
     }
 
@@ -69,12 +55,12 @@ export class RecipeApp extends Component<PROPS, STATE> {
               exact
               path="/login/sign-up"
               component={() =>
-                userToken && userToken.length > 0 ? (
+                user.token && user.token.length > 0 ? (
                   <Redirect to="/" />
                 ) : (
                   <Elm
                     src={Signup}
-                    flags={{ token: userToken || '' }}
+                    flags={{ token: user.token || '' }}
                     ports={this.setupSignupPorts.bind(this)}
                   />
                 )
@@ -83,16 +69,22 @@ export class RecipeApp extends Component<PROPS, STATE> {
             <Route
               exact
               path="/login"
-              component={Login /*TODO: Replace with Login.elm*/}
+              component={() => (
+                <Elm
+                  src={Login}
+                  flags={{ token: user.token || '' }}
+                  ports={this.setupLoginPorts.bind(this)}
+                />
+              )}
             />
             <Route
               exact
               path="/random"
               component={() => (
-                <Elm src={Randomizer} flags={{ token: userToken || '' }} />
+                <Elm src={Randomizer} flags={{ token: user.token || '' }} />
               )}
             />
-            <Route path="/" component={RecipeList} />
+            <Route path="/" render={DecoratedRecipeList} />
           </Switch>
         </TopRouteContainer>
       </AppContainer>
@@ -100,46 +92,61 @@ export class RecipeApp extends Component<PROPS, STATE> {
   }
 
   onClickLogoutHandler() {
-    const { history, dispatch } = this.props
-    dispatch(logout())
+    const { history } = this.props
+
+    clearUser()
+
+    this.setState(() => ({ user: null }))
+    this.updateElmHeader.call(this, 'false')
+
     history.push('/login')
   }
 
-  setupSignupPorts(ports: PORTS) {
-    ports.recordSignup.subscribe(a => {
-      setUser(JSON.parse(a))
+  setupSignupPorts(ports) {
+    ports.recordSignup.subscribe(sessionString => {
+      const user = JSON.parse(sessionString)
+
+      setUser(user)
+
+      this.setState(() => ({ user }))
+      this.updateElmHeader.call(this, 'true')
+
       window.location.href = '/'
     })
   }
 
-  setupLoginPorts(ports: PORTS) {
-    ports.recordLogin.subscribe(a => {
-      setUser(JSON.parse(a))
+  setupLoginPorts(ports) {
+    ports.recordLogin.subscribe(sessionString => {
+      const user = JSON.parse(sessionString)
+
+      setUser(user)
+
+      this.setState(() => ({ userToken: user.token }))
+      this.updateElmHeader.call(this, 'true')
+
       window.location.href = '/'
     })
   }
 
-  setupNavbarPorts(ports: PORTS) {
+  setupNavbarPorts(ports) {
     var self = this
-    this.setState.call(this, () => ({ ports }: { ports: PORTS }))
+    this.setState.call(this, () => ({ ports }))
 
     ports.requestLogout.subscribe(() => self.onClickLogoutHandler.call(self))
 
-    ports.readReactState.send(this.props.userToken ? 'true' : 'false')
+    ports.readReactState.send(
+      this.state.user && this.state.user.token ? 'true' : 'false'
+    )
   }
 
-  updateElmHeader(userTokenBoolString: 'true' | 'false') {
+  updateElmHeader(userTokenBoolString) {
     if (this.state && this.state.ports) {
       this.state.ports.readReactState.send.call(this, userTokenBoolString)
     }
   }
 }
 
-export default withRouter(
-  connect(state => ({
-    userToken: state.user.token
-  }))(RecipeApp)
-)
+export default withRouter(RecipeApp)
 
 const AppContainer = styled.div`
   display: flex;

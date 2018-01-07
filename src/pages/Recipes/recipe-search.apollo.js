@@ -1,7 +1,6 @@
 // @flow
 import React, { Component } from 'react'
 import { gql, graphql, compose } from 'react-apollo'
-import { connect } from 'react-redux'
 
 import RecipeSearch from './recipe-search'
 import Loading from '../shared-components/loading'
@@ -18,7 +17,8 @@ type RecipeSearchProps = {
 
 export class RecipeListApollo extends Component<RecipeSearchProps> {
   render() {
-    const { data } = this.props
+    const { data, token, userId } = this.props
+
     if (!data) {
       return <Loading />
     }
@@ -28,7 +28,7 @@ export class RecipeListApollo extends Component<RecipeSearchProps> {
       return <Loading />
     }
 
-    return <RecipeSearch tags={tags} />
+    return <RecipeSearch tags={tags} token={token} userId={userId} />
   }
 }
 
@@ -41,13 +41,4 @@ const tagsQuery = gql`
   }
 `
 
-const mapStateToProps = state => {
-  return {
-    isLoggedIn: state.user.token,
-    userId: state.user.userId
-  }
-}
-
-export default connect(mapStateToProps)(
-  compose(graphql(tagsQuery))(RecipeListApollo)
-)
+export default compose(graphql(tagsQuery))(RecipeListApollo)
