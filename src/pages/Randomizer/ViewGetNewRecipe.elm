@@ -6,10 +6,9 @@ import Html.Attributes exposing (type_, style, class)
 import Html.Events exposing (onClick)
 
 -- APPLICATION CODE
-import TypesRandomizer as TR exposing (..)
--- import Randomizer exposing (sendRecipeQuery)
+import Randomizer.Types as T exposing (..)
 
-viewGetNewRecipe : TR.Model -> Html TR.Msg
+viewGetNewRecipe : T.Model -> Html T.Msg
 viewGetNewRecipe model =
   div
   [ style
@@ -21,7 +20,7 @@ viewGetNewRecipe model =
   [ button
     [ type_ "submit"
     , class "ui primary button"
-    , onClick TR.RequestRecipe
+    , onClick T.RequestRecipe
     ]
     [text "NEW IDEA!"]
   ]

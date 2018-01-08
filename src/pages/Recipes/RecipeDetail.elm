@@ -1,4 +1,4 @@
-port module RecipeDetail exposing (main)
+port module Recipes.RecipeDetail exposing (main)
 
 --  ELM-LANG MODULES
 

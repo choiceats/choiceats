@@ -6,9 +6,9 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 
 -- APPLICATION CODE
-import TypesRandomizer as TR exposing (..)
+import Randomizer.Types as T exposing (..)
 
-viewFilterButtons : TR.Model -> Html TR.Msg
+viewFilterButtons : T.Model -> Html T.Msg
 viewFilterButtons model =
   div
   [ class "ui fluid buttons"

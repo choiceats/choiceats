@@ -3,9 +3,9 @@ module ViewNotFound exposing (viewNotFound)
 import Html exposing (Html, div, img, text)
 import Html.Attributes exposing (style, src)
 
-import TypesRandomizer as TR exposing (..)
+import Randomizer.Types as T exposing (..)
 
-viewNotFound : Html Msg
+viewNotFound : Html T.Msg
 viewNotFound =
   div
   [ style [ ("max-width", "100%")

@@ -2,9 +2,9 @@ module ViewLoading exposing (viewLoading)
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import TypesRandomizer as TR exposing (..)
+import Randomizer.Types as T exposing (..)
 
-viewLoading : Html TR.Msg
+viewLoading : Html T.Msg
 viewLoading =
   div
   [class "ui massive active text centered inline loader"]
