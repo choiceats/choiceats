@@ -72,6 +72,12 @@ update recipeMsg model =
         GetTagsResponse tagRes ->
             ( model, Cmd.none )
 
+        _ ->
+            updateSearch recipeMsg model
+
+
+updateSearch recipeMsg model =
+    case recipeMsg of
         SearchTextChange text ->
             let
                 searchParams =
@@ -99,6 +105,9 @@ update recipeMsg model =
                     sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
             in
                 ( { model | search = updatedSearchParms }, command )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 init : Flags -> ( Model, Cmd RecipeMsg )
@@ -140,6 +149,9 @@ searchBar searchParams =
         , select
             [ onInput onFilterChange ]
             filterOptions
+        , a
+            [ href ("/recipe/new") ]
+            [ text "New Recipe" ]
         ]
 
 

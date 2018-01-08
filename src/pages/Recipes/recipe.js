@@ -1,12 +1,9 @@
-// @flow
 import React, { Component } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Card, Icon, Image } from 'semantic-ui-react'
 
-import type { RecipeProps } from './prop-types.flow'
-
-export default class Recipe extends Component<RecipeProps> {
+export default class Recipe extends Component {
   render() {
     const { recipe } = this.props
     const likesCount: number =
