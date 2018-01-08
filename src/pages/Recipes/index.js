@@ -9,50 +9,58 @@ import RecipeEditor from './recipe-editor.apollo'
 import RecipeEditorNew from './recipe-editor-new.apollo'
 
 export default class RecipeRoute extends Component<PROPS, void> {
-  render() {
-    const { match, userId = null, token = '' } = this.props
+    render() {
+        const { match, userId = null, token = '' } = this.props
 
-    const DecoratedRecipeEditor = props => {
-      return <RecipeEditor userId={userId} {...props} />
+        const DecoratedRecipeEditor = props => {
+            return <RecipeEditor userId={userId} {...props} />
+        }
+
+        const DecoratedRecipeDetail = props => {
+            return <RecipeDetail userId={userId} token={token} />
+        }
+
+        return (
+            <RecipesBody>
+                <RecipesContent>
+                    <Switch>
+                        <Route
+                            path={`${match.url}recipe/new`}
+                            component={RecipeEditorNew}
+                        />
+                        <Route
+                            path={`${match.url}recipe/:recipeId/edit`}
+                            render={DecoratedRecipeEditor}
+                        />
+                        <Route
+                            path={`${match.url}recipe/:recipeId`}
+                            render={DecoratedRecipeDetail}
+                        />
+                        <Route
+                            path={match.url}
+                            component={() => (
+                                <Elm
+                                    src={Recipes.RecipeSearch}
+                                    flags={{
+                                        token: token,
+                                        userId: userId,
+                                        isLoggedIn: !!token
+                                    }}
+                                />
+                            )}
+                        />
+                    </Switch>
+                </RecipesContent>
+            </RecipesBody>
+        )
     }
-
-    return (
-      <RecipesBody>
-        <RecipesContent>
-          <Switch>
-            <Route
-              path={`${match.url}recipe/new`}
-              component={RecipeEditorNew}
-            />
-            <Route
-              path={`${match.url}recipe/:recipeId/edit`}
-              render={DecoratedRecipeEditor}
-            />
-            <Route
-              path={`${match.url}recipe/:recipeId`}
-              component={RecipeDetail}
-            />
-            <Route
-              path={match.url}
-              component={() => (
-                <Elm
-                  src={Recipes.RecipeSearch}
-                  flags={{ token: token, userId: userId, isLoggedIn: !!token }}
-                />
-              )}
-            />
-          </Switch>
-        </RecipesContent>
-      </RecipesBody>
-    )
-  }
 }
 
 const RecipesBody = styled.div`
-  margin: auto;
-  max-width: 1000px;
-  margin-top: 10px;
+    margin: auto;
+    max-width: 1000px;
+    margin-top: 10px;
 `
 const RecipesContent = styled.div`
-  margin-top: 25px;
+    margin-top: 25px;
 `

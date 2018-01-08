@@ -1,4 +1,4 @@
-module TypesRandomizer exposing (..)
+module Randomizer.Types exposing (..)
 import Time exposing (Time)
 import GraphQL.Client.Http as GraphQLClient
 import Http
@@ -11,7 +11,7 @@ type alias RecipeSummary =
   , description: String
   , id:          String
   , imageUrl:    String
-  , likes:       Int
+  , likes:       List Int
   , name:        String
   , youLike:     Bool
   }

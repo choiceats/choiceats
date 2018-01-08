@@ -6,8 +6,8 @@
     "source-directories": [
         "src/",
         "src/pages/",
-        "src/pages/randomizer/",
-        "src/pages/randomizer/components/",
+        "src/pages/Randomizer/",
+        "src/pages/Randomizer/components/",
         "src/pages/shared-components/not-found/",
         "src/pages/shared-components/loading/"
     ],

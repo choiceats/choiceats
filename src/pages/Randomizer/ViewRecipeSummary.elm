@@ -8,11 +8,11 @@ import Html.Attributes exposing (class, style, href, src)
 
 -- APPLICATION MODULES
 
-import TypesRandomizer as TR exposing (..)
+import Randomizer.Types as T exposing (..)
 import ViewLoading exposing (viewLoading)
 
 
-viewRecipeSummary : Maybe RecipeResponse -> Html TR.Msg
+viewRecipeSummary : Maybe RecipeResponse -> Html T.Msg
 viewRecipeSummary mRecipeSummary =
     case mRecipeSummary of
         Just res ->
