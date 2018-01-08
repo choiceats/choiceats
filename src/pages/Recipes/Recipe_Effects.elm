@@ -122,3 +122,24 @@ sendTagsQuery : AuthToken -> SearchFilter -> List String -> String -> Cmd Recipe
 sendTagsQuery authToken searchFilter tags searchText =
     sendQueryRequest authToken (tagsQueryRequest searchFilter tags searchText)
         |> Task.attempt GetTagsResponse
+
+
+
+-- const deleteRecipe = gql`
+--   mutation deleteRecipe($recipeId: ID!) {
+--     deleteRecipe(recipeId: $recipeId) {
+--       recipeId
+--       deleted
+--     }
+--   }
+-- `
+-- 
+-- const likeRecipe = gql`
+--   mutation likeRecipe($userId: ID!, $recipeId: ID!) {
+--     likeRecipe(userId: $userId, recipeId: $recipeId) {
+--       id
+--       likes
+--       youLike
+--     }
+--   }
+-- `
