@@ -32,8 +32,7 @@ export default class IngredientTypeahead extends Component {
         searchOptions={(inputValue, options) =>
           options.filter(
             o => o.name.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
-          )
-        }
+          )}
         onOptionSelected={ingredient => onSelect(ingredient)}
         maxVisible={6}
       />
