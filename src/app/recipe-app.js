@@ -9,8 +9,7 @@ import { Navbar } from './components/Navbar.elm'
 import { Randomizer } from '../pages/Randomizer/Randomizer.elm'
 import { Signup } from '../pages/Signup/Signup.elm'
 import Elm from '../pages/shared-components/react-elm/elm'
-import RecipeEditorNew from '../pages/Recipes/recipe-editor-new.apollo'
-import RecipeEditor from '../pages/Recipes/recipe-editor.apollo'
+import RecipeEditor from '../pages/RecipeEditor/RecipeEditor.elm'
 import * as R from '../pages/Recipes/RecipeDetail.elm'
 import { Recipes } from '../pages/Recipes/RecipeSearch.elm'
 
@@ -40,11 +39,6 @@ export class RecipeApp extends Component {
 
     const isRestrictedPath =
       NON_RESTRICTED_PATHS.indexOf(location.pathname) === -1
-
-    const DecoratedRecipeEditor = props => {
-      return <RecipeEditor userId={userId} {...props} />
-      /*Maybe missing tags information, or an id maybe is an string that should be an int, or vice versa? Certain updates fail graphql schema validation on the backend*/
-    }
 
     const getRecipeIdFromMatch = match =>
       (match &&
@@ -98,11 +92,29 @@ export class RecipeApp extends Component {
             />
             <Route
               path={`${match.url}recipe/new`}
-              component={RecipeEditorNew}
+              component={props => (
+                <Elm
+                  src={RecipeEditor.RecipeEditor}
+                  flags={{
+                    token,
+                    userId: parseInt(userId, 10) || 0,
+                    recipeId: getRecipeIdFromMatch(props.match)
+                  }}
+                />
+              )}
             />
             <Route
               path={`${match.url}recipe/:recipeId/edit`}
-              render={DecoratedRecipeEditor}
+              component={props => (
+                <Elm
+                  src={RecipeEditor.RecipeEditor}
+                  flags={{
+                    token,
+                    userId: parseInt(userId, 10) || 0,
+                    recipeId: getRecipeIdFromMatch(props.match)
+                  }}
+                />
+              )}
             />
             <Route
               path={`${match.url}recipe/:recipeId`}
