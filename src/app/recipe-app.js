@@ -97,8 +97,8 @@ export class RecipeApp extends Component {
                   src={RecipeEditor.RecipeEditor}
                   flags={{
                     token,
-                    userId: parseInt(userId, 10) || 0,
-                    recipeId: getRecipeIdFromMatch(props.match)
+                    userId,
+                    recipeId: parseInt(getRecipeIdFromMatch(props.match))
                   }}
                 />
               )}
@@ -110,8 +110,8 @@ export class RecipeApp extends Component {
                   src={RecipeEditor.RecipeEditor}
                   flags={{
                     token,
-                    userId: parseInt(userId, 10) || 0,
-                    recipeId: getRecipeIdFromMatch(props.match)
+                    userId,
+                    recipeId: parseInt( getRecipeIdFromMatch(props.match))
                   }}
                 />
               )}
