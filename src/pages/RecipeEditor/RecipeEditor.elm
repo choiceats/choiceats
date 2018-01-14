@@ -3,6 +3,7 @@ port module RecipeEditor exposing (main)
 import Html exposing (Html, h1, label, button, textarea, form, div, input, text, a, img, i, option, select, span)
 import Html.Attributes exposing (type_, class, style, href, src, placeholder, value, for, id, rows, tabindex)
 import Html.Attributes.Aria exposing (role)
+import Html.Events exposing (onClick)
 import Http
 import Task exposing (Task)
 import GraphQL.Client.Http as GraphQLClient
@@ -17,6 +18,9 @@ type alias Model =
     { recipe : Maybe Recipes.Types.RecipeFull
     , flags : RecipeFlags
     , units : Maybe (List Recipes.Types.Unit)
+    , ui :
+        { isUnitsListOpen : Bool
+        }
     }
 
 
@@ -32,6 +36,8 @@ type Msg
     | RequestRecipe
     | ReceiveRecipeFull RecipeFullResponse
     | ReceiveUnits UnitsResponse
+      -- UI Events
+    | ToggleUnitsList
 
 
 main : Program RecipeFlags Model Msg
@@ -69,13 +75,25 @@ update msg model =
         ReceiveUnits res ->
             ( { model | units = Result.toMaybe res }, Cmd.none )
 
+        ToggleUnitsList ->
+            let
+                ui =
+                    model.ui
+
+                updatedUI =
+                    { ui
+                        | isUnitsListOpen = not ui.isUnitsListOpen
+                    }
+            in
+                ( { model | ui = updatedUI }, Cmd.none )
+
         None ->
             ( model, Cmd.none )
 
 
 init : RecipeFlags -> ( Model, Cmd Msg )
 init flags =
-    ( { recipe = Nothing, units = Nothing, flags = flags }
+    ( { recipe = Nothing, units = Nothing, flags = flags, ui = { isUnitsListOpen = False } }
     , Cmd.batch
         [ queryForRecipe flags
         , queryForTags flags
@@ -170,20 +188,7 @@ viewIngredientList model r =
             [ div [ class "two wide field" ]
                 [ div [ class "ui input" ] [ input [ type_ "text", value "1", placeholder "#" ] [] ] ]
             , div [ class "four wide field" ]
-                [ div [ class "ui active visible selection dropdown", tabindex 0 ]
-                    -- needs attr of role "listbox"
-                    [ div [ class "text" ] [ text "cm." ] -- needs role of alert. This div represent the head of the list/the active element
-                    , i [ class "dropdown icon" ] []
-                    , div [ class "menu transition visible" ]
-                        (case model.units of
-                            Nothing ->
-                                [ div [] [ text "no display units..." ] ]
-
-                            Just res ->
-                                List.map measuringUnit res
-                        )
-                    ]
-                ]
+                [ unitsDropdown model.units model.ui.isUnitsListOpen ]
             , div [ class "six wide field" ]
                 [ div
                     [ class "typeahead" ]
@@ -191,6 +196,30 @@ viewIngredientList model r =
                 ]
             ]
         ]
+
+
+unitsDropdown : Maybe (List Recipes.Types.Unit) -> Bool -> Html Msg
+unitsDropdown units isOpen =
+    let
+        visible =
+            if isOpen then
+                "visible"
+            else
+                ""
+    in
+        div [ class "ui active visible selection dropdown", tabindex 0, onClick ToggleUnitsList ]
+            -- needs attr of role "listbox"
+            [ div [ class "text" ] [ text "cm." ] -- needs role of alert. This div represent the head of the list/the active element
+            , i [ class "dropdown icon" ] []
+            , div [ class ("menu transition " ++ visible) ]
+                (case units of
+                    Nothing ->
+                        [ div [] [ text "no display units..." ] ]
+
+                    Just res ->
+                        List.map measuringUnit res
+                )
+            ]
 
 
 
