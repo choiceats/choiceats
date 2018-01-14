@@ -19,7 +19,6 @@ type alias SearchParams =
 
 type alias Flags =
     { userId : String
-    , isLoggedIn : Bool
     , token : String
     }
 
@@ -27,7 +26,6 @@ type alias Flags =
 type alias Model =
     { recipes : Maybe Recipes.Types.RecipesResponse
     , userId : String
-    , isLoggedIn : Bool
     , token : String
     , search : SearchParams
     }
@@ -113,7 +111,6 @@ updateSearch recipeMsg model =
 init : Flags -> ( Model, Cmd RecipeMsg )
 init flags =
     ( { recipes = Nothing
-      , isLoggedIn = flags.isLoggedIn
       , userId = toString flags.userId
       , token = flags.token
       , search = defaultSearchParams

@@ -18,7 +18,7 @@ type alias TagsResponse =
 type alias Flags =
     { token : String
     , recipeId : Int
-    , userId : Int
+    , userId : String
     }
 
 
