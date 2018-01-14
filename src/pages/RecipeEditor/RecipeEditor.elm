@@ -13,7 +13,7 @@ import Recipes.Types exposing (..)
 
 
 type alias Model =
-    { recipe : Maybe RecipeFullResponse
+    { recipe : Maybe RecipeFull
     , flags : RecipeFlags
     , units : Maybe UnitsResponse
     }
@@ -66,7 +66,11 @@ update msg model =
             ( model, sendRecipeQuery model.flags.token model.flags.recipeId )
 
         ReceiveRecipeFull res ->
-            ( { model | recipe = Just res }, Cmd.none )
+            let
+                saveRecipe =
+                    Result.toMaybe res
+            in
+                ( { model | recipe = saveRecipe }, Cmd.none )
 
         ReceiveUnits res ->
             ( { model | units = Just res }, Cmd.none )
@@ -196,13 +200,8 @@ view model =
         Nothing ->
             div [ class "editor" ] [ text "loading..." ]
 
-        Just res ->
-            case res of
-                Ok r ->
-                    recipeFormView model r
-
-                Err r ->
-                    div [ class "error" ] [ text "ERROR DUDE " ]
+        Just recipe ->
+            recipeFormView model recipe
 
 
 recipeFormView :
