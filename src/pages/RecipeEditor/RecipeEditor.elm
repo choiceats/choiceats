@@ -9,13 +9,14 @@ import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Recipes.Types exposing (..)
+import Recipes.Types
+import RecipeQueries exposing (sendUnitsQuery, sendRecipeQuery, RecipeFullResponse, UnitsResponse)
 
 
 type alias Model =
-    { recipe : Maybe RecipeFull
+    { recipe : Maybe Recipes.Types.RecipeFull
     , flags : RecipeFlags
-    , units : Maybe (List Unit)
+    , units : Maybe (List Recipes.Types.Unit)
     }
 
 
@@ -24,17 +25,6 @@ type alias RecipeFlags =
     , token : String
     , userId : String
     }
-
-
-type alias Unit =
-    { id : String
-    , name : String
-    , abbr : String
-    }
-
-
-type alias UnitsResponse =
-    Result GraphQLClient.Error (List Unit)
 
 
 type Msg
@@ -59,11 +49,19 @@ subscriptions model =
     Sub.none
 
 
+queryForRecipe flags =
+    sendRecipeQuery flags.token flags.recipeId ReceiveRecipeFull
+
+
+queryForTags flags =
+    sendUnitsQuery flags.token ReceiveUnits
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         RequestRecipe ->
-            ( model, sendRecipeQuery model.flags.token model.flags.recipeId )
+            ( model, queryForRecipe model.flags )
 
         ReceiveRecipeFull res ->
             ( { model | recipe = Result.toMaybe res }, Cmd.none )
@@ -78,116 +76,11 @@ update msg model =
 init : RecipeFlags -> ( Model, Cmd Msg )
 init flags =
     ( { recipe = Nothing, units = Nothing, flags = flags }
-    , Cmd.batch [ sendRecipeQuery flags.token flags.recipeId, sendUnitsQuery flags.token ]
+    , Cmd.batch
+        [ queryForRecipe flags
+        , queryForTags flags
+        ]
     )
-
-
-type alias AuthToken =
-    String
-
-
-type alias RecipeId =
-    Int
-
-
-sendUnitsQuery : AuthToken -> Cmd Msg
-sendUnitsQuery authToken =
-    Task.attempt
-        ReceiveUnits
-        (GraphQLClient.customSendQuery
-            (requestOptions authToken)
-            (GqlB.request {} unitsRequest)
-        )
-
-
-builtUnitList =
-    GqlB.list
-        (GqlB.object Unit
-            |> GqlB.with (GqlB.field "id" [] GqlB.string)
-            |> GqlB.with (GqlB.field "name" [] GqlB.string)
-            |> GqlB.with (GqlB.field "abbr" [] GqlB.string)
-        )
-
-
-unitsRequest : GqlB.Document GqlB.Query (List Unit) {}
-unitsRequest =
-    GqlB.queryDocument
-        (GqlB.extract
-            (GqlB.field
-                "units"
-                []
-                builtUnitList
-            )
-        )
-
-
-sendRecipeQuery : AuthToken -> RecipeId -> Cmd Msg
-sendRecipeQuery authToken recipeId =
-    Task.attempt
-        ReceiveRecipeFull
-        (GraphQLClient.customSendQuery
-            (requestOptions authToken)
-            (GqlB.request { recipeId = recipeId } recipeRequest)
-        )
-
-
-recipeRequest : GqlB.Document GqlB.Query RecipeFull { vars | recipeId : Int }
-recipeRequest =
-    GqlB.queryDocument
-        (GqlB.extract
-            (GqlB.field
-                "recipe"
-                [ ( "recipeId"
-                  , Arg.variable (Var.required "recipeId" .recipeId Var.int)
-                  )
-                ]
-                recFull
-            )
-        )
-
-
-requestOptions token =
-    { method = "POST"
-    , headers = [ (Http.header "Authorization" ("Bearer " ++ token)) ]
-    , url = "http://localhost:4000/graphql/"
-    , timeout = Nothing
-    , withCredentials = False -- value of True makes CORS active, breaking the request
-    }
-
-
-builtUnit =
-    GqlB.object IngredientUnit
-        |> GqlB.with (GqlB.field "abbr" [] GqlB.string)
-        |> GqlB.with (GqlB.field "name" [] GqlB.string)
-
-
-builtTag =
-    GqlB.object RecipeTag
-        |> GqlB.with (GqlB.field "id" [] GqlB.string)
-        |> GqlB.with (GqlB.field "name" [] GqlB.string)
-
-
-builtIngredient =
-    GqlB.object Ingredient
-        |> GqlB.with (GqlB.field "quantity" [] GqlB.float)
-        |> GqlB.with (GqlB.field "displayQuantity" [] GqlB.string)
-        |> GqlB.with (GqlB.field "name" [] GqlB.string)
-        |> GqlB.with (GqlB.field "unit" [] builtUnit)
-
-
-recFull =
-    GqlB.object RecipeFull
-        |> GqlB.with (GqlB.field "author" [] GqlB.string)
-        |> GqlB.with (GqlB.field "authorId" [] GqlB.string)
-        |> GqlB.with (GqlB.field "description" [] GqlB.string)
-        |> GqlB.with (GqlB.field "id" [] GqlB.string)
-        |> GqlB.with (GqlB.field "imageUrl" [] GqlB.string)
-        |> GqlB.with (GqlB.field "ingredients" [] (GqlB.list builtIngredient))
-        |> GqlB.with (GqlB.field "instructions" [] GqlB.string)
-        |> GqlB.with (GqlB.field "likes" [] (GqlB.list GqlB.int))
-        |> GqlB.with (GqlB.field "name" [] GqlB.string)
-        |> GqlB.with (GqlB.field "tags" [] (GqlB.list builtTag))
-        |> GqlB.with (GqlB.field "youLike" [] GqlB.bool)
 
 
 view : Model -> Html Msg
@@ -202,7 +95,7 @@ view model =
 
 recipeFormView :
     Model
-    -> RecipeFull
+    -> Recipes.Types.RecipeFull
     -> Html Msg -- need model for list of units
 recipeFormView model r =
     div [ style [ ( "-webkit-animation", "slideInLeft 0.25s linear" ), ( "animation", "slideInLeft 0.25s linear" ), ( "min-width", "260px" ) ] ]
@@ -269,7 +162,7 @@ viewInput modelData fieldLabel fieldId isTextarea =
             ]
 
 
-viewIngredientList : Model -> RecipeFull -> Html Msg
+viewIngredientList : Model -> Recipes.Types.RecipeFull -> Html Msg
 viewIngredientList model r =
     div []
         [ label [] [ text "Ingredients" ]
@@ -305,7 +198,7 @@ viewIngredientList model r =
 -- TODO: find how to add role attribute to wrapping div
 
 
-measuringUnit : Unit -> Html Msg
+measuringUnit : Recipes.Types.Unit -> Html Msg
 measuringUnit unit =
     div
         [ class "item", style [ ( "pointer-events", "all" ) ] ]

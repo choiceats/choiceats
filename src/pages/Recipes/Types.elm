@@ -69,6 +69,13 @@ type alias IngredientUnit =
     }
 
 
+type alias Unit =
+    { id : String
+    , name : String
+    , abbr : String
+    }
+
+
 type SearchFilter
     = My
     | Fav
