@@ -4,23 +4,30 @@ import Html exposing (Html, h1, label, button, textarea, form, div, input, text,
 import Html.Attributes exposing (type_, class, style, href, src, placeholder, value, for, id, rows, tabindex)
 import Html.Attributes.Aria exposing (role)
 import Html.Events exposing (onClick)
-import Http
-import Task exposing (Task)
-import GraphQL.Client.Http as GraphQLClient
-import GraphQL.Request.Builder as GqlB
-import GraphQL.Request.Builder.Arg as Arg
-import GraphQL.Request.Builder.Variable as Var
 import Recipes.Types
-import RecipeQueries exposing (sendUnitsQuery, sendRecipeQuery, RecipeFullResponse, UnitsResponse)
+import RecipeQueries
+    exposing
+        ( RecipeQueryMsg(..)
+        , sendUnitsQuery
+        , sendRecipeQuery
+        )
+
+
+type DropdownKey
+    = UnitsDropdown Int
+    | IngredientDropdown Int
+
+
+type alias UI =
+    { openDropdown : Maybe DropdownKey
+    }
 
 
 type alias Model =
     { recipe : Maybe Recipes.Types.RecipeFull
     , flags : RecipeFlags
     , units : Maybe (List Recipes.Types.Unit)
-    , ui :
-        { isUnitsListOpen : Bool
-        }
+    , ui : UI
     }
 
 
@@ -33,11 +40,13 @@ type alias RecipeFlags =
 
 type Msg
     = None
-    | RequestRecipe
-    | ReceiveRecipeFull RecipeFullResponse
-    | ReceiveUnits UnitsResponse
+    | Query RecipeQueryMsg
       -- UI Events
-    | ToggleUnitsList
+    | ToggleIngredientDropdown (Maybe DropdownKey)
+
+
+
+-- | SelectUnit String
 
 
 main : Program RecipeFlags Model Msg
@@ -63,40 +72,61 @@ queryForTags flags =
     sendUnitsQuery flags.token ReceiveUnits
 
 
+convertToLocalCmd recipeQueryCmd =
+    Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        RequestRecipe ->
-            ( model, queryForRecipe model.flags )
+        Query subMsg ->
+            case subMsg of
+                RequestRecipe ->
+                    ( model, convertToLocalCmd (queryForRecipe model.flags) )
 
-        ReceiveRecipeFull res ->
-            ( { model | recipe = Result.toMaybe res }, Cmd.none )
+                ReceiveRecipeFull res ->
+                    ( { model | recipe = Result.toMaybe res }, Cmd.none )
 
-        ReceiveUnits res ->
-            ( { model | units = Result.toMaybe res }, Cmd.none )
+                ReceiveUnits res ->
+                    ( { model | units = Result.toMaybe res }, Cmd.none )
 
-        ToggleUnitsList ->
+        ToggleIngredientDropdown dropdown ->
             let
+                _ =
+                    Debug.log "gg" dropdown
+
                 ui =
                     model.ui
 
+                key =
+                    if dropdown == model.ui.openDropdown then
+                        Nothing
+                    else
+                        dropdown
+
                 updatedUI =
                     { ui
-                        | isUnitsListOpen = not ui.isUnitsListOpen
+                        | openDropdown = key
                     }
             in
                 ( { model | ui = updatedUI }, Cmd.none )
 
+        -- SelectUnit unitId ->
+        --     let
+        --         ingredient =
+        --             case model.recipe of
+        --                 Just recipe ->
+        --                     recipe
         None ->
             ( model, Cmd.none )
 
 
 init : RecipeFlags -> ( Model, Cmd Msg )
 init flags =
-    ( { recipe = Nothing, units = Nothing, flags = flags, ui = { isUnitsListOpen = False } }
+    ( { recipe = Nothing, units = Nothing, flags = flags, ui = { openDropdown = Nothing } }
     , Cmd.batch
-        [ queryForRecipe flags
-        , queryForTags flags
+        [ convertToLocalCmd (queryForRecipe flags)
+        , convertToLocalCmd (queryForTags flags)
         ]
     )
 
@@ -182,36 +212,71 @@ viewInput modelData fieldLabel fieldId isTextarea =
 
 viewIngredientList : Model -> Recipes.Types.RecipeFull -> Html Msg
 viewIngredientList model r =
-    div []
-        [ label [] [ text "Ingredients" ]
-        , div [ class "fields recipe-editor-group" ]
-            [ div [ class "two wide field" ]
-                [ div [ class "ui input" ] [ input [ type_ "text", value "1", placeholder "#" ] [] ] ]
-            , div [ class "four wide field" ]
-                [ unitsDropdown model.units model.ui.isUnitsListOpen ]
-            , div [ class "six wide field" ]
-                [ div
-                    [ class "typeahead" ]
-                    [ input [ type_ "text", placeholder "", class "", value "Can of Soup" ] [] ]
-                ]
+    let
+        ingredientsLabel =
+            (label [] [ text "Ingredients" ])
+                :: (List.indexedMap
+                        (ingredientRow model.units model.ui)
+                        r.ingredients
+                   )
+    in
+        div []
+            ingredientsLabel
+
+
+ingredientRow : Maybe (List Recipes.Types.Unit) -> UI -> Int -> Recipes.Types.Ingredient -> Html Msg
+ingredientRow units ui ingredientIndex ingredient =
+    div [ class "fields recipe-editor-group" ]
+        [ div [ class "two wide field" ]
+            [ div [ class "ui input" ] [ input [ type_ "text", value (toString ingredient.quantity), placeholder "#" ] [] ] ]
+        , div [ class "four wide field" ]
+            [ unitsDropdown units ingredientIndex ingredient.unit ui.openDropdown ]
+        , div [ class "six wide field" ]
+            [ div
+                [ class "typeahead" ]
+                [ input [ type_ "text", placeholder "", class "", value ingredient.name ] [] ]
             ]
         ]
 
 
-unitsDropdown : Maybe (List Recipes.Types.Unit) -> Bool -> Html Msg
-unitsDropdown units isOpen =
+unitsDropdown : Maybe (List Recipes.Types.Unit) -> Int -> Recipes.Types.IngredientUnit -> Maybe DropdownKey -> Html Msg
+unitsDropdown units ingredientIndex ingredientUnit openDropdown =
     let
+        isVisible =
+            case openDropdown of
+                Just (UnitsDropdown dd) ->
+                    if dd == ingredientIndex then
+                        True
+                    else
+                        False
+
+                _ ->
+                    False
+
+        active =
+            if isVisible then
+                "active"
+            else
+                ""
+
         visible =
-            if isOpen then
+            if isVisible then
                 "visible"
             else
                 ""
     in
-        div [ class "ui active visible selection dropdown", tabindex 0, onClick ToggleUnitsList ]
+        div
+            [ class ("ui " ++ active ++ " selection dropdown")
+            , tabindex 0
+            , onClick (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex)))
+            ]
             -- needs attr of role "listbox"
-            [ div [ class "text" ] [ text "cm." ] -- needs role of alert. This div represent the head of the list/the active element
+            [ div [ class "text" ] [ text ingredientUnit.name ] -- needs role of alert. This div represent the head of the list/the active element
             , i [ class "dropdown icon" ] []
-            , div [ class ("menu transition " ++ visible) ]
+            , div
+                [ class
+                    ("menu " ++ visible ++ " transition ")
+                ]
                 (case units of
                     Nothing ->
                         [ div [] [ text "no display units..." ] ]
@@ -231,6 +296,7 @@ measuringUnit : Recipes.Types.Unit -> Html Msg
 measuringUnit unit =
     div
         [ class "item", style [ ( "pointer-events", "all" ) ] ]
+        --, onClick (SelectUnit unit.id) ]
         [ span [ class "text" ] [ text unit.abbr ] ]
 
 

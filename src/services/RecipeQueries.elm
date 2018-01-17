@@ -1,11 +1,9 @@
 module RecipeQueries
     exposing
-        ( -- Queries
-          sendUnitsQuery
+        ( RecipeQueryMsg(..)
+          -- Queries
+        , sendUnitsQuery
         , sendRecipeQuery
-          -- Response types
-        , RecipeFullResponse
-        , UnitsResponse
         )
 
 import Http
