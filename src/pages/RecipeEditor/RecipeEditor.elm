@@ -19,16 +19,18 @@ type DropdownKey
     | IngredientDropdown Int
 
 
-type alias UI =
-    { openDropdown : Maybe DropdownKey
-    }
+type alias UI a =
+    { a | uiOpenDropdown : Maybe DropdownKey }
 
 
 type alias Model =
     { recipe : Maybe Recipes.Types.RecipeFull
+    , editingRecipe : Maybe Recipes.Types.RecipeFull
     , flags : RecipeFlags
     , units : Maybe (List Recipes.Types.Unit)
-    , ui : UI
+
+    -- UI
+    , uiOpenDropdown : Maybe DropdownKey
     }
 
 
@@ -47,8 +49,20 @@ type Msg
     | ToggleIngredientDropdown (Maybe DropdownKey)
 
 
-
--- | SelectUnit String
+emptyRecipe : Recipes.Types.RecipeFull
+emptyRecipe =
+    { id = ""
+    , name = ""
+    , author = ""
+    , authorId = ""
+    , description = ""
+    , likes = []
+    , ingredients = []
+    , imageUrl = ""
+    , instructions = ""
+    , tags = []
+    , youLike = True
+    }
 
 
 main : Program RecipeFlags Model Msg
@@ -66,14 +80,19 @@ subscriptions model =
     Sub.none
 
 
+queryForRecipe :
+    { a | recipeId : Int, token : String }
+    -> Cmd RecipeQueryMsg
 queryForRecipe flags =
     sendRecipeQuery flags.token flags.recipeId ReceiveRecipeFull
 
 
+queryForTags : { a | token : String } -> Cmd RecipeQueryMsg
 queryForTags flags =
     sendUnitsQuery flags.token ReceiveUnits
 
 
+convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
 convertToLocalCmd recipeQueryCmd =
     Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
 
@@ -94,51 +113,24 @@ update msg model =
 
         ToggleIngredientDropdown dropdown ->
             let
-                _ =
-                    Debug.log "Toggle Click" "..."
-
-                ui =
-                    model.ui
-
                 key =
-                    if dropdown == model.ui.openDropdown then
+                    if dropdown == model.uiOpenDropdown then
                         Nothing
                     else
                         dropdown
-
-                updatedUI =
-                    { ui
-                        | openDropdown = key
-                    }
             in
-                ( { model | ui = updatedUI }, Cmd.none )
+                ( { model | uiOpenDropdown = key }, Cmd.none )
 
         BodyClick ->
-            let
-                _ =
-                    Debug.log "Body Click" "..."
+            ( { model | uiOpenDropdown = Nothing }, Cmd.none )
 
-                ui =
-                    model.ui
-
-                updatedUi =
-                    { ui | openDropdown = Nothing }
-            in
-                ( { model | ui = updatedUi }, Cmd.none )
-
-        -- SelectUnit unitId ->
-        --     let
-        --         ingredient =
-        --             case model.recipe of
-        --                 Just recipe ->
-        --                     recipe
         None ->
             ( model, Cmd.none )
 
 
 init : RecipeFlags -> ( Model, Cmd Msg )
 init flags =
-    ( { recipe = Nothing, units = Nothing, flags = flags, ui = { openDropdown = Nothing } }
+    ( { recipe = Nothing, editingRecipe = Nothing, units = Nothing, flags = flags, uiOpenDropdown = Nothing }
     , Cmd.batch
         [ convertToLocalCmd (queryForRecipe flags)
         , convertToLocalCmd (queryForTags flags)
@@ -234,7 +226,7 @@ viewIngredientList model r =
         ingredientsLabel =
             (label [] [ text "Ingredients" ])
                 :: (List.indexedMap
-                        (ingredientRow model.units model.ui)
+                        (ingredientRow model.units model)
                         r.ingredients
                    )
     in
@@ -242,13 +234,13 @@ viewIngredientList model r =
             ingredientsLabel
 
 
-ingredientRow : Maybe (List Recipes.Types.Unit) -> UI -> Int -> Recipes.Types.Ingredient -> Html Msg
+ingredientRow : Maybe (List Recipes.Types.Unit) -> UI a -> Int -> Recipes.Types.Ingredient -> Html Msg
 ingredientRow units ui ingredientIndex ingredient =
     div [ class "fields recipe-editor-group" ]
         [ div [ class "two wide field" ]
             [ div [ class "ui input" ] [ input [ type_ "text", value (toString ingredient.quantity), placeholder "#" ] [] ] ]
         , div [ class "four wide field" ]
-            [ unitsDropdown units ingredientIndex ingredient.unit ui.openDropdown ]
+            [ unitsDropdown units ingredientIndex ingredient.unit ui.uiOpenDropdown ]
         , div [ class "six wide field" ]
             [ div
                 [ class "typeahead" ]
