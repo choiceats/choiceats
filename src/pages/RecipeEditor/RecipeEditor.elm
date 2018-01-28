@@ -1,9 +1,10 @@
-port module RecipeEditor exposing (main)
+module RecipeEditor exposing (main)
 
 import Html exposing (Html, h1, label, button, textarea, form, div, input, text, a, img, i, option, select, span)
 import Html.Attributes exposing (type_, class, style, href, src, placeholder, value, for, id, rows, tabindex)
 import Html.Attributes.Aria exposing (role)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onWithOptions, defaultOptions)
+import Json.Decode as Decode
 import Recipes.Types
 import RecipeQueries
     exposing
@@ -42,6 +43,7 @@ type Msg
     = None
     | Query RecipeQueryMsg
       -- UI Events
+    | BodyClick
     | ToggleIngredientDropdown (Maybe DropdownKey)
 
 
@@ -93,7 +95,7 @@ update msg model =
         ToggleIngredientDropdown dropdown ->
             let
                 _ =
-                    Debug.log "gg" dropdown
+                    Debug.log "Toggle Click" "..."
 
                 ui =
                     model.ui
@@ -110,6 +112,19 @@ update msg model =
                     }
             in
                 ( { model | ui = updatedUI }, Cmd.none )
+
+        BodyClick ->
+            let
+                _ =
+                    Debug.log "Body Click" "..."
+
+                ui =
+                    model.ui
+
+                updatedUi =
+                    { ui | openDropdown = Nothing }
+            in
+                ( { model | ui = updatedUi }, Cmd.none )
 
         -- SelectUnit unitId ->
         --     let
@@ -146,7 +161,10 @@ recipeFormView :
     -> Recipes.Types.RecipeFull
     -> Html Msg -- need model for list of units
 recipeFormView model r =
-    div [ style [ ( "-webkit-animation", "slideInLeft 0.25s linear" ), ( "animation", "slideInLeft 0.25s linear" ), ( "min-width", "260px" ) ] ]
+    div
+        [ style [ ( "-webkit-animation", "slideInLeft 0.25s linear" ), ( "animation", "slideInLeft 0.25s linear" ), ( "min-width", "260px" ) ]
+        , onClick BodyClick
+        ]
         [ form [ class "ui form recipe-editor-form" ]
             [ h1 [] [ text "Recipe Editor" ]
             , viewInput r.name "Recipe Name" "recipe-name" False
@@ -268,7 +286,7 @@ unitsDropdown units ingredientIndex ingredientUnit openDropdown =
         div
             [ class ("ui " ++ active ++ " selection dropdown")
             , tabindex 0
-            , onClick (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex)))
+            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex))))
             ]
             -- needs attr of role "listbox"
             [ div [ class "text" ] [ text ingredientUnit.name ] -- needs role of alert. This div represent the head of the list/the active element
