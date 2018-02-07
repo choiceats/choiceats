@@ -3,7 +3,7 @@ module RecipeEditor exposing (main)
 import Html exposing (Html, h1, label, button, textarea, form, div, input, text, a, img, i, option, select, span)
 import Html.Attributes exposing (type_, class, style, href, src, placeholder, value, for, id, rows, tabindex)
 import Html.Attributes.Aria exposing (role)
-import Html.Events exposing (onClick, onWithOptions, defaultOptions)
+import Html.Events exposing (onClick, onInput, onWithOptions, defaultOptions)
 import Json.Decode as Decode
 import Recipes.Types
 import RecipeQueries
@@ -17,6 +17,12 @@ import RecipeQueries
 type DropdownKey
     = UnitsDropdown Int
     | IngredientDropdown Int
+
+
+type TextField
+    = RecipeName
+    | RecipeDescription
+    | RecipeInstructions
 
 
 type alias UI a =
@@ -47,22 +53,7 @@ type Msg
       -- UI Events
     | BodyClick
     | ToggleIngredientDropdown (Maybe DropdownKey)
-
-
-emptyRecipe : Recipes.Types.RecipeFull
-emptyRecipe =
-    { id = ""
-    , name = ""
-    , author = ""
-    , authorId = ""
-    , description = ""
-    , likes = []
-    , ingredients = []
-    , imageUrl = ""
-    , instructions = ""
-    , tags = []
-    , youLike = True
-    }
+    | UpdateTextField TextField String
 
 
 main : Program RecipeFlags Model Msg
@@ -127,6 +118,9 @@ update msg model =
         None ->
             ( model, Cmd.none )
 
+        UpdateTextField textfield value ->
+            ( model, Cmd.none )
+
 
 init : RecipeFlags -> ( Model, Cmd Msg )
 init flags =
@@ -151,7 +145,7 @@ view model =
 recipeFormView :
     Model
     -> Recipes.Types.RecipeFull
-    -> Html Msg -- need model for list of units
+    -> Html Msg
 recipeFormView model r =
     div
         [ style [ ( "-webkit-animation", "slideInLeft 0.25s linear" ), ( "animation", "slideInLeft 0.25s linear" ), ( "min-width", "260px" ) ]
@@ -159,8 +153,8 @@ recipeFormView model r =
         ]
         [ form [ class "ui form recipe-editor-form" ]
             [ h1 [] [ text "Recipe Editor" ]
-            , viewInput r.name "Recipe Name" "recipe-name" False
-            , viewInput r.description "Description" "recipe-description" True
+            , textInput r.name RecipeName False
+            , textInput r.description RecipeDescription True
             , viewIngredientList model r
             , div
                 [ class "field" ]
@@ -176,31 +170,47 @@ recipeFormView model r =
                 , i [ class "dropdown icon" ] []
                 , div [ class "menu transition" ] []
                 ]
-            , viewInput r.instructions "Instructions" "recipe-instructions" True
+            , textInput r.instructions RecipeInstructions True
             , button [ class "ui button", role "button" ] [ text "Save" ]
             ]
         ]
 
 
-type alias ModelData =
-    String
+textFieldToLabel : TextField -> String
+textFieldToLabel field =
+    case field of
+        RecipeName ->
+            "Recipe Name"
+
+        RecipeDescription ->
+            "Description"
+
+        RecipeInstructions ->
+            "Instructions"
 
 
-type alias FieldLabel =
-    String
+textFieldToInputId : TextField -> String
+textFieldToInputId field =
+    case field of
+        RecipeName ->
+            "recipe-name"
+
+        RecipeDescription ->
+            "recipe-description"
+
+        RecipeInstructions ->
+            "recipe-instructions"
 
 
-type alias FieldId =
-    String
-
-
-type alias IsTextarea =
-    Bool
-
-
-viewInput : ModelData -> FieldLabel -> FieldId -> IsTextarea -> Html Msg
-viewInput modelData fieldLabel fieldId isTextarea =
+textInput : String -> TextField -> Bool -> Html Msg
+textInput modelData textField isTextarea =
     let
+        inputId =
+            textFieldToInputId textField
+
+        inputLabel =
+            textFieldToLabel textField
+
         inputType =
             if isTextarea then
                 textarea
@@ -214,9 +224,9 @@ viewInput modelData fieldLabel fieldId isTextarea =
                 [ type_ "text" ]
     in
         div [ class "field" ]
-            [ label [ for fieldId ] [ text fieldLabel ]
+            [ label [ for inputId ] [ text inputLabel ]
             , div [ class "ui input" ]
-                [ inputType ([ id fieldId, value modelData ] ++ moreAttrs) [] ]
+                [ inputType ([ id inputId, value modelData, onInput (UpdateTextField textField) ] ++ moreAttrs) [] ]
             ]
 
 
@@ -297,18 +307,9 @@ unitsDropdown units ingredientIndex ingredientUnit openDropdown =
             ]
 
 
-
--- need the typeahead list display thing.
--- TODO: find how to add role attribute to wrapping div
-
-
 measuringUnit : Recipes.Types.Unit -> Html Msg
 measuringUnit unit =
     div
         [ class "item", style [ ( "pointer-events", "all" ) ] ]
         --, onClick (SelectUnit unit.id) ]
         [ span [ class "text" ] [ text unit.abbr ] ]
-
-
-
--- measuringUnit need eventing for on click
