@@ -97,7 +97,7 @@ update msg model =
                     ( model, convertToLocalCmd (queryForRecipe model.flags) )
 
                 ReceiveRecipeFull res ->
-                    ( { model | recipe = Result.toMaybe res }, Cmd.none )
+                    ( { model | recipe = Result.toMaybe res, editingRecipe = Result.toMaybe res }, Cmd.none )
 
                 ReceiveUnits res ->
                     ( { model | units = Result.toMaybe res }, Cmd.none )
@@ -119,7 +119,35 @@ update msg model =
             ( model, Cmd.none )
 
         UpdateTextField textfield value ->
-            ( model, Cmd.none )
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    case textfield of
+                        RecipeName ->
+                            let 
+                                updatedEditingRecipeModel = ({ editingRecipe | name = value })
+                                newEditingRecipe = Just updatedEditingRecipeModel
+                            in
+                                ( {model | editingRecipe = newEditingRecipe}, Cmd.none)
+
+                        RecipeDescription ->
+                            let 
+                                updatedEditingRecipeModel = ({ editingRecipe | description = value })
+                                newEditingRecipe = Just updatedEditingRecipeModel
+                            in
+                                ( {model | editingRecipe = newEditingRecipe}, Cmd.none)
+
+                        RecipeInstructions ->
+                            let
+                                updatedEditingRecipeModel = ({ editingRecipe | instructions = value })
+                                newEditingRecipe = Just updatedEditingRecipeModel
+                            in
+                                ( {model | editingRecipe = newEditingRecipe}, Cmd.none)
+
+                Nothing ->
+                    ( model, Cmd.none)
+
+           
+
 
 
 init : RecipeFlags -> ( Model, Cmd Msg )
@@ -134,7 +162,7 @@ init flags =
 
 view : Model -> Html Msg
 view model =
-    case model.recipe of
+    case model.editingRecipe of
         Nothing ->
             div [ class "editor" ] [ text "loading..." ]
 
