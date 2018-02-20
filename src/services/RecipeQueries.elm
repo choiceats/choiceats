@@ -4,6 +4,7 @@ module RecipeQueries
           -- Queries
         , sendUnitsQuery
         , sendRecipeQuery
+        , sendIngredientsQuery
         )
 
 import Http
@@ -57,6 +58,7 @@ type RecipeQueryMsg
     = RequestRecipe
     | ReceiveUnits UnitsResponse
     | ReceiveRecipeFull Recipes.Types.RecipeFullResponse
+    | ReceiveIngredients IngredientsResponse
 
 
 
@@ -81,6 +83,10 @@ type alias UnitsResponse =
     Result GraphQLClient.Error (List Recipes.Types.Unit)
 
 
+type alias IngredientsResponse =
+    Result GraphQLClient.Error (List Recipes.Types.IngredientRaw)
+
+
 
 --
 -- GRAPHQL Queries
@@ -94,6 +100,16 @@ sendUnitsQuery authToken msg =
         (GraphQLClient.customSendQuery
             (requestOptions authToken)
             (GqlB.request {} unitsRequest)
+        )
+
+
+sendIngredientsQuery : AuthToken -> (IngredientsResponse -> a) -> Cmd a
+sendIngredientsQuery authToken msg =
+    Task.attempt
+        msg
+        (GraphQLClient.customSendQuery
+            (requestOptions authToken)
+            (GqlB.request {} ingredientsRequest)
         )
 
 
@@ -140,7 +156,82 @@ recipeRequest =
         )
 
 
+ingredientsRequest : GqlB.Document GqlB.Query (List Recipes.Types.IngredientRaw) {}
+ingredientsRequest =
+    GqlB.queryDocument
+        (GqlB.extract
+            (GqlB.field
+                "ingredients"
+                []
+                gqlIngredientList
+            )
+        )
 
+
+saveRecipeMutation recipe =
+    let
+        args =
+            [ ( "recipe"
+              , Arg.object
+                    [ ( "id", Arg.string recipe.id )
+                    , ( "authorId", Arg.string recipe.authorId )
+                    , ( "description", Arg.string recipe.description )
+                    , ( "name", Arg.string recipe.name )
+                    , ( "instructions", Arg.string recipe.instructions )
+                    , ( "ingredients", buildIngredientsVarList recipe.ingredients )
+                    ]
+              )
+            ]
+    in
+        GqlB.mutationDocument <|
+            (GqlB.extract
+                (GqlB.field "saveRecipe"
+                    [ ( "recipe", Arg.variable editingRecipe )
+                    ]
+                )
+            )
+
+
+buildIngredientsVarList ingredients =
+    Arg.list
+        (List.map
+            (\i ->
+                Arg.object
+                    [ ( "id", Arg.string, i.id )
+                    , ( "unit", Arg.string )
+                    ]
+            )
+        )
+
+
+
+-- const gqlStuff = gql`
+--   mutation SaveRecipe($recipe: RecipeInput!) {
+--     saveRecipe(recipe: $recipe) {
+--       id
+--       author
+--       authorId
+--       description
+--       imageUrl
+--       name
+--       instructions
+--       ingredients {
+--         id
+--         name
+--         unit {
+--           id
+--           name
+--           abbr
+--         }
+--         quantity
+--       }
+--       tags {
+--         id
+--       }
+--       likes
+--     }
+--   }
+-- `
 --
 -- GraphQL Object definitions
 --
@@ -192,4 +283,13 @@ gqlUnitList =
             |> GqlB.with (GqlB.field "id" [] GqlB.string)
             |> GqlB.with (GqlB.field "name" [] GqlB.string)
             |> GqlB.with (GqlB.field "abbr" [] GqlB.string)
+        )
+
+
+gqlIngredientList : GqlB.ValueSpec GqlB.NonNull (GqlB.ListType GqlB.NonNull GqlB.ObjectType) (List Recipes.Types.IngredientRaw) vars
+gqlIngredientList =
+    GqlB.list
+        (GqlB.object Recipes.Types.IngredientRaw
+            |> GqlB.with (GqlB.field "id" [] GqlB.string)
+            |> GqlB.with (GqlB.field "name" [] GqlB.string)
         )

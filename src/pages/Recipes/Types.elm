@@ -1,5 +1,6 @@
 module Recipes.Types exposing (..)
 
+import Array exposing (Array)
 import GraphQL.Client.Http as GraphQLClient
 
 
@@ -63,6 +64,12 @@ type alias Ingredient =
     }
 
 
+type alias IngredientRaw =
+    { id : String
+    , name : String
+    }
+
+
 type alias IngredientUnit =
     { name : String
     , abbr : String
@@ -88,6 +95,29 @@ type RecipeMsg
     | GetTagsResponse TagsResponse
     | SearchTextChange String
     | SearchFilterChange SearchFilter
+
+
+type alias EditingRecipeFull =
+    { author : String
+    , authorId : String
+    , description : String
+    , id : String
+    , imageUrl : String
+    , ingredients : Array EditingIngredient
+    , instructions : String
+    , likes : List Int
+    , name : String
+    , tags : List RecipeTag
+    , youLike : Bool
+    }
+
+
+type alias EditingIngredient =
+    { quantity : String
+    , ingredientId : String
+    , name : String
+    , unit : IngredientUnit
+    }
 
 
 mapFilterTypeToString : SearchFilter -> String

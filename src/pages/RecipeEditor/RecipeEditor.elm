@@ -1,7 +1,8 @@
 module RecipeEditor exposing (main)
 
+import Array exposing (Array, fromList, toList)
 import Html exposing (Html, h1, label, button, textarea, form, div, input, text, a, img, i, option, select, span)
-import Html.Attributes exposing (type_, class, style, href, src, placeholder, value, for, id, rows, tabindex)
+import Html.Attributes exposing (type_, class, style, href, src, placeholder, value, for, id, rows, tabindex, name, attribute)
 import Html.Attributes.Aria exposing (role)
 import Html.Events exposing (onClick, onInput, onWithOptions, defaultOptions)
 import Json.Decode as Decode
@@ -11,6 +12,7 @@ import RecipeQueries
         ( RecipeQueryMsg(..)
         , sendUnitsQuery
         , sendRecipeQuery
+        , sendIngredientsQuery
         )
 
 
@@ -25,15 +27,22 @@ type TextField
     | RecipeInstructions
 
 
+type IngredientField
+    = IngredientQuanity
+    | IngredientName
+    | IngredientUnits
+
+
 type alias UI a =
     { a | uiOpenDropdown : Maybe DropdownKey }
 
 
 type alias Model =
     { recipe : Maybe Recipes.Types.RecipeFull
-    , editingRecipe : Maybe Recipes.Types.RecipeFull
+    , editingRecipe : Maybe Recipes.Types.EditingRecipeFull
     , flags : RecipeFlags
     , units : Maybe (List Recipes.Types.Unit)
+    , ingredients : Maybe (List Recipes.Types.IngredientRaw)
 
     -- UI
     , uiOpenDropdown : Maybe DropdownKey
@@ -54,6 +63,9 @@ type Msg
     | BodyClick
     | ToggleIngredientDropdown (Maybe DropdownKey)
     | UpdateTextField TextField String
+    | UpdateIngredient IngredientField Int String
+    | SelectIngredientUnit Int Recipes.Types.Unit
+    | SelectIngredient Int Recipes.Types.IngredientRaw
 
 
 main : Program RecipeFlags Model Msg
@@ -83,6 +95,10 @@ queryForTags flags =
     sendUnitsQuery flags.token ReceiveUnits
 
 
+queryForIngredients flags =
+    sendIngredientsQuery flags.token ReceiveIngredients
+
+
 convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
 convertToLocalCmd recipeQueryCmd =
     Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
@@ -97,10 +113,13 @@ update msg model =
                     ( model, convertToLocalCmd (queryForRecipe model.flags) )
 
                 ReceiveRecipeFull res ->
-                    ( { model | recipe = Result.toMaybe res, editingRecipe = Result.toMaybe res }, Cmd.none )
+                    ( { model | recipe = Result.toMaybe res, editingRecipe = (recipeFullToEditingRecipe model (Result.toMaybe res)) }, Cmd.none )
 
                 ReceiveUnits res ->
                     ( { model | units = Result.toMaybe res }, Cmd.none )
+
+                ReceiveIngredients res ->
+                    ( { model | ingredients = Result.toMaybe res }, Cmd.none )
 
         ToggleIngredientDropdown dropdown ->
             let
@@ -123,41 +142,173 @@ update msg model =
                 Just editingRecipe ->
                     case textfield of
                         RecipeName ->
-                            let 
-                                updatedEditingRecipeModel = ({ editingRecipe | name = value })
-                                newEditingRecipe = Just updatedEditingRecipeModel
+                            let
+                                updatedEditingRecipeModel =
+                                    ({ editingRecipe | name = value })
+
+                                newEditingRecipe =
+                                    Just updatedEditingRecipeModel
                             in
-                                ( {model | editingRecipe = newEditingRecipe}, Cmd.none)
+                                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
                         RecipeDescription ->
-                            let 
-                                updatedEditingRecipeModel = ({ editingRecipe | description = value })
-                                newEditingRecipe = Just updatedEditingRecipeModel
+                            let
+                                updatedEditingRecipeModel =
+                                    ({ editingRecipe | description = value })
+
+                                newEditingRecipe =
+                                    Just updatedEditingRecipeModel
                             in
-                                ( {model | editingRecipe = newEditingRecipe}, Cmd.none)
+                                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
                         RecipeInstructions ->
                             let
-                                updatedEditingRecipeModel = ({ editingRecipe | instructions = value })
-                                newEditingRecipe = Just updatedEditingRecipeModel
+                                updatedEditingRecipeModel =
+                                    ({ editingRecipe | instructions = value })
+
+                                newEditingRecipe =
+                                    Just updatedEditingRecipeModel
                             in
-                                ( {model | editingRecipe = newEditingRecipe}, Cmd.none)
+                                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
                 Nothing ->
-                    ( model, Cmd.none)
+                    ( model, Cmd.none )
 
-           
+        UpdateIngredient field ingredientIndex value ->
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    case Array.get ingredientIndex editingRecipe.ingredients of
+                        Just foundIngredient ->
+                            let
+                                newIngredient =
+                                    { foundIngredient | quantity = value }
 
+                                newIngredients =
+                                    Array.set ingredientIndex newIngredient editingRecipe.ingredients
+
+                                newEditingRecipe =
+                                    { editingRecipe | ingredients = newIngredients }
+                            in
+                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        SelectIngredientUnit ingredientIndex unit ->
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    case Array.get ingredientIndex editingRecipe.ingredients of
+                        Just foundIngredient ->
+                            let
+                                newUnit =
+                                    { name = unit.name, abbr = unit.abbr }
+
+                                newIngredient =
+                                    { foundIngredient | unit = newUnit }
+
+                                newIngredients =
+                                    Array.set ingredientIndex newIngredient editingRecipe.ingredients
+
+                                newEditingRecipe =
+                                    { editingRecipe | ingredients = newIngredients }
+                            in
+                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        SelectIngredient index rawIngredient ->
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    case Array.get index editingRecipe.ingredients of
+                        Just foundIngredient ->
+                            let
+                                newIngredient =
+                                    { foundIngredient | ingredientId = rawIngredient.id, name = rawIngredient.name }
+
+                                newIngredients =
+                                    Array.set index newIngredient editingRecipe.ingredients
+
+                                newEditingRecipe =
+                                    { editingRecipe | ingredients = newIngredients }
+                            in
+                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
 
 init : RecipeFlags -> ( Model, Cmd Msg )
 init flags =
-    ( { recipe = Nothing, editingRecipe = Nothing, units = Nothing, flags = flags, uiOpenDropdown = Nothing }
+    ( { recipe = Nothing, editingRecipe = Nothing, units = Nothing, ingredients = Nothing, flags = flags, uiOpenDropdown = Nothing }
     , Cmd.batch
         [ convertToLocalCmd (queryForRecipe flags)
         , convertToLocalCmd (queryForTags flags)
+        , convertToLocalCmd (queryForIngredients flags)
         ]
     )
+
+
+recipeFullToEditingRecipe : Model -> Maybe Recipes.Types.RecipeFull -> Maybe Recipes.Types.EditingRecipeFull
+recipeFullToEditingRecipe model recipeFull =
+    case recipeFull of
+        Just recipe ->
+            Just { recipe | ingredients = ingredientsToEditingIngredients model recipe.ingredients }
+
+        Nothing ->
+            Nothing
+
+
+ingredientsToEditingIngredients model recipeIngredients =
+    fromList (List.map (ingredientToEditingIngredient model) recipeIngredients)
+
+
+ingredientToEditingIngredient : Model -> Recipes.Types.Ingredient -> Recipes.Types.EditingIngredient
+ingredientToEditingIngredient model recipeIngredient =
+    { name = recipeIngredient.name
+    , quantity = toString recipeIngredient.quantity
+    , ingredientId = getIngredientId model.ingredients recipeIngredient
+    , unit = recipeIngredient.unit
+    }
+
+
+getIngredientId : Maybe (List Recipes.Types.IngredientRaw) -> Recipes.Types.Ingredient -> String
+getIngredientId ingredients recipeIngredient =
+    case ingredients of
+        Just ingredients ->
+            case List.head (List.filter (\i -> i.name == recipeIngredient.name) ingredients) of
+                Just foundIT ->
+                    foundIT.id
+
+                Nothing ->
+                    ""
+
+        Nothing ->
+            ""
+
+
+getIngredientName : Maybe (List Recipes.Types.IngredientRaw) -> String -> String
+getIngredientName ingredients ingredientId =
+    case ingredients of
+        Just ingredients ->
+            case List.head (List.filter (\i -> i.id == ingredientId) ingredients) of
+                Just foundIT ->
+                    foundIT.name
+
+                Nothing ->
+                    ""
+
+        Nothing ->
+            ""
 
 
 view : Model -> Html Msg
@@ -172,7 +323,7 @@ view model =
 
 recipeFormView :
     Model
-    -> Recipes.Types.RecipeFull
+    -> Recipes.Types.EditingRecipeFull
     -> Html Msg
 recipeFormView model r =
     div
@@ -258,32 +409,31 @@ textInput modelData textField isTextarea =
             ]
 
 
-viewIngredientList : Model -> Recipes.Types.RecipeFull -> Html Msg
+viewIngredientList : Model -> Recipes.Types.EditingRecipeFull -> Html Msg
 viewIngredientList model r =
     let
         ingredientsLabel =
             (label [] [ text "Ingredients" ])
-                :: (List.indexedMap
-                        (ingredientRow model.units model)
-                        r.ingredients
+                :: (Array.toList
+                        (Array.indexedMap
+                            (ingredientRow model)
+                            r.ingredients
+                        )
                    )
     in
         div []
             ingredientsLabel
 
 
-ingredientRow : Maybe (List Recipes.Types.Unit) -> UI a -> Int -> Recipes.Types.Ingredient -> Html Msg
-ingredientRow units ui ingredientIndex ingredient =
+ingredientRow : Model -> Int -> Recipes.Types.EditingIngredient -> Html Msg
+ingredientRow model ingredientIndex ingredient =
     div [ class "fields recipe-editor-group" ]
         [ div [ class "two wide field" ]
-            [ div [ class "ui input" ] [ input [ type_ "text", value (toString ingredient.quantity), placeholder "#" ] [] ] ]
+            [ div [ class "ui input" ] [ input [ type_ "text", value ingredient.quantity, placeholder "#", onInput (UpdateIngredient IngredientQuanity ingredientIndex) ] [] ] ]
         , div [ class "four wide field" ]
-            [ unitsDropdown units ingredientIndex ingredient.unit ui.uiOpenDropdown ]
+            [ unitsDropdown model.units ingredientIndex ingredient.unit model.uiOpenDropdown ]
         , div [ class "six wide field" ]
-            [ div
-                [ class "typeahead" ]
-                [ input [ type_ "text", placeholder "", class "", value ingredient.name ] [] ]
-            ]
+            [ ingredientTypeAhead model ingredientIndex ingredient model.uiOpenDropdown ]
         ]
 
 
@@ -330,14 +480,72 @@ unitsDropdown units ingredientIndex ingredientUnit openDropdown =
                         [ div [] [ text "no display units..." ] ]
 
                     Just res ->
-                        List.map measuringUnit res
+                        List.map (measuringUnit ingredientIndex) res
                 )
             ]
 
 
-measuringUnit : Recipes.Types.Unit -> Html Msg
-measuringUnit unit =
+ingredientTypeAhead : Model -> Int -> Recipes.Types.EditingIngredient -> Maybe DropdownKey -> Html Msg
+ingredientTypeAhead model ingredientIndex ingredient openDropdown =
+    let
+        isVisible =
+            case openDropdown of
+                Just (IngredientDropdown dd) ->
+                    if dd == ingredientIndex then
+                        True
+                    else
+                        False
+
+                _ ->
+                    False
+
+        active =
+            if isVisible then
+                "active"
+            else
+                ""
+
+        visible =
+            if isVisible then
+                "visible"
+            else
+                ""
+    in
+        div
+            [ class ("ui " ++ active ++ " selection dropdown")
+            , tabindex 0
+            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (IngredientDropdown ingredientIndex))))
+            ]
+            [ input [ type_ "hidden", name "gender" ] []
+            , i [ class "dropdown icon" ] []
+            , div [ class "default text" ] [ text (getIngredientName model.ingredients ingredient.ingredientId) ]
+            , div [ class ("menu " ++ visible ++ " transition") ]
+                (case model.ingredients of
+                    Nothing ->
+                        [ div [] [ text "Na uh uh.  You didn't say the magic word" ] ]
+
+                    Just ingred ->
+                        List.map (ingredientItem ingredientIndex ingredient) ingred
+                )
+            ]
+
+
+ingredientItem : Int -> Recipes.Types.EditingIngredient -> Recipes.Types.IngredientRaw -> Html Msg
+ingredientItem index ingredient ingredientRaw =
     div
-        [ class "item", style [ ( "pointer-events", "all" ) ] ]
+        [ class "item"
+        , attribute "data-value" "42"
+        , onClick (SelectIngredient index ingredientRaw)
+        ]
+        [ text ingredientRaw.name ]
+
+
+measuringUnit : Int -> Recipes.Types.Unit -> Html Msg
+measuringUnit index unit =
+    div
+        [ class "item"
+        , style [ ( "pointer-events", "all" ) ]
+        , onClick (SelectIngredientUnit index unit)
+        ]
         --, onClick (SelectUnit unit.id) ]
         [ span [ class "text" ] [ text unit.abbr ] ]
