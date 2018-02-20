@@ -1,17 +1,13 @@
 ChoicEats
 ===============
 
-Two terminals:
+This app is in transition from React to Elm. Both rely on the same backend. to start the backend, clone the backend project from [github](https://github.com/choiceats/choiceats-server). Then run `cd CHOICEATS_SERVER_DIRECTORY && yarn build && yarn start`.
 
-First, compile and start the server
-```
-cd CHOICEATS_SERVER_DIRECTORY && yarn build && yarn start
-```
+To start the React version of the client, run `yarn start`
 
-Second, start up the client
-```
-yarn start
-```
+To start the Elm version of the client, navigate to the project root and run `elm-live --output=elm.js src/Main.elm --pushstate --open --debug`. Note that you will need `elm` and `elm-live` installed (run `npm install -g elm elm-live`).
+
+
 ## Minimum Viable Product
 TODO
 * Edit recipes
@@ -35,55 +31,5 @@ DONE
 ### Ingredients to fix
 * apple slices. large apples, sliced
 * unitless ingredients may need to display quantity sometimes but not other times. e.g. ketchup would not show quantity, but eggs would
-
-### Custom configuration
-Although this app uses create react app, the elm portion changes webpack configuration in node_modules\react-scripts\config\webpack.config.dev.js in the following ways
-
-```
-module.exports.resolve.extensions = ['.web.js', '.js', '.json', '.web.jsx', '.jsx', '.elm']
-```
-
-`module.exports.module.rules` has another array entry:
-```
-{
-  test: /\.elm$/,
-  exclude: [/elm-stuff/, /node_modules/],
-  loader: require.resolve('elm-webpack-loader')
-},
-```
-
-The `` entry that looks like this:
-
-```
-{
-  // "oneOf" will traverse all following loaders until one will
-  // match the requirements. When no loader matches it will fall
-  // back to the "file" loader at the end of the loader list.
-  oneOf: [
-    // "url" loader works like "file" loader except that it embeds assets
-    // smaller than specified limit in bytes as data URLs to avoid requests.
-    // A missing "test" is equivalent to a match.
-    {
-      test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.elm$/],
-      loader: require.resolve('url-loader'),
-      options: {
-        limit: 10000,
-        name: 'static/media/[name].[hash:8].[ext]',
-      },
-    },
-    ...
-    ...
-  ]
-}
-```
-
-has the images entry test changed to [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.elm$/],
-
-See these links for adding ELM into a React project:
-
-* http://elm-lang.org/blog/how-to-use-elm-at-work
-* https://codeburst.io/using-elm-in-react-from-the-ground-up-e3866bb0369d
-* https://github.com/ceddlyburge/elm-in-react/blob/master/src/elm/Buttons.elm
-* https://medium.com/javascript-inside/building-a-react-redux-elm-bridge-8f5b875a9b76
 
 ## Something Missing?
