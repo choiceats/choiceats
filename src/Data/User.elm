@@ -1,4 +1,19 @@
-module Data.User exposing (User, Username, decoder, encode, usernameDecoder, usernameParser, usernameToHtml, usernameToString)
+module Data.User
+    exposing
+        ( User
+        , Name
+        , UserId
+        , decoder
+        , encode
+        , nameDecoder
+        , nameParser
+        , nameToHtml
+        , nameToString
+        , userIdDecoder
+        , userIdParser
+        , userIdToHtml
+        , userIdToString
+        )
 
 import Data.AuthToken as AuthToken exposing (AuthToken)
 import Html exposing (Html)
@@ -13,7 +28,8 @@ import Util exposing ((=>))
 type alias User =
     { email : String
     , token : AuthToken
-    , username : Username
+    , name : Name
+    , userId : UserId
     }
 
 
@@ -26,7 +42,8 @@ decoder =
     decode User
         |> required "email" Decode.string
         |> required "token" AuthToken.decoder
-        |> required "username" usernameDecoder
+        |> required "name" nameDecoder
+        |> required "userId" userIdDecoder
 
 
 encode : User -> Value
@@ -34,7 +51,8 @@ encode user =
     Encode.object
         [ "email" => Encode.string user.email
         , "token" => AuthToken.encode user.token
-        , "username" => encodeUsername user.username
+        , "name" => encodeName user.name
+        , "userId" => encodeUserId user.userId
         ]
 
 
@@ -42,30 +60,59 @@ encode user =
 -- IDENTIFIERS --
 
 
-type Username
-    = Username String
+type Name
+    = Name String
 
 
-usernameToString : Username -> String
-usernameToString (Username username) =
-    username
+type UserId
+    = UserId String
 
 
-usernameParser : UrlParser.Parser (Username -> a) a
-usernameParser =
-    UrlParser.custom "USERNAME" (Ok << Username)
+nameToString : Name -> String
+nameToString (Name name) =
+    name
 
 
-usernameDecoder : Decoder Username
-usernameDecoder =
-    Decode.map Username Decode.string
+userIdToString : Name -> String
+userIdToString (Name userId) =
+    userId
 
 
-encodeUsername : Username -> Value
-encodeUsername (Username username) =
-    Encode.string username
+nameParser : UrlParser.Parser (Name -> a) a
+nameParser =
+    UrlParser.custom "NAME" (Ok << Name)
 
 
-usernameToHtml : Username -> Html msg
-usernameToHtml (Username username) =
-    Html.text username
+userIdParser : UrlParser.Parser (UserId -> a) a
+userIdParser =
+    UrlParser.custom "USERID" (Ok << UserId)
+
+
+nameDecoder : Decoder Name
+nameDecoder =
+    Decode.map Name Decode.string
+
+
+userIdDecoder : Decoder UserId
+userIdDecoder =
+    Decode.map UserId Decode.string
+
+
+encodeName : Name -> Value
+encodeName (Name name) =
+    Encode.string name
+
+
+encodeUserId : UserId -> Value
+encodeUserId (UserId userId) =
+    Encode.string userId
+
+
+nameToHtml : Name -> Html msg
+nameToHtml (Name name) =
+    Html.text name
+
+
+userIdToHtml : UserId -> Html msg
+userIdToHtml (UserId userId) =
+    Html.text userId

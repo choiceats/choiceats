@@ -48,7 +48,7 @@ view session model =
                 [ div [ class "col-md-6 offset-md-3 col-xs-12" ]
                     [ h1 [ class "text-xs-center" ] [ text "Sign in" ]
                     , p [ class "text-xs-center" ]
-                        [ a [ Route.href Route.Register ]
+                        [ a [ Route.href Route.Signup ]
                             [ text "Need an account?" ]
                         ]
                     , Form.viewErrors model.errors

@@ -1,6 +1,5 @@
 module Route exposing (Route(..), fromLocation, href, modifyUrl)
 
-import Data.User as User exposing (Username)
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import Navigation exposing (Location)
@@ -15,7 +14,7 @@ type Route
     | Root
     | Login
     | Logout
-    | Register
+    | Signup
 
 
 route : Parser (Route -> a) a
@@ -24,7 +23,7 @@ route =
         [ Url.map Home (s "")
         , Url.map Login (s "login")
         , Url.map Logout (s "logout")
-        , Url.map Register (s "register")
+        , Url.map Signup (s "signup")
         ]
 
 
@@ -49,8 +48,8 @@ routeToString page =
                 Logout ->
                     [ "logout" ]
 
-                Register ->
-                    [ "register" ]
+                Signup ->
+                    [ "signup" ]
     in
         "#/" ++ String.join "/" pieces
 

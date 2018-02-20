@@ -1,14 +1,14 @@
 module Main exposing (main)
 
 import Data.Session exposing (Session)
-import Data.User as User exposing (User, Username)
+import Data.User as User exposing (User)
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
 import Navigation exposing (Location)
 import Page.Errored as Errored exposing (PageLoadError)
 import Page.Home as Home
 import Page.Login as Login
-import Page.Register as Register
+import Page.Signup as Signup
 import Page.NotFound as NotFound
 import Ports
 import Route exposing (Route)
@@ -23,6 +23,7 @@ import Views.Page as Page exposing (ActivePage)
    Errored
    |
 -}
+-- Models?
 
 
 type Page
@@ -31,7 +32,7 @@ type Page
     | Errored PageLoadError
     | Home Home.Model
     | Login Login.Model
-    | Register Register.Model
+    | Signup Signup.Model
 
 
 type PageState
@@ -114,10 +115,10 @@ viewPage session isLoading page =
                     |> frame Page.Other
                     |> Html.map LoginMsg
 
-            Register subModel ->
-                Register.view session subModel
+            Signup subModel ->
+                Signup.view session subModel
                     |> frame Page.Other
-                    |> Html.map RegisterMsg
+                    |> Html.map SignupMsg
 
 
 subscriptions model =
@@ -149,7 +150,7 @@ type Msg
     | HomeMsg Home.Msg
     | SetUser (Maybe User)
     | LoginMsg Login.Msg
-    | RegisterMsg Register.Msg
+    | SignupMsg Signup.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -191,8 +192,8 @@ setRoute maybeRoute model =
                             , Route.modifyUrl Route.Home
                             ]
 
-            Just Route.Register ->
-                { model | pageState = Loaded (Register Register.initialModel) } => Cmd.none
+            Just Route.Signup ->
+                { model | pageState = Loaded (Signup Signup.initialModel) } => Cmd.none
 
 
 pageErrored : Model -> ActivePage -> String -> ( Model, Cmd msg )
@@ -263,21 +264,21 @@ updatePage page msg model =
                     { newModel | pageState = Loaded (Login pageModel) }
                         => Cmd.map LoginMsg cmd
 
-            ( RegisterMsg subMsg, Register subModel ) ->
+            ( SignupMsg subMsg, Signup subModel ) ->
                 let
                     ( ( pageModel, cmd ), msgFromPage ) =
-                        Register.update subMsg subModel
+                        Signup.update subMsg subModel
 
                     newModel =
                         case msgFromPage of
-                            Register.NoOp ->
+                            Signup.NoOp ->
                                 model
 
-                            Register.SetUser user ->
+                            Signup.SetUser user ->
                                 { model | session = { user = Just user } }
                 in
-                    { newModel | pageState = Loaded (Register pageModel) }
-                        => Cmd.map RegisterMsg cmd
+                    { newModel | pageState = Loaded (Signup pageModel) }
+                        => Cmd.map SignupMsg cmd
 
             ( HomeMsg subMsg, Home subModel ) ->
                 toPage Home HomeMsg (Home.update session) subMsg subModel

@@ -3,7 +3,7 @@ module Views.Page exposing (ActivePage(..), bodyId, frame)
 {-| The frame around a typical page - that is, the header and footer.
 -}
 
-import Data.User as User exposing (User, Username)
+import Data.User as User exposing (User)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Lazy exposing (lazy2)
@@ -21,7 +21,7 @@ type ActivePage
     = Other
     | Home
     | Login
-    | Register
+    | Signup
 
 
 {-| Take a page's Html and frame it with a header and footer
@@ -63,7 +63,7 @@ viewSignIn page user =
         case user of
             Nothing ->
                 [ linkTo Route.Login [ text "Sign in" ]
-                , linkTo Route.Register [ text "Sign up" ]
+                , linkTo Route.Signup [ text "Sign up" ]
                 ]
 
             Just user ->
@@ -97,7 +97,7 @@ isActive page route =
         ( Login, Route.Login ) ->
             True
 
-        ( Register, Route.Register ) ->
+        ( Signup, Route.Signup ) ->
             True
 
         _ ->

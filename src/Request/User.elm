@@ -1,4 +1,4 @@
-module Request.User exposing (login, register, storeSession)
+module Request.User exposing (login, signup, storeSession)
 
 import Data.AuthToken exposing (AuthToken, withAuthorization)
 import Data.User as User exposing (User)
@@ -37,8 +37,8 @@ login { email, password } =
             |> Http.post (apiUrl "/users/login") body
 
 
-register : { r | username : String, email : String, password : String } -> Http.Request User
-register { username, email, password } =
+signup : { r | username : String, email : String, password : String } -> Http.Request User
+signup { username, email, password } =
     let
         user =
             Encode.object
