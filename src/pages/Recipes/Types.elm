@@ -98,25 +98,21 @@ type RecipeMsg
 
 
 type alias EditingRecipeFull =
-    { author : String
-    , authorId : String
-    , description : String
+    { description : String
     , id : String
     , imageUrl : String
-    , ingredients : Array EditingIngredient
+
+    -- , ingredients : Array EditingIngredient
     , instructions : String
-    , likes : List Int
     , name : String
     , tags : List RecipeTag
-    , youLike : Bool
     }
 
 
 type alias EditingIngredient =
     { quantity : String
     , ingredientId : String
-    , name : String
-    , unit : IngredientUnit
+    , unitId : String
     }
 
 

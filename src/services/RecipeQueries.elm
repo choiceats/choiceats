@@ -5,9 +5,11 @@ module RecipeQueries
         , sendUnitsQuery
         , sendRecipeQuery
         , sendIngredientsQuery
+        , submitRecipeMutation
         )
 
 import Http
+import Array exposing (Array)
 import Task exposing (Task)
 import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
@@ -123,6 +125,16 @@ sendRecipeQuery authToken recipeId msg =
         )
 
 
+submitRecipeMutation : AuthToken -> Recipes.Types.EditingRecipeFull -> (RecipeFullResponse -> a) -> Cmd a
+submitRecipeMutation authToken recipe msg =
+    Task.attempt
+        msg
+        (GraphQLClient.customSendMutation
+            (requestOptions authToken)
+            (GqlB.request { recipe = recipe } saveRecipeMutation)
+        )
+
+
 
 --
 -- GraphQL Requests
@@ -168,38 +180,29 @@ ingredientsRequest =
         )
 
 
-saveRecipeMutation recipe =
-    let
-        args =
-            [ ( "recipe"
-              , Arg.object
-                    [ ( "id", Arg.string recipe.id )
-                    , ( "authorId", Arg.string recipe.authorId )
-                    , ( "description", Arg.string recipe.description )
-                    , ( "name", Arg.string recipe.name )
-                    , ( "instructions", Arg.string recipe.instructions )
-                    , ( "ingredients", buildIngredientsVarList recipe.ingredients )
-                    ]
-              )
-            ]
-    in
-        GqlB.mutationDocument <|
-            (GqlB.extract
-                (GqlB.field "saveRecipe"
-                    [ ( "recipe", Arg.variable editingRecipe )
-                    ]
-                )
-            )
-
-
-buildIngredientsVarList ingredients =
-    Arg.list
-        (List.map
-            (\i ->
-                Arg.object
-                    [ ( "id", Arg.string, i.id )
-                    , ( "unit", Arg.string )
-                    ]
+saveRecipeMutation =
+    GqlB.mutationDocument
+        (GqlB.extract
+            (GqlB.field
+                "saveRecipe"
+                [ ( "recipe"
+                  , Arg.variable
+                        (Var.required
+                            "recipe"
+                            .recipe
+                            (Var.object
+                                "RecipeInput"
+                                [ Var.field "id" .id Var.string
+                                , Var.field "description" .description Var.string
+                                , Var.field "imageUrl" .imageUrl Var.string
+                                , Var.field "instructions" .instructions Var.string
+                                , Var.field "name" .name Var.string
+                                ]
+                            )
+                        )
+                  )
+                ]
+                gqlRecipeFull
             )
         )
 
@@ -274,6 +277,26 @@ gqlRecipeFull =
         |> GqlB.with (GqlB.field "name" [] GqlB.string)
         |> GqlB.with (GqlB.field "tags" [] (GqlB.list gqlTag))
         |> GqlB.with (GqlB.field "youLike" [] GqlB.bool)
+
+
+gqlEditingRecipeFull : GqlB.ValueSpec GqlB.NonNull GqlB.ObjectType Recipes.Types.EditingRecipeFull vars
+gqlEditingRecipeFull =
+    GqlB.object Recipes.Types.EditingRecipeFull
+        |> GqlB.with (GqlB.field "description" [] GqlB.string)
+        |> GqlB.with (GqlB.field "id" [] GqlB.string)
+        |> GqlB.with (GqlB.field "imageUrl" [] GqlB.string)
+        -- |> GqlB.with (GqlB.field "ingredients" [] (GqlB.list (Array.toList gqlEditingIngredient)))
+        |> GqlB.with (GqlB.field "instructions" [] GqlB.string)
+        |> GqlB.with (GqlB.field "name" [] GqlB.string)
+        |> GqlB.with (GqlB.field "tags" [] (GqlB.list gqlTag))
+
+
+gqlEditingIngredient : GqlB.ValueSpec GqlB.NonNull GqlB.ObjectType Recipes.Types.EditingIngredient vars
+gqlEditingIngredient =
+    GqlB.object Recipes.Types.EditingIngredient
+        |> GqlB.with (GqlB.field "quantity" [] GqlB.string)
+        |> GqlB.with (GqlB.field "ingredientId" [] GqlB.string)
+        |> GqlB.with (GqlB.field "unitId" [] GqlB.string)
 
 
 gqlUnitList : GqlB.ValueSpec GqlB.NonNull (GqlB.ListType GqlB.NonNull GqlB.ObjectType) (List Recipes.Types.Unit) vars
