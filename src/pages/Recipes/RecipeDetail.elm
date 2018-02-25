@@ -98,6 +98,7 @@ recipeQueryRequest recipeId =
 
 builtUnit =
     GqlB.object IngredientUnit
+        |> GqlB.with (GqlB.field "id" [] GqlB.string)
         |> GqlB.with (GqlB.field "abbr" [] GqlB.string)
         |> GqlB.with (GqlB.field "name" [] GqlB.string)
 

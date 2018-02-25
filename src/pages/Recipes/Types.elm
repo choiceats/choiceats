@@ -71,7 +71,8 @@ type alias IngredientRaw =
 
 
 type alias IngredientUnit =
-    { name : String
+    { id : String
+    , name : String
     , abbr : String
     }
 
@@ -101,8 +102,7 @@ type alias EditingRecipeFull =
     { description : String
     , id : String
     , imageUrl : String
-
-    -- , ingredients : Array EditingIngredient
+    , ingredients : Array EditingIngredient
     , instructions : String
     , name : String
     , tags : List RecipeTag

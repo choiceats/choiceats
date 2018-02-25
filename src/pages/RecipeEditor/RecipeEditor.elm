@@ -65,12 +65,9 @@ type Msg
     | ToggleIngredientDropdown (Maybe DropdownKey)
     | UpdateTextField TextField String
     | Submit
-
-
-
--- | UpdateIngredient IngredientField Int String
--- | SelectIngredientUnit Int Recipes.Types.Unit
--- | SelectIngredient Int Recipes.Types.IngredientRaw
+    | UpdateIngredient IngredientField Int String
+    | SelectIngredientUnit Int Recipes.Types.Unit
+    | SelectIngredient Int Recipes.Types.IngredientRaw
 
 
 main : Program RecipeFlags Model Msg
@@ -192,64 +189,74 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
+        UpdateIngredient field ingredientIndex value ->
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    case Array.get ingredientIndex editingRecipe.ingredients of
+                        Just foundIngredient ->
+                            let
+                                newIngredient =
+                                    { foundIngredient | quantity = value }
 
+                                newIngredients =
+                                    Array.set ingredientIndex newIngredient editingRecipe.ingredients
 
--- UpdateIngredient field ingredientIndex value ->
---     case model.editingRecipe of
---         Just editingRecipe ->
---             case Array.get ingredientIndex editingRecipe.ingredients of
---                 Just foundIngredient ->
---                     let
---                         newIngredient =
---                             { foundIngredient | quantity = value }
---                         newIngredients =
---                             Array.set ingredientIndex newIngredient editingRecipe.ingredients
---                         newEditingRecipe =
---                             { editingRecipe | ingredients = newIngredients }
---                     in
---                         ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
---                 Nothing ->
---                     ( model, Cmd.none )
---         Nothing ->
---             ( model, Cmd.none )
--- SelectIngredientUnit ingredientIndex unit ->
---     case model.editingRecipe of
---         Just editingRecipe ->
---             case Array.get ingredientIndex editingRecipe.ingredients of
---                 Just foundIngredient ->
---                     let
---                         newUnit =
---                             { name = unit.name, abbr = unit.abbr }
---                         newIngredient =
---                             { foundIngredient | unit = newUnit }
---                         newIngredients =
---                             Array.set ingredientIndex newIngredient editingRecipe.ingredients
---                         newEditingRecipe =
---                             { editingRecipe | ingredients = newIngredients }
---                     in
---                         ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
---                 Nothing ->
---                     ( model, Cmd.none )
---         Nothing ->
---             ( model, Cmd.none )
--- SelectIngredient index rawIngredient ->
---     case model.editingRecipe of
---         Just editingRecipe ->
---             case Array.get index editingRecipe.ingredients of
---                 Just foundIngredient ->
---                     let
---                         newIngredient =
---                             { foundIngredient | ingredientId = rawIngredient.id, name = rawIngredient.name }
---                         newIngredients =
---                             Array.set index newIngredient editingRecipe.ingredients
---                         newEditingRecipe =
---                             { editingRecipe | ingredients = newIngredients }
---                     in
---                         ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
---                 Nothing ->
---                     ( model, Cmd.none )
---         Nothing ->
---             ( model, Cmd.none )
+                                newEditingRecipe =
+                                    { editingRecipe | ingredients = newIngredients }
+                            in
+                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        SelectIngredientUnit ingredientIndex unit ->
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    case Array.get ingredientIndex editingRecipe.ingredients of
+                        Just foundIngredient ->
+                            let
+                                newIngredient =
+                                    { foundIngredient | unitId = unit.id }
+
+                                newIngredients =
+                                    Array.set ingredientIndex newIngredient editingRecipe.ingredients
+
+                                newEditingRecipe =
+                                    { editingRecipe | ingredients = newIngredients }
+                            in
+                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        SelectIngredient index rawIngredient ->
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    case Array.get index editingRecipe.ingredients of
+                        Just foundIngredient ->
+                            let
+                                newIngredient =
+                                    { foundIngredient | ingredientId = rawIngredient.id }
+
+                                newIngredients =
+                                    Array.set index newIngredient editingRecipe.ingredients
+
+                                newEditingRecipe =
+                                    { editingRecipe | ingredients = newIngredients }
+                            in
+                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
 
 init : RecipeFlags -> ( Model, Cmd Msg )
@@ -267,30 +274,34 @@ recipeFullToEditingRecipe : Model -> Maybe Recipes.Types.RecipeFull -> Maybe Rec
 recipeFullToEditingRecipe model recipeFull =
     case recipeFull of
         Just recipe ->
-            Just
-                { description = recipe.description
-                , id = recipe.id
-                , imageUrl = recipe.imageUrl
-                , instructions = recipe.instructions
-                , name = recipe.name
-                , tags = recipe.tags
-
-                -- , ingredients = ingredientsToEditingIngredients model recipe.ingredients
-                }
+            let
+                _ =
+                    Debug.log "recipe" recipe
+            in
+                Just
+                    { description = recipe.description
+                    , id = recipe.id
+                    , imageUrl = recipe.imageUrl
+                    , instructions = recipe.instructions
+                    , name = recipe.name
+                    , tags = recipe.tags
+                    , ingredients = ingredientsToEditingIngredients model recipe.ingredients
+                    }
 
         Nothing ->
             Nothing
 
 
+ingredientsToEditingIngredients model recipeIngredients =
+    fromList (List.map (ingredientToEditingIngredient model) recipeIngredients)
 
--- ingredientsToEditingIngredients model recipeIngredients =
---     fromList (List.map (ingredientToEditingIngredient model) recipeIngredients)
--- ingredientToEditingIngredient : Model -> Recipes.Types.Ingredient -> Recipes.Types.EditingIngredient
--- ingredientToEditingIngredient model recipeIngredient =
---     { quantity = toString recipeIngredient.quantity
---     , ingredientId = getIngredientId model.ingredients recipeIngredient
---     , unitId = recipeIngredient.unit.id
---     }
+
+ingredientToEditingIngredient : Model -> Recipes.Types.Ingredient -> Recipes.Types.EditingIngredient
+ingredientToEditingIngredient model recipeIngredient =
+    { quantity = toString recipeIngredient.quantity
+    , ingredientId = getIngredientId model.ingredients recipeIngredient
+    , unitId = recipeIngredient.unit.id
+    }
 
 
 getIngredientId : Maybe (List Recipes.Types.IngredientRaw) -> Recipes.Types.Ingredient -> String
@@ -346,8 +357,7 @@ recipeFormView model r =
             [ h1 [] [ text "Recipe Editor" ]
             , textInput r.name RecipeName False
             , textInput r.description RecipeDescription True
-
-            -- , viewIngredientList model r
+            , viewIngredientList model r
             , div
                 [ class "field" ]
                 [ button [ class "ui negative button", role "button" ] [ text "X" ] ]
@@ -422,126 +432,156 @@ textInput modelData textField isTextarea =
             ]
 
 
+viewIngredientList : Model -> Recipes.Types.EditingRecipeFull -> Html Msg
+viewIngredientList model r =
+    let
+        ingredientsLabel =
+            (label [] [ text "Ingredients" ])
+                :: (Array.toList
+                        (Array.indexedMap
+                            (ingredientRow model)
+                            r.ingredients
+                        )
+                   )
+    in
+        div []
+            ingredientsLabel
 
--- viewIngredientList : Model -> Recipes.Types.EditingRecipeFull -> Html Msg
--- viewIngredientList model r =
---     let
---         ingredientsLabel =
---             (label [] [ text "Ingredients" ])
---                 :: (Array.toList
---                         (Array.indexedMap
---                             (ingredientRow model)
---                             r.ingredients
---                         )
---                    )
---     in
---         div []
---             ingredientsLabel
--- ingredientRow : Model -> Int -> Recipes.Types.EditingIngredient -> Html Msg
--- ingredientRow model ingredientIndex ingredient =
---     div [ class "fields recipe-editor-group" ]
---         [ div [ class "two wide field" ]
---             [ div [ class "ui input" ] [ input [ type_ "text", value ingredient.quantity, placeholder "#", onInput (UpdateIngredient IngredientQuanity ingredientIndex) ] [] ] ]
---         , div [ class "four wide field" ]
---             [ unitsDropdown model.units ingredientIndex ingredient.unit model.uiOpenDropdown ]
---         , div [ class "six wide field" ]
---             [ ingredientTypeAhead model ingredientIndex ingredient model.uiOpenDropdown ]
---         ]
--- unitsDropdown : Maybe (List Recipes.Types.Unit) -> Int -> Recipes.Types.IngredientUnit -> Maybe DropdownKey -> Html Msg
--- unitsDropdown units ingredientIndex ingredientUnit openDropdown =
---     let
---         isVisible =
---             case openDropdown of
---                 Just (UnitsDropdown dd) ->
---                     if dd == ingredientIndex then
---                         True
---                     else
---                         False
---                 _ ->
---                     False
---         active =
---             if isVisible then
---                 "active"
---             else
---                 ""
---         visible =
---             if isVisible then
---                 "visible"
---             else
---                 ""
---     in
---         div
---             [ class ("ui " ++ active ++ " selection dropdown")
---             , tabindex 0
---             , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex))))
---             ]
---             -- needs attr of role "listbox"
---             [ div [ class "text" ] [ text ingredientUnit.name ] -- needs role of alert. This div represent the head of the list/the active element
---             , i [ class "dropdown icon" ] []
---             , div
---                 [ class
---                     ("menu " ++ visible ++ " transition ")
---                 ]
---                 (case units of
---                     Nothing ->
---                         [ div [] [ text "no display units..." ] ]
---                     Just res ->
---                         List.map (measuringUnit ingredientIndex) res
---                 )
---             ]
--- ingredientTypeAhead : Model -> Int -> Recipes.Types.EditingIngredient -> Maybe DropdownKey -> Html Msg
--- ingredientTypeAhead model ingredientIndex ingredient openDropdown =
---     let
---         isVisible =
---             case openDropdown of
---                 Just (IngredientDropdown dd) ->
---                     if dd == ingredientIndex then
---                         True
---                     else
---                         False
---                 _ ->
---                     False
---         active =
---             if isVisible then
---                 "active"
---             else
---                 ""
---         visible =
---             if isVisible then
---                 "visible"
---             else
---                 ""
---     in
---         div
---             [ class ("ui " ++ active ++ " selection dropdown")
---             , tabindex 0
---             , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (IngredientDropdown ingredientIndex))))
---             ]
---             [ input [ type_ "hidden", name "gender" ] []
---             , i [ class "dropdown icon" ] []
---             , div [ class "default text" ] [ text (getIngredientName model.ingredients ingredient.ingredientId) ]
---             , div [ class ("menu " ++ visible ++ " transition") ]
---                 (case model.ingredients of
---                     Nothing ->
---                         [ div [] [ text "Na uh uh.  You didn't say the magic word" ] ]
---                     Just ingred ->
---                         List.map (ingredientItem ingredientIndex ingredient) ingred
---                 )
---             ]
--- ingredientItem : Int -> Recipes.Types.EditingIngredient -> Recipes.Types.IngredientRaw -> Html Msg
--- ingredientItem index ingredient ingredientRaw =
---     div
---         [ class "item"
---         , attribute "data-value" "42"
---         , onClick (SelectIngredient index ingredientRaw)
---         ]
---         [ text ingredientRaw.name ]
--- measuringUnit : Int -> Recipes.Types.Unit -> Html Msg
--- measuringUnit index unit =
---     div
---         [ class "item"
---         , style [ ( "pointer-events", "all" ) ]
---         , onClick (SelectIngredientUnit index unit)
---         ]
---         --, onClick (SelectUnit unit.id) ]
---         [ span [ class "text" ] [ text unit.abbr ] ]
+
+ingredientRow : Model -> Int -> Recipes.Types.EditingIngredient -> Html Msg
+ingredientRow model ingredientIndex ingredient =
+    div [ class "fields recipe-editor-group" ]
+        [ div [ class "two wide field" ]
+            [ div [ class "ui input" ] [ input [ type_ "text", value ingredient.quantity, placeholder "#", onInput (UpdateIngredient IngredientQuanity ingredientIndex) ] [] ] ]
+        , div [ class "four wide field" ]
+            [ unitsDropdown model.units ingredientIndex ingredient.unitId model.uiOpenDropdown ]
+        , div [ class "six wide field" ]
+            [ ingredientTypeAhead model ingredientIndex ingredient model.uiOpenDropdown ]
+        ]
+
+
+unitsDropdown : Maybe (List Recipes.Types.Unit) -> Int -> String -> Maybe DropdownKey -> Html Msg
+unitsDropdown units ingredientIndex ingredientUnitId openDropdown =
+    let
+        isVisible =
+            case openDropdown of
+                Just (UnitsDropdown dd) ->
+                    if dd == ingredientIndex then
+                        True
+                    else
+                        False
+
+                _ ->
+                    False
+
+        active =
+            if isVisible then
+                "active"
+            else
+                ""
+
+        visible =
+            if isVisible then
+                "visible"
+            else
+                ""
+
+        displayUnit =
+            case units of
+                Nothing ->
+                    ""
+
+                Just res ->
+                    case (List.head (List.filter (\n -> n.id == ingredientUnitId) res)) of
+                        Nothing ->
+                            ""
+
+                        Just foundUnit ->
+                            foundUnit.abbr
+    in
+        div
+            [ class ("ui " ++ active ++ " selection dropdown")
+            , tabindex 0
+            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex))))
+            ]
+            -- needs attr of role "listbox"
+            [ div [ class "text" ] [ text displayUnit ] -- needs role of alert. This div represent the head of the list/the active element
+            , i [ class "dropdown icon" ] []
+            , div
+                [ class
+                    ("menu " ++ visible ++ " transition ")
+                ]
+                (case units of
+                    Nothing ->
+                        [ div [] [ text "no display units..." ] ]
+
+                    Just res ->
+                        List.map (measuringUnit ingredientIndex) res
+                )
+            ]
+
+
+ingredientTypeAhead : Model -> Int -> Recipes.Types.EditingIngredient -> Maybe DropdownKey -> Html Msg
+ingredientTypeAhead model ingredientIndex ingredient openDropdown =
+    let
+        isVisible =
+            case openDropdown of
+                Just (IngredientDropdown dd) ->
+                    if dd == ingredientIndex then
+                        True
+                    else
+                        False
+
+                _ ->
+                    False
+
+        active =
+            if isVisible then
+                "active"
+            else
+                ""
+
+        visible =
+            if isVisible then
+                "visible"
+            else
+                ""
+    in
+        div
+            [ class ("ui " ++ active ++ " selection dropdown")
+            , tabindex 0
+            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (IngredientDropdown ingredientIndex))))
+            ]
+            [ input [ type_ "hidden", name "gender" ] []
+            , i [ class "dropdown icon" ] []
+            , div [ class "default text" ] [ text (getIngredientName model.ingredients ingredient.ingredientId) ]
+            , div [ class ("menu " ++ visible ++ " transition") ]
+                (case model.ingredients of
+                    Nothing ->
+                        [ div [] [ text "Na uh uh.  You didn't say the magic word" ] ]
+
+                    Just ingred ->
+                        List.map (ingredientItem ingredientIndex ingredient) ingred
+                )
+            ]
+
+
+ingredientItem : Int -> Recipes.Types.EditingIngredient -> Recipes.Types.IngredientRaw -> Html Msg
+ingredientItem index ingredient ingredientRaw =
+    div
+        [ class "item"
+        , attribute "data-value" "42"
+        , onClick (SelectIngredient index ingredientRaw)
+        ]
+        [ text ingredientRaw.name ]
+
+
+measuringUnit : Int -> Recipes.Types.Unit -> Html Msg
+measuringUnit index unit =
+    div
+        [ class "item"
+        , style [ ( "pointer-events", "all" ) ]
+        , onClick (SelectIngredientUnit index unit)
+        ]
+        --, onClick (SelectUnit unit.id) ]
+        [ span [ class "text" ] [ text unit.abbr ] ]
