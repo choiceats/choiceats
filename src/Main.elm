@@ -122,7 +122,9 @@ viewPage session isLoading page =
 
 
 subscriptions model =
-    Sub.none
+    Sub.batch
+        [ Sub.map SetUser sessionChange
+        ]
 
 
 sessionChange : Sub (Maybe User)

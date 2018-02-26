@@ -1,4 +1,4 @@
-module Request.User exposing (login, signup, storeSession)
+module Request.User exposing (login, storeSession)
 
 import Data.AuthToken exposing (AuthToken, withAuthorization)
 import Data.User as User exposing (User)
@@ -34,22 +34,24 @@ login { email, password } =
                 |> Http.jsonBody
     in
         Decode.field "user" User.decoder
-            |> Http.post (apiUrl "/users/login") body
+            |> Http.post ("http://localhost:4000/auth") body
 
 
-signup : { r | username : String, email : String, password : String } -> Http.Request User
-signup { username, email, password } =
-    let
-        user =
-            Encode.object
-                [ "username" => Encode.string username
-                , "email" => Encode.string email
-                , "password" => Encode.string password
-                ]
 
-        body =
-            Encode.object [ "user" => user ]
-                |> Http.jsonBody
-    in
-        Decode.field "user" User.decoder
-            |> Http.post (apiUrl "/users") body
+-- TODO: Convert http request in Page/Signup
+-- signup : { r | username : String, email : String, password : String } -> Http.Request User
+-- signup { username, email, password } =
+--     let
+--         user =
+--             Encode.object
+--                 [ "username" => Encode.string username
+--                 , "email" => Encode.string email
+--                 , "password" => Encode.string password
+--                 ]
+--
+--         body =
+--             Encode.object [ "user" => user ]
+--                 |> Http.jsonBody
+--     in
+--         Decode.field "user" User.decoder
+--             |> Http.post (apiUrl "/users") body

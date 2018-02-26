@@ -1,6 +1,6 @@
-module Views.Page exposing (ActivePage(..), bodyId, frame)
+module Views.Page exposing (ActivePage(..), frame)
 
-{-| The frame around a typical page - that is, the header and footer.
+{-| Add header to page
 -}
 
 import Data.User as User exposing (User)
@@ -24,9 +24,9 @@ type ActivePage
     | Signup
 
 
-{-| Take a page's Html and frame it with a header and footer
+{-| Take a page's Html and add a header
 
-The caller provides the current user, so we can display in either "signed in" (rendering username) or "signed out" mode.
+The caller provides the current user, letting us show login or logout buttons and user's name.
 
 isLoading is for determining whether we should show a loading spinner in the header. (This comes up during slow page transitions.)
 
@@ -36,56 +36,40 @@ frame isLoading user page content =
     div [ class "page-frame" ]
         [ viewHeader page user isLoading
         , content
-        , viewFooter
         ]
 
 
 viewHeader : ActivePage -> Maybe User -> Bool -> Html msg
 viewHeader page user isLoading =
-    nav [ class "navbar navbar-light" ]
-        [ div [ class "container" ]
-            [ a [ class "navbar-brand", Route.href Route.Home ]
-                [ text "conduit" ]
-            , ul [ class "nav navbar-nav pull-xs-right" ] <|
-                lazy2 Util.viewIf isLoading spinner
-                    :: navbarLink page Route.Home [ text "home" ]
-                    :: viewSignIn page user
-            ]
-        ]
-
-
-viewSignIn : ActivePage -> Maybe User -> List (Html msg)
-viewSignIn page user =
     let
         linkTo =
             navbarLink page
+
+        sessionButton =
+            case user of
+                Just user ->
+                    linkTo Route.Logout
+                        [ button [ class "ui button", type_ "button" ] [ text "Logout" ] ]
+
+                Nothing ->
+                    linkTo Route.Login
+                        [ button [ class "ui button", type_ "button" ] [ text "Login" ] ]
     in
-        case user of
-            Nothing ->
-                [ linkTo Route.Login [ text "Sign in" ]
-                , linkTo Route.Signup [ text "Sign up" ]
+        div [ class "ui secondary menu", style [ ( "height", "50px" ) ] ]
+            [ div [ class "header item" ] [ text "ChoicEats" ]
+            , linkTo Route.Signup [ text "Recipes" ] -- TODO: Change route to / when this route is created. And make recipes the default route.
+            , linkTo Route.Signup [ text "Ideas" ] -- TODO: Change route to /random when this route is created
+            , div [ class "right menu" ]
+                [ div [ class "item" ]
+                    [ sessionButton ]
                 ]
-
-            Just user ->
-                [ linkTo Route.Logout [ text "Sign out" ]
-                ]
-
-
-viewFooter : Html msg
-viewFooter =
-    footer []
-        [ div [ class "container" ]
-            [ a [ class "logo-font", href "/" ] [ text "conduit" ]
-            , span [ class "attribution" ]
-                [ text "Attribution and stuff" ]
             ]
-        ]
 
 
 navbarLink : ActivePage -> Route -> List (Html msg) -> Html msg
 navbarLink page route linkContent =
-    li [ classList [ ( "nav-item", True ), ( "active", isActive page route ) ] ]
-        [ a [ class "nav-link", Route.href route ] linkContent ]
+    li [ classList [ ( "item", True ), ( "active", isActive page route ) ] ]
+        [ a [ Route.href route ] linkContent ]
 
 
 isActive : ActivePage -> Route -> Bool
@@ -102,11 +86,3 @@ isActive page route =
 
         _ ->
             False
-
-
-{-| This id comes from index.html.
-the Feed users it to scroll to the top of the page (by ID) when switching pages in the pagination sense.
--}
-bodyId : String
-bodyId =
-    "page-body"

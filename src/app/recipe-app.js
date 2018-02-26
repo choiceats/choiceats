@@ -30,7 +30,12 @@ export class RecipeApp extends Component {
 
   render() {
     const { location, match } = this.props
-    const { user = {} } = this.state
+
+    let { user = {} } = this.state
+    if (user === null) {
+      user = {};
+    }
+
     let { token = '', userId = '' } = user
 
     if (token === null) {

@@ -36,41 +36,61 @@ initialModel =
     }
 
 
-
--- VIEW --
-
-
 view : Session -> Model -> Html Msg
 view session model =
-    div [ class "auth-page" ]
-        [ div [ class "container page" ]
-            [ div [ class "row" ]
-                [ div [ class "col-md-6 offset-md-3 col-xs-12" ]
-                    [ h1 [ class "text-xs-center" ] [ text "Sign in" ]
-                    , p [ class "text-xs-center" ]
-                        [ a [ Route.href Route.Signup ]
-                            [ text "Need an account?" ]
+    div
+        [ style [ ( "height", "calc(100vh - 50px)" ), ( "overflow", "auto" ), ( "padding", "20px" ) ] ]
+        [ div
+            [ style [ ( "max-width", "500px" ), ( "margin", "auto" ) ] ]
+            [ Html.form [ class "ui form", onSubmit SubmitForm ]
+                [ h1 [ style [ ( "font-family", "Fira Code" ), ( "font-size", "25px" ) ] ] [ text "Login" ]
+                , viewInput model.email "Email" "text" SetEmail
+                , viewInput model.password "Password" "password" SetPassword
+                , br [] []
+                , div []
+                    [ button
+                        [ type_ "submit"
+                        , class "ui primary button"
+                        , disabled (not (hasLength model.email) || not (hasLength model.password))
                         ]
-                    , Form.viewErrors model.errors
-                    , viewForm
+                        [ text "Login" ]
+                    ]
+                , br [] []
+                , br [] []
+                , a [ Route.href Route.Signup ]
+                    [ button
+                        [ type_ "button"
+                        , class "ui button"
+                        ]
+                        [ text "Sign up" ]
                     ]
                 ]
             ]
+
+        --  , div
+        --    [class <| "ui error message " ++ (if hasLength model.serverFeedback then "visible" else "hidden")]
+        --    [text model.serverFeedback]
         ]
 
 
-viewForm : Html Msg
-viewForm =
-    Html.form [ onSubmit SubmitForm ]
-        [ Form.input
-            [ class "form-control-lg"
-            , placeholder "Email"
-            , onInput SetEmail
+viewInput : String -> LabelName -> InputAttr -> (String -> Msg) -> Html Msg
+viewInput userInput labelName inputAttr inputType =
+    let
+        idName =
+            (String.filter isIdChar labelName)
+    in
+        div [ class "field" ]
+            [ label [ for idName ] [ text labelName ]
+            , div [ class "ui input" ]
+                [ input
+                    [ type_ inputAttr
+                    , onInput inputType
+                    , value userInput
+                    , id idName
+                    ]
+                    []
+                ]
             ]
-            []
-        , button [ class "btn btn-lg btn-primary pull-xs-right" ]
-            [ text "Sign in" ]
-        ]
 
 
 
@@ -95,24 +115,18 @@ update msg model =
         SubmitForm ->
             case validate modelValidator model of
                 [] ->
-                    { model | errors = [] }
-                        => Http.send LoginCompleted (Request.User.login model)
-                        => NoOp
+                    ( ( { model | errors = [] }, Http.send LoginCompleted (Request.User.login model) )
+                    , NoOp
+                    )
 
                 errors ->
-                    { model | errors = errors }
-                        => Cmd.none
-                        => NoOp
+                    ( ( { model | errors = errors }, Cmd.none ), NoOp )
 
         SetEmail email ->
-            { model | email = email }
-                => Cmd.none
-                => NoOp
+            ( ( { model | email = email }, Cmd.none ), NoOp )
 
         SetPassword password ->
-            { model | password = password }
-                => Cmd.none
-                => NoOp
+            ( ( { model | password = password }, Cmd.none ), NoOp )
 
         LoginCompleted (Err error) ->
             let
@@ -126,14 +140,14 @@ update msg model =
                         _ ->
                             [ "unable to perform login" ]
             in
-                { model | errors = List.map (\errorMessage -> Form => errorMessage) errorMessages }
-                    => Cmd.none
-                    => NoOp
+                ( ( { model | errors = List.map (\err -> ( Form, err )) errorMessages }, Cmd.none )
+                , NoOp
+                )
 
         LoginCompleted (Ok user) ->
-            model
-                => Cmd.batch [ storeSession user, Route.modifyUrl Route.Home ]
-                => SetUser user
+            ( ( model, Cmd.batch [ storeSession user, Route.modifyUrl Route.Home ] )
+            , SetUser user
+            )
 
 
 
@@ -189,3 +203,31 @@ optionalError fieldName =
             String.join " " [ fieldName, errorMessage ]
     in
         optional fieldName (Decode.list (Decode.map errorToString string)) []
+
+
+isIdChar : Char -> Bool
+isIdChar char =
+    notDash char && notSpace char
+
+
+notDash : Char -> Bool
+notDash char =
+    char /= '-'
+
+
+notSpace : Char -> Bool
+notSpace char =
+    char /= ' '
+
+
+hasLength : String -> Bool
+hasLength str =
+    not <| String.isEmpty str
+
+
+type alias LabelName =
+    String
+
+
+type alias InputAttr =
+    String
