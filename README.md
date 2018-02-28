@@ -5,7 +5,15 @@ This app is in transition from React to Elm. Both rely on the same backend. to s
 
 To start the React version of the client, run `yarn start`
 
-To start the Elm version of the client, navigate to the project root and run `elm-live --output=elm.js src/Main.elm --pushstate --open --debug`. Note that you will need `elm` and `elm-live` installed (run `npm install -g elm elm-live`).
+To start the Elm version of the client, navigate to the project root and run
+```
+elm-live --output=elm.js src/Main.elm --pushstate --open --debug
+```
+
+Note that you will need `elm` and `elm-live` installed. They can be installed by running
+```
+npm install -g elm elm-live
+```
 
 
 ## Minimum Viable Product

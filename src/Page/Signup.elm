@@ -34,10 +34,6 @@ type ExternalMsg
     | SetUser User
 
 
-type alias Flags =
-    { token : String }
-
-
 
 -- type UserInput = Int | String | Number
 -- had problems getting union types to play nicely with things that expected a String. TODO: Make this type work as it generalizes better to different form field types
@@ -381,11 +377,6 @@ requestAccount model =
              <|
                 decoder
             )
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
 
 
 view : Session -> Model -> Html Msg

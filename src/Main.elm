@@ -9,6 +9,7 @@ import Page.Errored as Errored exposing (PageLoadError)
 import Page.Home as Home
 import Page.Login as Login
 import Page.Signup as Signup
+import Page.Randomizer as Randomizer
 import Page.NotFound as NotFound
 import Ports
 import Route exposing (Route)
@@ -33,6 +34,7 @@ type Page
     | Home Home.Model
     | Login Login.Model
     | Signup Signup.Model
+    | Randomizer Randomizer.Model
 
 
 type PageState
@@ -120,6 +122,11 @@ viewPage session isLoading page =
                     |> frame Page.Other
                     |> Html.map SignupMsg
 
+            Randomizer subModel ->
+                Randomizer.view session subModel
+                    |> frame Page.Other
+                    |> Html.map RandomizerMsg
+
 
 subscriptions model =
     Sub.batch
@@ -153,6 +160,7 @@ type Msg
     | SetUser (Maybe User)
     | LoginMsg Login.Msg
     | SignupMsg Signup.Msg
+    | RandomizerMsg Randomizer.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -196,6 +204,13 @@ setRoute maybeRoute model =
 
             Just Route.Signup ->
                 { model | pageState = Loaded (Signup Signup.initialModel) } => Cmd.none
+
+            Just Route.Randomizer ->
+                let
+                    ( newModel, newMsg ) =
+                        (Randomizer.init model.session)
+                in
+                    ( { model | pageState = Loaded (Randomizer newModel) }, Cmd.map RandomizerMsg newMsg )
 
 
 pageErrored : Model -> ActivePage -> String -> ( Model, Cmd msg )
@@ -281,6 +296,19 @@ updatePage page msg model =
                 in
                     { newModel | pageState = Loaded (Signup pageModel) }
                         => Cmd.map SignupMsg cmd
+
+            ( RandomizerMsg subMsg, Randomizer subModel ) ->
+                let
+                    ( ( pageModel, cmd ), msgFromPage ) =
+                        Randomizer.update subMsg subModel
+
+                    newModel =
+                        case msgFromPage of
+                            Randomizer.NoOp ->
+                                model
+                in
+                    { newModel | pageState = Loaded (Randomizer pageModel) }
+                        => Cmd.map RandomizerMsg cmd
 
             ( HomeMsg subMsg, Home subModel ) ->
                 toPage Home HomeMsg (Home.update session) subMsg subModel
