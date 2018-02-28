@@ -68,6 +68,7 @@ type Msg
     | UpdateIngredient IngredientField Int String
     | SelectIngredientUnit Int Recipes.Types.Unit
     | SelectIngredient Int Recipes.Types.IngredientRaw
+    | AddIngredient
 
 
 main : Program RecipeFlags Model Msg
@@ -258,6 +259,26 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
+        AddIngredient ->
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    let
+                        newIngredientList =
+                            Array.push
+                                { quantity = ""
+                                , ingredientId = "2"
+                                , unitId = "4"
+                                }
+                                editingRecipe.ingredients
+
+                        newEditingRecipe =
+                            Just { editingRecipe | ingredients = newIngredientList }
+                    in
+                        ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
 
 init : RecipeFlags -> ( Model, Cmd Msg )
 init flags =
@@ -363,15 +384,16 @@ recipeFormView model r =
                 [ button [ class "ui negative button", role "button" ] [ text "X" ] ]
             , div
                 [ class "field" ]
-                [ button [ class "ui primary button", role "button" ] [ text "Add Ingredient" ] ]
-            , div [ class "field" ]
-                [ label [ class "field" ] [ text "Tags" ]
-                , div [ class "ui multiple selection dropdown", tabindex 0, role "listbox" ]
-                    [ a [ class "ui label", value "0" ] [ text "Spicy", i [ class "delete icon" ] [] ] ]
-                , div [ class "text", role "alert" ] []
-                , i [ class "dropdown icon" ] []
-                , div [ class "menu transition" ] []
-                ]
+                [ button [ class "ui primary button", role "button", onClick AddIngredient ] [ text "Add Ingredient" ] ]
+
+            -- , div [ class "field" ]
+            --     [ label [ class "field" ] [ text "Tags" ]
+            --     , div [ class "ui multiple selection dropdown", tabindex 0, role "listbox" ]
+            --         [ a [ class "ui label", value "0" ] [ text "Spicy", i [ class "delete icon" ] [] ] ]
+            --     , div [ class "text", role "alert" ] []
+            --     , i [ class "dropdown icon" ] []
+            --     , div [ class "menu transition" ] []
+            --     ]
             , textInput r.instructions RecipeInstructions True
             , button [ class "ui button", onClick Submit ] [ text "Save" ]
             ]
@@ -421,7 +443,7 @@ textInput modelData textField isTextarea =
 
         moreAttrs =
             if isTextarea then
-                [ rows 3 ]
+                [ rows 5 ]
             else
                 [ type_ "text" ]
     in
