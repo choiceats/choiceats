@@ -69,6 +69,7 @@ type Msg
     | SelectIngredientUnit Int Recipes.Types.Unit
     | SelectIngredient Int Recipes.Types.IngredientRaw
     | AddIngredient
+    | DeleteIngredient Int
 
 
 main : Program RecipeFlags Model Msg
@@ -266,10 +267,31 @@ update msg model =
                         newIngredientList =
                             Array.push
                                 { quantity = ""
-                                , ingredientId = "2"
-                                , unitId = "4"
+                                , ingredientId = ""
+                                , unitId = ""
                                 }
                                 editingRecipe.ingredients
+
+                        newEditingRecipe =
+                            Just { editingRecipe | ingredients = newIngredientList }
+                    in
+                        ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        DeleteIngredient index ->
+            case model.editingRecipe of
+                Just editingRecipe ->
+                    let
+                        beforeIngredientList =
+                            Array.slice 0 index editingRecipe.ingredients
+
+                        afterIngredientList =
+                            Array.slice (index + 1) (Array.length editingRecipe.ingredients) editingRecipe.ingredients
+
+                        newIngredientList =
+                            Array.append beforeIngredientList afterIngredientList
 
                         newEditingRecipe =
                             Just { editingRecipe | ingredients = newIngredientList }
@@ -381,7 +403,7 @@ recipeFormView model r =
             , viewIngredientList model r
             , div
                 [ class "field" ]
-                [ button [ class "ui negative button", role "button" ] [ text "X" ] ]
+                []
             , div
                 [ class "field" ]
                 [ button [ class "ui primary button", role "button", onClick AddIngredient ] [ text "Add Ingredient" ] ]
@@ -457,7 +479,7 @@ textInput modelData textField isTextarea =
 viewIngredientList : Model -> Recipes.Types.EditingRecipeFull -> Html Msg
 viewIngredientList model r =
     let
-        ingredientsLabel =
+        ingredientForms =
             (label [] [ text "Ingredients" ])
                 :: (Array.toList
                         (Array.indexedMap
@@ -467,7 +489,7 @@ viewIngredientList model r =
                    )
     in
         div []
-            ingredientsLabel
+            ingredientForms
 
 
 ingredientRow : Model -> Int -> Recipes.Types.EditingIngredient -> Html Msg
@@ -479,6 +501,8 @@ ingredientRow model ingredientIndex ingredient =
             [ unitsDropdown model.units ingredientIndex ingredient.unitId model.uiOpenDropdown ]
         , div [ class "six wide field" ]
             [ ingredientTypeAhead model ingredientIndex ingredient model.uiOpenDropdown ]
+        , div [ class "six wide field" ]
+            [ button [ class "ui negative button", role "button", onClick (DeleteIngredient ingredientIndex) ] [ text "X" ] ]
         ]
 
 
