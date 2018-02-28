@@ -1,4 +1,4 @@
-module Util exposing (appendErrors, onClickStopPropagation, pair, viewIf)
+module Util exposing (appendErrors, onClickStopPropagation, viewIf)
 
 import Html exposing (Attribute, Html)
 import Html.Events exposing (defaultOptions, onWithOptions)
