@@ -14,7 +14,6 @@ import Page.NotFound as NotFound
 import Ports
 import Route exposing (Route)
 import Task
-import Util exposing ((=>))
 import Views.Page as Page exposing (ActivePage)
 
 
@@ -168,8 +167,8 @@ setRoute maybeRoute model =
     let
         -- TODO: Make it how it should be
         -- transition toMsg task =
-        --     { model | pageState = TransitioningFrom (getPage model.pageState) }
-        --         => Task.attempt toMsg task
+        --     ({ model | pageState = TransitioningFrom (getPage model.pageState) },
+        --         Task.attempt toMsg task)
         transition toMsg task =
             ( { model | pageState = TransitioningFrom (getPage model.pageState) }, Cmd.none )
 
@@ -179,31 +178,32 @@ setRoute maybeRoute model =
     in
         case maybeRoute of
             Nothing ->
-                { model | pageState = Loaded NotFound } => Cmd.none
+                ( { model | pageState = Loaded NotFound }, Cmd.none )
 
             -- TODO: Make it how it should be
             Just Route.Home ->
                 transition HomeLoaded (Home.init model.session)
 
             Just Route.Root ->
-                model => Route.modifyUrl Route.Home
+                ( model, Route.modifyUrl Route.Home )
 
             Just Route.Login ->
-                { model | pageState = Loaded (Login Login.initialModel) } => Cmd.none
+                ( { model | pageState = Loaded (Login Login.initialModel) }, Cmd.none )
 
             Just Route.Logout ->
                 let
                     session =
                         model.session
                 in
-                    { model | session = { session | user = Nothing } }
-                        => Cmd.batch
-                            [ Ports.storeSession Nothing
-                            , Route.modifyUrl Route.Home
-                            ]
+                    ( { model | session = { session | user = Nothing } }
+                    , Cmd.batch
+                        [ Ports.storeSession Nothing
+                        , Route.modifyUrl Route.Home
+                        ]
+                    )
 
             Just Route.Signup ->
-                { model | pageState = Loaded (Signup Signup.initialModel) } => Cmd.none
+                ( { model | pageState = Loaded (Signup Signup.initialModel) }, Cmd.none )
 
             Just Route.Randomizer ->
                 let
@@ -219,7 +219,7 @@ pageErrored model activePage errorMessage =
         error =
             Errored.pageLoadError activePage errorMessage
     in
-        { model | pageState = Loaded (Errored error) } => Cmd.none
+        ( { model | pageState = Loaded (Errored error) }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -248,10 +248,10 @@ updatePage page msg model =
                 setRoute route model
 
             ( HomeLoaded (Ok subModel), _ ) ->
-                { model | pageState = Loaded (Home subModel) } => Cmd.none
+                ( { model | pageState = Loaded (Home subModel) }, Cmd.none )
 
             ( HomeLoaded (Err error), _ ) ->
-                { model | pageState = Loaded (Errored error) } => Cmd.none
+                ( { model | pageState = Loaded (Errored error) }, Cmd.none )
 
             ( SetUser user, _ ) ->
                 let
@@ -262,8 +262,7 @@ updatePage page msg model =
                         else
                             Cmd.none
                 in
-                    { model | session = { session | user = user } }
-                        => cmd
+                    ( { model | session = { session | user = user } }, cmd )
 
             ( LoginMsg subMsg, Login subModel ) ->
                 let
@@ -278,8 +277,7 @@ updatePage page msg model =
                             Login.SetUser user ->
                                 { model | session = { user = Just user } }
                 in
-                    { newModel | pageState = Loaded (Login pageModel) }
-                        => Cmd.map LoginMsg cmd
+                    ( { newModel | pageState = Loaded (Login pageModel) }, Cmd.map LoginMsg cmd )
 
             ( SignupMsg subMsg, Signup subModel ) ->
                 let
@@ -294,8 +292,7 @@ updatePage page msg model =
                             Signup.SetUser user ->
                                 { model | session = { user = Just user } }
                 in
-                    { newModel | pageState = Loaded (Signup pageModel) }
-                        => Cmd.map SignupMsg cmd
+                    ( { newModel | pageState = Loaded (Signup pageModel) }, Cmd.map SignupMsg cmd )
 
             ( RandomizerMsg subMsg, Randomizer subModel ) ->
                 let
@@ -307,18 +304,17 @@ updatePage page msg model =
                             Randomizer.NoOp ->
                                 model
                 in
-                    { newModel | pageState = Loaded (Randomizer pageModel) }
-                        => Cmd.map RandomizerMsg cmd
+                    ( { newModel | pageState = Loaded (Randomizer pageModel) }, Cmd.map RandomizerMsg cmd )
 
             ( HomeMsg subMsg, Home subModel ) ->
                 toPage Home HomeMsg (Home.update session) subMsg subModel
 
             ( _, NotFound ) ->
                 -- Disregard incoming messages when on the NotFound page.
-                model => Cmd.none
+                ( model, Cmd.none )
 
             ( _, _ ) ->
-                model => Cmd.none
+                ( model, Cmd.none )
 
 
 

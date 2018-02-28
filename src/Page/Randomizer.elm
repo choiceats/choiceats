@@ -135,7 +135,7 @@ update : Msg -> Model -> ( ( Model, Cmd Msg ), ExternalMsg )
 update msg model =
     case msg of
         RequestRecipe ->
-            ( ( model, sendRecipeQuery "model.token" model.currentFilter ), NoOp )
+            ( ( model, sendRecipeQuery (getTokenString model.token) model.currentFilter ), NoOp )
 
         SetFilterType msg ->
             ( ( { model | currentFilter = msg }, Cmd.none ), NoOp )
