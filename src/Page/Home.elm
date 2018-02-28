@@ -12,7 +12,7 @@ import Html.Events exposing (onClick)
 import Http
 import Page.Errored exposing (PageLoadError, pageLoadError)
 import Task exposing (Task)
-import Util exposing ((=>), onClickStopPropagation)
+import Util exposing (onClickStopPropagation)
 import Views.Page as Page
 
 
@@ -81,4 +81,4 @@ update : Session -> Msg -> Model -> ( Model, Cmd Msg )
 update session msg model =
     case msg of
         NoOp ->
-            { model | garbage = "in -> out" } => Cmd.none
+            ( { model | garbage = "in -> out" }, Cmd.none )

@@ -22,7 +22,6 @@ import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (Value)
 import Json.Encode.Extra as EncodeExtra
 import UrlParser
-import Util exposing ((=>))
 
 
 type alias User =
@@ -49,10 +48,10 @@ decoder =
 encode : User -> Value
 encode user =
     Encode.object
-        [ "email" => Encode.string user.email
-        , "token" => AuthToken.encode user.token
-        , "name" => encodeName user.name
-        , "userId" => encodeUserId user.userId
+        [ ( "email", Encode.string user.email )
+        , ( "token", AuthToken.encode user.token )
+        , ( "name", encodeName user.name )
+        , ( "userId", encodeUserId user.userId )
         ]
 
 

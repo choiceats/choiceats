@@ -9,7 +9,6 @@ import Json.Encode as Encode
 import Json.Encode.Extra as EncodeExtra
 import Ports
 import Request.Helpers exposing (apiUrl)
-import Util exposing ((=>))
 
 
 storeSession : User -> Cmd msg
@@ -25,12 +24,12 @@ login { email, password } =
     let
         user =
             Encode.object
-                [ "email" => Encode.string email
-                , "password" => Encode.string password
+                [ ( "email", Encode.string email )
+                , ( "password", Encode.string password )
                 ]
 
         body =
-            Encode.object [ "user" => user ]
+            Encode.object [ ( "user", user ) ]
                 |> Http.jsonBody
     in
         Decode.field "user" User.decoder
@@ -44,13 +43,13 @@ login { email, password } =
 --     let
 --         user =
 --             Encode.object
---                 [ "username" => Encode.string username
---                 , "email" => Encode.string email
---                 , "password" => Encode.string password
+--                 [ ("username", Encode.string username)
+--                 , ("email", Encode.string email)
+--                 , ("password", Encode.string password)
 --                 ]
 --
 --         body =
---             Encode.object [ "user" => user ]
+--             Encode.object [ ("user", user) ]
 --                 |> Http.jsonBody
 --     in
 --         Decode.field "user" User.decoder

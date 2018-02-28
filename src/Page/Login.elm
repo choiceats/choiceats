@@ -13,7 +13,6 @@ import Json.Decode as Decode exposing (Decoder, decodeString, field, string)
 import Json.Decode.Pipeline exposing (decode, optional)
 import Request.User exposing (storeSession)
 import Route exposing (Route)
-import Util exposing ((=>))
 import Validate exposing (Validator, ifBlank, validate)
 import Views.Form as Form
 
@@ -182,8 +181,8 @@ type alias Error =
 modelValidator : Validator Error Model
 modelValidator =
     Validate.all
-        [ ifBlank .email (Email => "email can't be blank.")
-        , ifBlank .password (Password => "password can't be blank.")
+        [ ifBlank .email ( Email, "email can't be blank." )
+        , ifBlank .password ( Password, "password can't be blank." )
         ]
 
 
