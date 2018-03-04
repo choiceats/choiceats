@@ -11,6 +11,14 @@ import Html.Attributes exposing (src, style, class)
 import Http
 import Task exposing (Task)
 import Recipes.Types exposing (..)
+import RecipeQueries
+    exposing
+        ( RecipeQueryMsg(..)
+        , sendUnitsQuery
+        , sendRecipeQuery
+        , sendIngredientsQuery
+        , submitRecipeMutation
+        )
 
 
 type alias Model =
@@ -29,12 +37,21 @@ main =
         }
 
 
+convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
+convertToLocalCmd recipeQueryCmd =
+    Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
+
+
+queryForRecipe flags =
+    sendRecipeQuery flags.token flags.recipeId ReceiveRecipeFull
+
+
 init : Flags -> ( Model, Cmd Msg )
 init initFlags =
     ( { mRecipe = Nothing
       , flags = initFlags
       }
-    , sendRecipeQuery initFlags.token initFlags.recipeId
+    , convertToLocalCmd (queryForRecipe initFlags)
     )
 
 
@@ -44,17 +61,20 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        RequestRecipeFull ->
-            ( model, sendRecipeQuery model.flags.token model.flags.recipeId )
+        Query subMsg ->
+            case subMsg of
+                -- RequestRecipeFull ->
+                --     ( model, sendRecipeQuery model.flags.token model.flags.recipeId )
+                ReceiveRecipeFull res ->
+                    ( { model | mRecipe = Just res }, Cmd.none )
 
-        ReceiveRecipeFull res ->
-            ( { model | mRecipe = Just res }, Cmd.none )
+                _ ->
+                    ( model, Cmd.none )
 
 
 type Msg
     = NoOp
-    | RequestRecipeFull
-    | ReceiveRecipeFull RecipeFullResponse
+    | Query RecipeQueryMsg
 
 
 subscriptions : Model -> Sub Msg
@@ -68,84 +88,6 @@ type alias AuthToken =
 
 type alias RecipeId =
     Int
-
-
-sendRecipeQuery : AuthToken -> RecipeId -> Cmd Msg
-sendRecipeQuery authToken recipeId =
-    sendQueryRequest authToken (recipeQueryRequest recipeId)
-        |> Task.attempt ReceiveRecipeFull
-
-
-sendQueryRequest : AuthToken -> GqlB.Request GqlB.Query a -> Task GraphQLClient.Error a
-sendQueryRequest authToken request =
-    GraphQLClient.customSendQuery (requestOptions authToken) request
-
-
-requestOptions token =
-    { method = "POST"
-    , headers = [ (Http.header "Authorization" ("Bearer " ++ token)) ]
-    , url = "http://localhost:4000/graphql/"
-    , timeout = Nothing
-    , withCredentials = False -- value of True makes CORS active, breaking the request
-    }
-
-
-recipeQueryRequest : RecipeId -> GqlB.Request GqlB.Query RecipeFull
-recipeQueryRequest recipeId =
-    recipeRequest
-        |> GqlB.request { recipeId = recipeId }
-
-
-builtUnit =
-    GqlB.object IngredientUnit
-        |> GqlB.with (GqlB.field "id" [] GqlB.string)
-        |> GqlB.with (GqlB.field "abbr" [] GqlB.string)
-        |> GqlB.with (GqlB.field "name" [] GqlB.string)
-
-
-builtTag =
-    GqlB.object RecipeTag
-        |> GqlB.with (GqlB.field "id" [] GqlB.string)
-        |> GqlB.with (GqlB.field "name" [] GqlB.string)
-
-
-builtIngredient =
-    GqlB.object Ingredient
-        |> GqlB.with (GqlB.field "quantity" [] GqlB.float)
-        |> GqlB.with (GqlB.field "displayQuantity" [] GqlB.string)
-        |> GqlB.with (GqlB.field "name" [] GqlB.string)
-        |> GqlB.with (GqlB.field "unit" [] builtUnit)
-
-
-recFull =
-    GqlB.object RecipeFull
-        |> GqlB.with (GqlB.field "author" [] GqlB.string)
-        |> GqlB.with (GqlB.field "authorId" [] GqlB.string)
-        |> GqlB.with (GqlB.field "description" [] GqlB.string)
-        |> GqlB.with (GqlB.field "id" [] GqlB.string)
-        |> GqlB.with (GqlB.field "imageUrl" [] GqlB.string)
-        |> GqlB.with (GqlB.field "ingredients" [] (GqlB.list builtIngredient))
-        |> GqlB.with (GqlB.field "instructions" [] GqlB.string)
-        |> GqlB.with (GqlB.field "likes" [] (GqlB.list GqlB.int))
-        |> GqlB.with (GqlB.field "name" [] GqlB.string)
-        |> GqlB.with (GqlB.field "tags" [] (GqlB.list builtTag))
-        |> GqlB.with (GqlB.field "youLike" [] GqlB.bool)
-
-
-recipeRequest : GqlB.Document GqlB.Query RecipeFull { vars | recipeId : Int }
-recipeRequest =
-    let
-        recipeIdVar =
-            Var.required "recipeId" .recipeId Var.int
-
-        queryRoot =
-            GqlB.extract
-                (GqlB.field "recipe"
-                    [ ( "recipeId", Arg.variable recipeIdVar ) ]
-                    recFull
-                )
-    in
-        GqlB.queryDocument queryRoot
 
 
 viewDetail : Model -> Html Msg
