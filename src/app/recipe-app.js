@@ -56,7 +56,7 @@ export class RecipeApp extends Component {
 
     const makeRecipeTaco = match => ({
       ...taco,
-      recipeId: getRecipeId(match)
+      recipeId: getRecipeId(match) || -1
     })
 
     if (token === '' && isRestrictedPath) {
