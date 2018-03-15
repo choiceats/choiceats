@@ -40,7 +40,7 @@ type alias UI a =
 
 type alias Model =
     { recipe : Maybe Recipes.Types.RecipeFull
-    , editingRecipe : Maybe Recipes.Types.EditingRecipeFull
+    , editingRecipe : Recipes.Types.EditingRecipeFull
     , flags : RecipeFlags
     , units : Maybe (List Recipes.Types.Unit)
     , ingredients : Maybe (List Recipes.Types.IngredientRaw)
@@ -71,6 +71,17 @@ type Msg
     | AddIngredient
     | DeleteIngredient Int
 
+emptyRecipe : Recipes.Types.EditingRecipeFull 
+emptyRecipe = 
+    { description = ""
+    , id = ""
+    , imageUrl = ""
+    , ingredients = Array.empty
+    , instructions = ""
+    , name = ""
+    , tags = []
+
+    }
 
 main : Program RecipeFlags Model Msg
 main =
@@ -105,12 +116,7 @@ queryForIngredients flags =
 
 submitRecipe : Model -> Cmd RecipeQueryMsg
 submitRecipe model =
-    case model.editingRecipe of
-        Just editingRecipe ->
-            submitRecipeMutation model.flags.token editingRecipe ReceiveRecipeFull
-
-        Nothing ->
-            Cmd.none
+    submitRecipeMutation model.flags.token model.editingRecipe ReceiveRecipeFull
 
 
 convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
@@ -155,156 +161,139 @@ update msg model =
             ( model, Cmd.none )
 
         UpdateTextField textfield value ->
-            case model.editingRecipe of
-                Just editingRecipe ->
-                    case textfield of
-                        RecipeName ->
-                            let
-                                updatedEditingRecipeModel =
-                                    ({ editingRecipe | name = value })
+            let
+                editingRecipe = model.editingRecipe
+            in
+                case textfield of
+                    RecipeName ->
+                        let
+                            updatedEditingRecipeModel =
+                                ({ editingRecipe | name = value })
 
-                                newEditingRecipe =
-                                    Just updatedEditingRecipeModel
-                            in
-                                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
+                            newEditingRecipe = updatedEditingRecipeModel
+                        in
+                            ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
-                        RecipeDescription ->
-                            let
-                                updatedEditingRecipeModel =
-                                    ({ editingRecipe | description = value })
+                    RecipeDescription ->
+                        let
+                            updatedEditingRecipeModel =
+                                ({ editingRecipe | description = value })
 
-                                newEditingRecipe =
-                                    Just updatedEditingRecipeModel
-                            in
-                                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
+                            newEditingRecipe = updatedEditingRecipeModel
+                        in
+                            ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
-                        RecipeInstructions ->
-                            let
-                                updatedEditingRecipeModel =
-                                    ({ editingRecipe | instructions = value })
+                    RecipeInstructions ->
+                        let
+                            updatedEditingRecipeModel =
+                                ({ editingRecipe | instructions = value })
 
-                                newEditingRecipe =
-                                    Just updatedEditingRecipeModel
-                            in
-                                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
+                            newEditingRecipe = updatedEditingRecipeModel
+                        in
+                            ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
         UpdateIngredient field ingredientIndex value ->
-            case model.editingRecipe of
-                Just editingRecipe ->
-                    case Array.get ingredientIndex editingRecipe.ingredients of
-                        Just foundIngredient ->
-                            let
-                                newIngredient =
-                                    { foundIngredient | quantity = value }
+            let
+                 editingRecipe = model.editingRecipe
+            in
+                
+                case Array.get ingredientIndex editingRecipe.ingredients of
+                    Just foundIngredient ->
+                        let
+                            newIngredient =
+                                { foundIngredient | quantity = value }
 
-                                newIngredients =
-                                    Array.set ingredientIndex newIngredient editingRecipe.ingredients
+                            newIngredients =
+                                Array.set ingredientIndex newIngredient editingRecipe.ingredients
 
-                                newEditingRecipe =
-                                    { editingRecipe | ingredients = newIngredients }
-                            in
-                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+                            newEditingRecipe =
+                                { editingRecipe | ingredients = newIngredients }
+                        in
+                            ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
-                        Nothing ->
-                            ( model, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
+                    Nothing ->
+                        ( model, Cmd.none )
 
         SelectIngredientUnit ingredientIndex unit ->
-            case model.editingRecipe of
-                Just editingRecipe ->
-                    case Array.get ingredientIndex editingRecipe.ingredients of
-                        Just foundIngredient ->
-                            let
-                                newIngredient =
-                                    { foundIngredient | unitId = unit.id }
+            let
+                 editingRecipe = model.editingRecipe
+            in
+                
+                case Array.get ingredientIndex editingRecipe.ingredients of
+                    Just foundIngredient ->
+                        let
+                            newIngredient =
+                                { foundIngredient | unitId = unit.id }
 
-                                newIngredients =
-                                    Array.set ingredientIndex newIngredient editingRecipe.ingredients
+                            newIngredients =
+                                Array.set ingredientIndex newIngredient editingRecipe.ingredients
 
-                                newEditingRecipe =
-                                    { editingRecipe | ingredients = newIngredients }
-                            in
-                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+                            newEditingRecipe =
+                                { editingRecipe | ingredients = newIngredients }
+                        in
+                            ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
-                        Nothing ->
-                            ( model, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
+                    Nothing ->
+                        ( model, Cmd.none )
 
         SelectIngredient index rawIngredient ->
-            case model.editingRecipe of
-                Just editingRecipe ->
-                    case Array.get index editingRecipe.ingredients of
-                        Just foundIngredient ->
-                            let
-                                newIngredient =
-                                    { foundIngredient | ingredientId = rawIngredient.id }
+            let
+                editingRecipe = model.editingRecipe
+            
+            in
+                case Array.get index editingRecipe.ingredients of
+                    Just foundIngredient ->
+                        let
+                            newIngredient =
+                                { foundIngredient | ingredientId = rawIngredient.id }
 
-                                newIngredients =
-                                    Array.set index newIngredient editingRecipe.ingredients
+                            newIngredients =
+                                Array.set index newIngredient editingRecipe.ingredients
 
-                                newEditingRecipe =
-                                    { editingRecipe | ingredients = newIngredients }
-                            in
-                                ( { model | editingRecipe = Just newEditingRecipe }, Cmd.none )
+                            newEditingRecipe =
+                                { editingRecipe | ingredients = newIngredients }
+                        in
+                            ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
-                        Nothing ->
-                            ( model, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
+                    Nothing ->
+                        ( model, Cmd.none )
 
         AddIngredient ->
-            case model.editingRecipe of
-                Just editingRecipe ->
-                    let
-                        newIngredientList =
-                            Array.push
-                                { quantity = ""
-                                , ingredientId = ""
-                                , unitId = ""
-                                }
-                                editingRecipe.ingredients
+            let
+                editingRecipe = model.editingRecipe
+                newIngredientList =
+                    Array.push
+                        { quantity = ""
+                        , ingredientId = ""
+                        , unitId = ""
+                        }
+                        editingRecipe.ingredients
 
-                        newEditingRecipe =
-                            Just { editingRecipe | ingredients = newIngredientList }
-                    in
-                        ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
+                newEditingRecipe = { editingRecipe | ingredients = newIngredientList }
+            in
+                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
         DeleteIngredient index ->
-            case model.editingRecipe of
-                Just editingRecipe ->
-                    let
-                        beforeIngredientList =
-                            Array.slice 0 index editingRecipe.ingredients
+            let
+                editingRecipe = model.editingRecipe
+                beforeIngredientList =
+                    Array.slice 0 index editingRecipe.ingredients
 
-                        afterIngredientList =
-                            Array.slice (index + 1) (Array.length editingRecipe.ingredients) editingRecipe.ingredients
+                afterIngredientList =
+                    Array.slice (index + 1) (Array.length editingRecipe.ingredients) editingRecipe.ingredients
 
-                        newIngredientList =
-                            Array.append beforeIngredientList afterIngredientList
+                newIngredientList =
+                    Array.append beforeIngredientList afterIngredientList
 
-                        newEditingRecipe =
-                            Just { editingRecipe | ingredients = newIngredientList }
-                    in
-                        ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
+                newEditingRecipe = { editingRecipe | ingredients = newIngredientList }
+            in
+                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
-                Nothing ->
-                    ( model, Cmd.none )
 
 
 init : RecipeFlags -> ( Model, Cmd Msg )
 init flags =
-    ( { recipe = Nothing, editingRecipe = Nothing, units = Nothing, ingredients = Nothing, flags = flags, uiOpenDropdown = Nothing }
+    ( { recipe = Nothing, editingRecipe = emptyRecipe, units = Nothing, ingredients = Nothing, flags = flags, uiOpenDropdown = Nothing }
     , Cmd.batch
         [ convertToLocalCmd (queryForRecipe flags)
         , convertToLocalCmd (queryForTags flags)
@@ -313,26 +302,21 @@ init flags =
     )
 
 
-recipeFullToEditingRecipe : Model -> Maybe Recipes.Types.RecipeFull -> Maybe Recipes.Types.EditingRecipeFull
+recipeFullToEditingRecipe : Model -> Maybe Recipes.Types.RecipeFull -> Recipes.Types.EditingRecipeFull
 recipeFullToEditingRecipe model recipeFull =
     case recipeFull of
         Just recipe ->
-            let
-                _ =
-                    Debug.log "recipe" recipe
-            in
-                Just
-                    { description = recipe.description
-                    , id = recipe.id
-                    , imageUrl = recipe.imageUrl
-                    , instructions = recipe.instructions
-                    , name = recipe.name
-                    , tags = recipe.tags
-                    , ingredients = ingredientsToEditingIngredients model recipe.ingredients
-                    }
+            { description = recipe.description
+            , id = recipe.id
+            , imageUrl = recipe.imageUrl
+            , instructions = recipe.instructions
+            , name = recipe.name
+            , tags = recipe.tags
+            , ingredients = ingredientsToEditingIngredients model recipe.ingredients
+            }
 
         Nothing ->
-            Nothing
+            model.editingRecipe
 
 
 ingredientsToEditingIngredients model recipeIngredients =
@@ -379,12 +363,7 @@ getIngredientName ingredients ingredientId =
 
 view : Model -> Html Msg
 view model =
-    case model.editingRecipe of
-        Nothing ->
-            div [ class "editor" ] [ text "loading..." ]
-
-        Just recipe ->
-            recipeFormView model recipe
+    recipeFormView model model.editingRecipe
 
 
 recipeFormView :

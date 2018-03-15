@@ -245,34 +245,6 @@ ingredientsArrayFromRecipeInput input =
     Array.toList input.ingredients
 
 
-
--- const gqlStuff = gql`
---   mutation SaveRecipe($recipe: RecipeInput!) {
---     saveRecipe(recipe: $recipe) {
---       id
---       author
---       authorId
---       description
---       imageUrl
---       name
---       instructions
---       ingredients {
---         id
---         name
---         unit {
---           id
---           name
---           abbr
---         }
---         quantity
---       }
---       tags {
---         id
---       }
---       likes
---     }
---   }
--- `
 --
 -- GraphQL Object definitions
 --
