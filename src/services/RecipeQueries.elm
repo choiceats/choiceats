@@ -127,7 +127,7 @@ sendRecipeQuery authToken recipeId msg =
 
 type alias RecipeMutationInput =
     { description : String
-    , id : String
+    , id : Maybe String
     , imageUrl : String
     , ingredients : List RecipeMutationIngredientInput
     , instructions : String
@@ -145,7 +145,10 @@ type alias RecipeMutationIngredientInput =
 
 convertRecipeArraysToList : Recipes.Types.EditingRecipeFull -> RecipeMutationInput
 convertRecipeArraysToList recipe =
-    { recipe | ingredients = Array.toList recipe.ingredients }
+    let 
+        recipeId = if recipe.id == "" then Nothing else Just recipe.id
+    in
+        { recipe | ingredients = Array.toList recipe.ingredients, id = recipeId  }
 
 
 submitRecipeMutation : AuthToken -> Recipes.Types.EditingRecipeFull -> (RecipeFullResponse -> a) -> Cmd a
@@ -215,7 +218,7 @@ saveRecipeMutation =
                             .recipe
                             (Var.object
                                 "RecipeInput"
-                                [ Var.field "id" .id Var.string
+                                [ Var.field "id" .id (Var.nullable Var.string)
                                 , Var.field "description" .description Var.string
                                 , Var.field "imageUrl" .imageUrl Var.string
                                 , Var.field "instructions" .instructions Var.string
@@ -245,34 +248,6 @@ ingredientsArrayFromRecipeInput input =
     Array.toList input.ingredients
 
 
-
--- const gqlStuff = gql`
---   mutation SaveRecipe($recipe: RecipeInput!) {
---     saveRecipe(recipe: $recipe) {
---       id
---       author
---       authorId
---       description
---       imageUrl
---       name
---       instructions
---       ingredients {
---         id
---         name
---         unit {
---           id
---           name
---           abbr
---         }
---         quantity
---       }
---       tags {
---         id
---       }
---       likes
---     }
---   }
--- `
 --
 -- GraphQL Object definitions
 --
@@ -322,7 +297,7 @@ gqlEditingRecipeFull : GqlB.ValueSpec GqlB.NonNull GqlB.ObjectType RecipeMutatio
 gqlEditingRecipeFull =
     GqlB.object RecipeMutationInput
         |> GqlB.with (GqlB.field "description" [] GqlB.string)
-        |> GqlB.with (GqlB.field "id" [] GqlB.string)
+        |> GqlB.with (GqlB.field "id" [] (GqlB.nullable GqlB.string))
         |> GqlB.with (GqlB.field "imageUrl" [] GqlB.string)
         |> GqlB.with (GqlB.field "ingredients" [] (GqlB.list gqlEditingIngredient))
         |> GqlB.with (GqlB.field "instructions" [] GqlB.string)
