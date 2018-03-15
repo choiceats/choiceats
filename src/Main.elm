@@ -10,6 +10,7 @@ import Page.Home as Home
 import Page.Login as Login
 import Page.Signup as Signup
 import Page.Randomizer as Randomizer
+import Page.Recipes as Recipes
 import Page.NotFound as NotFound
 import Ports
 import Route exposing (Route)
@@ -34,6 +35,7 @@ type Page
     | Login Login.Model
     | Signup Signup.Model
     | Randomizer Randomizer.Model
+    | Recipes Recipes.Model
 
 
 type PageState
@@ -126,6 +128,11 @@ viewPage session isLoading page =
                     |> frame Page.Other
                     |> Html.map RandomizerMsg
 
+            Recipes subModel ->
+                Recipes.view session subModel
+                    |> frame Page.Other
+                    |> Html.map RecipesMsg
+
 
 subscriptions model =
     Sub.batch
@@ -160,6 +167,7 @@ type Msg
     | LoginMsg Login.Msg
     | SignupMsg Signup.Msg
     | RandomizerMsg Randomizer.Msg
+    | RecipesMsg Recipes.Msg
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -211,6 +219,13 @@ setRoute maybeRoute model =
                         (Randomizer.init model.session)
                 in
                     ( { model | pageState = Loaded (Randomizer newModel) }, Cmd.map RandomizerMsg newMsg )
+
+            Just Route.Recipes ->
+                let
+                    ( newModel, newMsg ) =
+                        (Recipes.init model.session)
+                in
+                    ( { model | pageState = Loaded (Recipes newModel) }, Cmd.map RecipesMsg newMsg )
 
 
 pageErrored : Model -> ActivePage -> String -> ( Model, Cmd msg )
@@ -305,6 +320,18 @@ updatePage page msg model =
                                 model
                 in
                     ( { newModel | pageState = Loaded (Randomizer pageModel) }, Cmd.map RandomizerMsg cmd )
+
+            ( RecipesMsg subMsg, Recipes subModel ) ->
+                let
+                    ( ( pageModel, cmd ), msgFromPage ) =
+                        Recipes.update subMsg subModel
+
+                    newModel =
+                        case msgFromPage of
+                            Recipes.NoOp ->
+                                model
+                in
+                    ( { newModel | pageState = Loaded (Recipes pageModel) }, Cmd.map RecipesMsg cmd )
 
             ( HomeMsg subMsg, Home subModel ) ->
                 toPage Home HomeMsg (Home.update session) subMsg subModel

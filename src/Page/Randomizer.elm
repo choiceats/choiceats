@@ -86,23 +86,6 @@ mapFilterTypeToString filterType =
             "all"
 
 
-
--- initialModel : Model
--- initialModel =
---     { formFields =
---         { email = emptyUserData
---         , firstName = emptyUserData
---         , lastName = emptyUserData
---         , password = emptyUserData
---         , passwordCheck = emptyUserData
---         }
---     , token = "dsf"
---     , canSubmitForm = False
---     , loggedIn = False
---     , serverFeedback = ""
---     }
-
-
 init : Session -> ( Model, Cmd Msg )
 init session =
     let
@@ -142,50 +125,6 @@ update msg model =
 
         ReceiveQueryResponse res ->
             ( ( { model | mRecipeSummary = Just res }, Cmd.none ), NoOp )
-
-
-
-{-
-   ReceiveResponse (Ok user) ->
-       -- TODO: Set up slug for recipe Id and recipe Id viewing
-       ( ( model, Cmd.batch [ Route.modifyUrl Route.Home ] ), NoOp )
-
-   ReceiveResponse (Err err) ->
-       ( ( { model | serverFeedback = toString err }, Cmd.none ), NoOp )
--}
--- view : Session -> Model -> Html Msg
--- view session model =
---     let
---         f =
---             model.formFields
---     in
---         div [ style [ ( "max-width", "500px" ), ( "margin", "auto" ) ] ]
---             [ form [ class "ui form" ]
---                 [ h1
---                     [ style [ ( "font-family", "Fira Code" ), ( "font-size", "25px" ) ] ]
---                     [ text "Signup!" ]
---                 , button
---                     [ type_ "submit"
---                     , class "ui primary button"
---                     , disabled <| not model.canSubmitForm
---                     , onWithOptions
---                         "click"
---                         { stopPropagation = True
---                         , preventDefault = True
---                         }
---                         (JD.succeed RequestAccount)
---                     ]
---                     [ text "Signup" ]
---                 , div [] [ text <| toString model ]
---                 ]
---             ]
--- Randomizer.elm --
--- main =
---     Html.programWithFlags
---         { update = update
---         , view = viewAll
---         , init = init
---         }
 
 
 view : Session -> Model -> Html Msg
@@ -328,7 +267,7 @@ viewRecipeSummary mRecipeSummary =
                                                 "grey" ++ " favorite large icon"
                                         ]
                                         []
-                                    , text <| toString r.likes
+                                    , text (likesText r.likes)
                                     ]
                                 ]
                             , div [ class "description" ] [ text r.description ]
@@ -340,6 +279,20 @@ viewRecipeSummary mRecipeSummary =
 
         Nothing ->
             viewLoading
+
+
+likesText : List a -> String
+likesText l =
+    let
+        likes =
+            List.length l
+    in
+        (toString likes)
+            ++ " like"
+            ++ if likes == 1 then
+                ""
+               else
+                "s"
 
 
 viewLoading : Html Msg

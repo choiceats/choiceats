@@ -16,6 +16,7 @@ type Route
     | Logout
     | Signup
     | Randomizer
+    | Recipes
 
 
 route : Parser (Route -> a) a
@@ -26,6 +27,7 @@ route =
         , Url.map Logout (s "logout")
         , Url.map Signup (s "signup")
         , Url.map Randomizer (s "random")
+        , Url.map Recipes (s "recipes")
         ]
 
 
@@ -55,6 +57,9 @@ routeToString page =
 
                 Randomizer ->
                     [ "random" ]
+
+                Recipes ->
+                    [ "recipes" ]
     in
         "#/" ++ String.join "/" pieces
 

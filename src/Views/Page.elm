@@ -22,6 +22,7 @@ type ActivePage
     | Login
     | Signup
     | Randomizer
+    | Recipes
 
 
 {-| Take a page's Html and add a header
@@ -57,7 +58,7 @@ viewHeader page user isLoading =
     in
         div [ class "ui secondary menu", style [ ( "height", "50px" ) ] ]
             [ div [ class "header item" ] [ text "ChoicEats" ]
-            , linkTo Route.Signup [ text "Recipes" ] -- TODO: Change route to / when this route is created. And make recipes the default route.
+            , linkTo Route.Recipes [ text "Recipes" ] -- TODO: Change route to / when this route is created. And make recipes the default route.
             , linkTo Route.Randomizer [ text "Ideas" ]
             , div [ class "right menu" ]
                 [ div [ class "item" ]
@@ -85,6 +86,9 @@ isActive page route =
             True
 
         ( Randomizer, Route.Randomizer ) ->
+            True
+
+        ( Recipes, Route.Recipes ) ->
             True
 
         _ ->
