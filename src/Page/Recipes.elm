@@ -32,10 +32,6 @@ type ExternalMsg
 
 
 
----- type Msg = ReceiveResponse (Result Http.Error User)
----- commented Msg type from Signup.elm
---
---
 --type Msg
 --    = RequestRecipe
 --    | SetFilterType ButtonFilter
@@ -52,20 +48,61 @@ type Msg
 
 recipeCard : RecipeSummary -> Html Msg
 recipeCard recipe =
-    a [ href ("/recipe/" ++ recipe.id) ]
-        [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
-            [ img [ class "ui image", src "/" ] []
-            , div [ class "content" ]
-                [ div [ class "header" ] [ text recipe.name ]
-                , div [ class "meta" ] [ text recipe.author ]
-                , div [ class "meta" ]
-                    [ i [ class "grey favorite large icon" ] []
-                    , text (toString recipe.likes)
+    let
+        noImage =
+            String.isEmpty recipe.imageUrl
+
+        image =
+            if noImage then
+                (text "")
+            else
+                img [ class "ui image", src (getImageUrl recipe.imageUrl) ] []
+    in
+        a [ class "recipe-card", href ("/recipe/" ++ recipe.id) ]
+            [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
+                [ image
+                , div [ class "content" ]
+                    [ div [ class "header" ] [ text recipe.name ]
+                    , div [ class "meta" ] [ text recipe.author ]
+                    , div [ class "meta" ]
+                        [ i [ class "grey favorite large icon" ] []
+                        , text (getLikesText recipe.likes)
+                        ]
                     ]
+                , div [ class "description" ] [ text recipe.description ]
                 ]
-            , div [ class "description" ] [ text recipe.description ]
             ]
-        ]
+
+
+getImageUrl str =
+    let
+        empty =
+            String.isEmpty str
+    in
+        if empty then
+            "/"
+        else
+            str
+
+
+getLikesText likes =
+    let
+        numberLikes =
+            List.length likes
+
+        pluralize =
+            if numberLikes == 1 then
+                ""
+            else
+                "s"
+
+        text =
+            if numberLikes == 0 then
+                "Be the first to like this"
+            else
+                ((toString numberLikes) ++ " like" ++ pluralize)
+    in
+        text
 
 
 type alias SearchParams =
@@ -123,7 +160,7 @@ updateSearch msg model =
                     { searchParams | text = text }
 
                 command =
-                    sendRecipesQuery blankToken {- model.token -} updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
+                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
             in
                 ( { model | search = updatedSearchParms }, command )
 
@@ -138,7 +175,7 @@ updateSearch msg model =
                     { searchParams | filter = filter }
 
                 command =
-                    sendRecipesQuery blankToken {- model.token -} updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
+                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
             in
                 ( { model | search = updatedSearchParms }, command )
 
@@ -164,7 +201,7 @@ init session =
           , token = authToken
           , search = defaultSearchParams
           }
-        , sendRecipesQuery blankToken {- flags.token -} initialFilterType [] "he"
+        , sendRecipesQuery authToken initialFilterType [] "he"
         )
 
 
