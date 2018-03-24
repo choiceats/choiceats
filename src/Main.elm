@@ -10,6 +10,7 @@ import Page.Home as Home
 import Page.Login as Login
 import Page.Signup as Signup
 import Page.Randomizer as Randomizer
+import Page.RecipeDetail as RecipeDetail
 import Page.Recipes as Recipes
 import Page.NotFound as NotFound
 import Ports
@@ -35,6 +36,7 @@ type Page
     | Login Login.Model
     | Signup Signup.Model
     | Randomizer Randomizer.Model
+    | RecipeDetail RecipeDetail.Model
     | Recipes Recipes.Model
 
 
@@ -133,6 +135,11 @@ viewPage session isLoading page =
                     |> frame Page.Other
                     |> Html.map RecipesMsg
 
+            RecipeDetail subModel ->
+                RecipeDetail.view session subModel
+                    |> frame Page.Other
+                    |> Html.map RecipeDetailMsg
+
 
 subscriptions model =
     Sub.batch
@@ -168,6 +175,8 @@ type Msg
     | SignupMsg Signup.Msg
     | RandomizerMsg Randomizer.Msg
     | RecipesMsg Recipes.Msg
+    | RecipeDetailMsg RecipeDetail.Msg
+    | RecipeDetailLoaded (Result PageLoadError RecipeDetail.Model)
 
 
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -178,7 +187,7 @@ setRoute maybeRoute model =
         --     ({ model | pageState = TransitioningFrom (getPage model.pageState) },
         --         Task.attempt toMsg task)
         transition toMsg task =
-            ( { model | pageState = TransitioningFrom (getPage model.pageState) }, Cmd.none )
+            ( { model | pageState = TransitioningFrom (getPage model.pageState) }, (Task.attempt toMsg task) )
 
         --
         errored =
@@ -190,7 +199,7 @@ setRoute maybeRoute model =
 
             -- TODO: Make it how it should be
             Just Route.Home ->
-                transition HomeLoaded (Home.init model.session)
+                transition HomeLoaded (Task.succeed (Home.init model.session))
 
             Just Route.Root ->
                 ( model, Route.modifyUrl Route.Home )
@@ -226,6 +235,38 @@ setRoute maybeRoute model =
                         (Recipes.init model.session)
                 in
                     ( { model | pageState = Loaded (Recipes newModel) }, Cmd.map RecipesMsg newMsg )
+
+            Just (Route.RecipeDetail slug) ->
+                let
+                    init =
+                        (RecipeDetail.init model.session slug)
+                in
+                    transition RecipeDetailLoaded init
+
+
+
+-- should be a task for the second argument. A Task.attempt?? That can produce a model??
+-- updatePage can call setRoute. setRoute can setRoute, or it can do a task. If the task succeeds, it does some sort of resolving with data (via result??) and triggers the *Loaded message. I think the Loaded message then tells the page it can now display, and sets the model to the form ((model, msg), external msg)
+-- After all, setRoute is for when you FIRST come in on the page so it is not expected that you be able to set all the model at once. So it is enough to do a task that gets data. And that is also another reason why you don't go to the page immediately: the data is still loading.
+-- And it is if ALL the tasks (i.e. Task.map2) succeed that you must end up with a Home.Model or RecipeDetail.Model or what have you.
+-- It does not return a model, but a Task Model. The whole thing is still boxed in task!! Which is why they are using Task.Map
+-- the success ask for recipe, gets passed to a function that takes a recipe and returns a model !! :D :D :D :D
+--
+--
+--
+--
+--                let
+--                    ( ( newModel, newMsg ), newExternalMsg ) =
+--                        (RecipeDetail.init model.session slug)
+--                in
+--                    transition RecipeDetailLoaded ( ( newModel, newMsg ), newExternalMsg )
+--( { model | pageState = Loaded (RecipeDetail newModel) }, Cmd.map RecipeDetailMsg newMsg )
+--            Just (Route.RecipeDetail slug) ->
+--                let
+--                    ( ( newModel, newMsg ), newExternalMsg ) =
+--                        (RecipeDetail.init model.session slug)
+--                in
+--                    ( { model | pageState = Loaded (RecipeDetail newModel) }, Cmd.map RecipeDetailMsg newMsg )
 
 
 pageErrored : Model -> ActivePage -> String -> ( Model, Cmd msg )
@@ -333,6 +374,33 @@ updatePage page msg model =
                 in
                     ( { newModel | pageState = Loaded (Recipes pageModel) }, Cmd.map RecipesMsg cmd )
 
+            ( RecipeDetailLoaded (Ok subModel), _ ) ->
+                ( { model | pageState = Loaded (RecipeDetail subModel) }, Cmd.none )
+
+            ( RecipeDetailLoaded (Err error), _ ) ->
+                ( { model | pageState = Loaded (Errored error) }, Cmd.none )
+
+            --                let
+            --                    ( ( pageModel, cmd ), msgFromPage ) =
+            --                        RecipeDetail.update subMsg subModel
+            --
+            --                    newModel =
+            --                        case msgFromPage of
+            --                            RecipeDetail.NoOp ->
+            --                                model
+            --                in
+            --                    ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
+            --            ( RecipeDetailMsg subMsg, RecipeDetail subModel ) ->
+            --                let
+            --                    ( ( pageModel, cmd ), msgFromPage ) =
+            --                        RecipeDetail.update subMsg subModel
+            --
+            --                    newModel =
+            --                        case msgFromPage of
+            --                            RecipeDetail.NoOp ->
+            --                                model
+            --                in
+            --                    ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
             ( HomeMsg subMsg, Home subModel ) ->
                 toPage Home HomeMsg (Home.update session) subMsg subModel
 

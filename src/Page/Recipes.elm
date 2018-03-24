@@ -1,6 +1,3 @@
--- TODO: Use actual token in requests
-
-
 module Page.Recipes exposing (ExternalMsg(..), Model, Msg, update, view, init)
 
 import Array exposing (Array)
@@ -9,7 +6,19 @@ import Html.Attributes exposing (class, style, href, src, placeholder, value)
 import Html.Events exposing (onInput)
 import Http
 import List exposing (map)
+import Util exposing (getImageUrl)
 import Task exposing (Task)
+import Route as Route exposing (Route(..))
+import Data.Recipe
+    exposing
+        ( SearchFilter(..)
+        , mapFilterTypeToString
+        , RecipeSummary
+        , RecipesResponse
+        , TagsResponse
+        , RecipeTag
+        , Slug(..)
+        )
 
 
 -- THIRD PARTY MODULES
@@ -31,13 +40,6 @@ type ExternalMsg
     = NoOp
 
 
-
---type Msg
---    = RequestRecipe
---    | SetFilterType ButtonFilter
---    | ReceiveQueryResponse RecipeResponse
-
-
 type Msg
     = GetRecipes
     | GetRecipesResponse RecipesResponse
@@ -52,15 +54,15 @@ recipeCard recipe =
         noImage =
             String.isEmpty recipe.imageUrl
 
-        image =
+        mImg =
             if noImage then
                 (text "")
             else
                 img [ class "ui image", src (getImageUrl recipe.imageUrl) ] []
     in
-        a [ class "recipe-card", href ("/recipe/" ++ recipe.id) ]
+        a [ class "recipe-card", Route.href (RecipeDetail (Slug recipe.id)) ]
             [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
-                [ image
+                [ mImg
                 , div [ class "content" ]
                     [ div [ class "header" ] [ text recipe.name ]
                     , div [ class "meta" ] [ text recipe.author ]
@@ -72,17 +74,6 @@ recipeCard recipe =
                 , div [ class "description" ] [ text recipe.description ]
                 ]
             ]
-
-
-getImageUrl str =
-    let
-        empty =
-            String.isEmpty str
-    in
-        if empty then
-            "/"
-        else
-            str
 
 
 getLikesText likes =
@@ -117,19 +108,6 @@ type alias Model =
     , userId : String
     , token : AuthToken
     , search : SearchParams
-    }
-
-
-initialFilterType : SearchFilter
-initialFilterType =
-    All
-
-
-defaultSearchParams : SearchParams
-defaultSearchParams =
-    { text = ""
-    , tags = []
-    , filter = All
     }
 
 
@@ -193,6 +171,12 @@ init session =
 
                 Just user ->
                     user.token
+
+        defaultSearchParams =
+            { text = ""
+            , tags = []
+            , filter = All
+            }
     in
         ( { recipes = Nothing
           , userId = ""
@@ -201,7 +185,7 @@ init session =
           , token = authToken
           , search = defaultSearchParams
           }
-        , sendRecipesQuery authToken initialFilterType [] "he"
+        , sendRecipesQuery authToken All [] "he"
         )
 
 
@@ -372,69 +356,3 @@ sendTagsQuery : AuthToken -> SearchFilter -> List String -> String -> Cmd Msg
 sendTagsQuery authToken searchFilter tags searchText =
     sendQueryRequest authToken (tagsQueryRequest searchFilter tags searchText)
         |> Task.attempt GetTagsResponse
-
-
-
--- const deleteRecipe = gql`
---   mutation deleteRecipe($recipeId: ID!) {
---     deleteRecipe(recipeId: $recipeId) {
---       recipeId
---       deleted
---     }
---   }
--- `
---
--- const likeRecipe = gql`
---   mutation likeRecipe($userId: ID!, $recipeId: ID!) {
---     likeRecipe(userId: $userId, recipeId: $recipeId) {
---       id
---       likes
---       youLike
---     }
---   }
--- `
-
-
-type alias RecipesResponse =
-    Result GraphQLClient.Error (List RecipeSummary)
-
-
-type alias TagsResponse =
-    Result GraphQLClient.Error (List RecipeTag)
-
-
-type alias RecipeTag =
-    { id : String
-    , name : String
-    }
-
-
-type alias RecipeSummary =
-    { author : String
-    , authorId : String
-    , description : String
-    , id : String
-    , imageUrl : String
-    , likes : List Int
-    , name : String
-    , youLike : Bool
-    }
-
-
-type SearchFilter
-    = My
-    | Fav
-    | All
-
-
-mapFilterTypeToString : SearchFilter -> String
-mapFilterTypeToString filterType =
-    case filterType of
-        My ->
-            "my"
-
-        Fav ->
-            "fav"
-
-        All ->
-            "all"

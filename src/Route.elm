@@ -3,6 +3,7 @@ module Route exposing (Route(..), fromLocation, href, modifyUrl)
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import Navigation exposing (Location)
+import Data.Recipe as Recipe
 import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, string)
 
 
@@ -17,6 +18,7 @@ type Route
     | Signup
     | Randomizer
     | Recipes
+    | RecipeDetail Recipe.Slug
 
 
 route : Parser (Route -> a) a
@@ -28,6 +30,7 @@ route =
         , Url.map Signup (s "signup")
         , Url.map Randomizer (s "random")
         , Url.map Recipes (s "recipes")
+        , Url.map RecipeDetail (s "recipes" </> Recipe.slugParser)
         ]
 
 
@@ -60,6 +63,9 @@ routeToString page =
 
                 Recipes ->
                     [ "recipes" ]
+
+                RecipeDetail slug ->
+                    [ "recipes", Recipe.slugToString slug ]
     in
         "#/" ++ String.join "/" pieces
 

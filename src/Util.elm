@@ -1,4 +1,4 @@
-module Util exposing (appendErrors, onClickStopPropagation, viewIf)
+module Util exposing (appendErrors, onClickStopPropagation, viewIf, getImageUrl)
 
 import Html exposing (Attribute, Html)
 import Html.Events exposing (defaultOptions, onWithOptions)
@@ -23,3 +23,14 @@ onClickStopPropagation msg =
 appendErrors : { model | errors : List error } -> List error -> { model | errors : List error }
 appendErrors model errors =
     { model | errors = model.errors ++ errors }
+
+
+getImageUrl str =
+    let
+        empty =
+            String.isEmpty str
+    in
+        if empty then
+            "/"
+        else
+            str

@@ -3,14 +3,12 @@ module Page.Home exposing (Model, Msg, init, update, view)
 {-| The homepage. You can get here via either the / or /#/ routes.
 -}
 
--- module Page.Home exposing (Model, Msg, update, view)
-
 import Data.Session exposing (Session)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder)
 import Html.Events exposing (onClick)
 import Http
-import Page.Errored exposing (PageLoadError, pageLoadError)
+import Page.Errored exposing (PageLoadError(..), pageLoadError)
 import Task exposing (Task)
 import Util exposing (onClickStopPropagation)
 import Views.Page as Page
@@ -18,6 +16,11 @@ import Views.Page as Page
 
 type alias Model =
     { garbage : String
+    }
+
+
+garbageModel =
+    { garbage = "in -> out"
     }
 
 
@@ -36,11 +39,37 @@ type alias Model =
 --         -- Task.mapError handleLoadError
 --         handleLoadError Model
 -- TODO: Make it how it should be
+-- Just Route.Home ->
+--     transition HomeLoaded (Home.init model.session)
+-- init : Session -> Task PageLoadError Model
+-- init session =
+--     let
+--         feedSources =
+--             if session.user == Nothing then
+--                 SelectList.singleton globalFeed
+--             else
+--                 SelectList.fromLists [] yourFeed [ globalFeed ]
+--
+--         loadTags =
+--             Request.Article.tags
+--                 |> Http.toTask
+--
+--         loadSources =
+--             Feed.init session feedSources
+--
+--         handleLoadError _ =
+--             pageLoadError Page.Home "Homepage is currently unavailable."
+--     in
+--     Task.map2 Model loadTags loadSources
+--         |> Task.mapError handleLoadError
+-- init : Session -> Msg
+-- init session =
+--     Blah
 
 
-init : Session -> Msg
+init : Session -> Model
 init session =
-    NoOp
+    garbageModel
 
 
 
@@ -74,11 +103,11 @@ viewBanner =
 
 
 type Msg
-    = NoOp
+    = Blah
 
 
 update : Session -> Msg -> Model -> ( Model, Cmd Msg )
 update session msg model =
     case msg of
-        NoOp ->
-            ( { model | garbage = "in -> out" }, Cmd.none )
+        Blah ->
+            ( garbageModel, Cmd.none )
