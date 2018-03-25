@@ -1,33 +1,36 @@
 module Data.Recipe
     exposing
-        ( RecipeQueryMsg(..)
-          -- Queries
-        , sendUnitsQuery
-        , sendRecipeQuery
+        ( -- QUERIES --
+          createIngredientsQueryTask
         , createRecipeQueryTask
+        , createUnitsQueryTask
         , sendIngredientsQuery
+        , sendRecipeQuery
+        , sendUnitsQuery
         , submitRecipeMutation
-          -- Types
-        , RecipeFullResponse
-        , RecipesResponse
-        , TagsResponse
+          -- TYPES --
+        , EditingIngredient
+        , EditingRecipeFull
         , Flags
-        , RecipeTag
-        , RecipeSummary
-        , RecipeFull
         , Ingredient
         , IngredientRaw
         , IngredientUnit
-        , Unit
-        , SearchFilter(..)
+        , RecipeFull
+        , RecipeFullResponse
+        , RecipeId
         , RecipeMsg
-        , EditingRecipeFull
-        , EditingIngredient
+        , RecipeQueryMsg(..)
+        , RecipeSummary
+        , RecipeTag
+        , RecipesResponse
+        , SearchFilter(..)
+        , Slug(..)
+        , TagsResponse
+        , Unit
+          -- HELPER FUNCTIONS
         , mapFilterTypeToString
         , slugToString
         , slugParser
-        , Slug(..)
-        , RecipeId
         )
 
 import Http
@@ -117,6 +120,14 @@ type alias IngredientsResponse =
 --
 
 
+createUnitsQueryTask : AuthToken -> Task GraphQLClient.Error (List Unit)
+createUnitsQueryTask authToken =
+    (GraphQLClient.customSendQuery
+        (requestOptions authToken)
+        (GqlB.request {} unitsRequest)
+    )
+
+
 sendUnitsQuery : AuthToken -> (UnitsResponse -> a) -> Cmd a
 sendUnitsQuery authToken msg =
     Task.attempt
@@ -135,6 +146,14 @@ sendIngredientsQuery authToken msg =
             (requestOptions authToken)
             (GqlB.request {} ingredientsRequest)
         )
+
+
+createIngredientsQueryTask : AuthToken -> Task GraphQLClient.Error (List IngredientRaw)
+createIngredientsQueryTask authToken =
+    (GraphQLClient.customSendQuery
+        (requestOptions authToken)
+        (GqlB.request {} ingredientsRequest)
+    )
 
 
 sendRecipeQuery : AuthToken -> RecipeId -> (RecipeFullResponse -> a) -> Cmd a

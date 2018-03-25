@@ -1,37 +1,38 @@
 module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg, update, view, init)
 
-import Data.Session exposing (Session)
+-- ELM-LANG MODULES --
+
+import Html exposing (Html, div, text, button, h1, ul, li, img, i, span, p)
+import Html.Attributes exposing (src, style, class)
+import Http
+import Task exposing (Task)
 
 
---  ELM-LANG MODULES
+-- THIRD PARTY MODULES --
 
 import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Html exposing (Html, div, text, button, h1, ul, li, img, i, span, p)
-import Html.Attributes exposing (src, style, class)
-import Http
-import Page.Errored exposing (PageLoadError(..), pageLoadError)
-import Views.Page as Page
-import Task exposing (Task)
+
+
+-- APPLICATION MODULES --
+
 import Data.AuthToken exposing (AuthToken, getTokenString, blankToken)
 import Data.Recipe
     exposing
-        ( RecipeQueryMsg(..)
-        , sendUnitsQuery
-        , sendRecipeQuery
-        , sendIngredientsQuery
-        , submitRecipeMutation
-        , RecipeFullResponse
-        , RecipeQueryMsg(..)
-        , RecipeId
-        , Ingredient
+        ( Ingredient
         , RecipeFull
+        , RecipeFullResponse
+        , RecipeId
+        , RecipeQueryMsg(..)
         , Slug
         , slugToString
         , createRecipeQueryTask
         )
+import Data.Session exposing (Session)
+import Page.Errored exposing (PageLoadError(..), pageLoadError)
+import Views.Page as Page
 import Util exposing (getImageUrl)
 
 
@@ -46,11 +47,6 @@ type alias Model =
     }
 
 
-convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
-convertToLocalCmd recipeQueryCmd =
-    Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
-
-
 init : Session -> Slug -> Task PageLoadError Model
 init session slug =
     let
@@ -62,14 +58,8 @@ init session slug =
                 Just user ->
                     user.token
 
-        recipeIdString =
-            slugToString slug
-
-        recipeIdIntResult =
-            String.toInt recipeIdString
-
         recipeIdInt =
-            case recipeIdIntResult of
+            case (String.toInt (slugToString slug)) of
                 Ok int ->
                     int
 

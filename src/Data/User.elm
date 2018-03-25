@@ -3,6 +3,7 @@ module Data.User
         ( User
         , Name
         , UserId
+        , blankUserId
         , decoder
         , encode
         , nameDecoder
@@ -65,6 +66,10 @@ type Name
 
 type UserId
     = UserId String
+
+
+blankUserId =
+    UserId ""
 
 
 nameToString : Name -> String

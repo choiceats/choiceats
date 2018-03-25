@@ -7,9 +7,6 @@ import Data.Recipe as Recipe
 import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, string)
 
 
--- ROUTING --
-
-
 type Route
     = Home
     | Root
@@ -18,7 +15,9 @@ type Route
     | Signup
     | Randomizer
     | Recipes
+    | NewRecipe
     | RecipeDetail Recipe.Slug
+    | EditRecipe Recipe.Slug
 
 
 route : Parser (Route -> a) a
@@ -30,7 +29,9 @@ route =
         , Url.map Signup (s "signup")
         , Url.map Randomizer (s "random")
         , Url.map Recipes (s "recipes")
-        , Url.map RecipeDetail (s "recipes" </> Recipe.slugParser)
+        , Url.map NewRecipe (s "recipe" </> s "new")
+        , Url.map RecipeDetail (s "recipe" </> Recipe.slugParser)
+        , Url.map EditRecipe (s "recipe" </> Recipe.slugParser </> s "edit")
         ]
 
 
@@ -64,8 +65,14 @@ routeToString page =
                 Recipes ->
                     [ "recipes" ]
 
+                NewRecipe ->
+                    [ "recipe", "new" ]
+
                 RecipeDetail slug ->
-                    [ "recipes", Recipe.slugToString slug ]
+                    [ "recipe", Recipe.slugToString slug ]
+
+                EditRecipe slug ->
+                    [ "recipe", Recipe.slugToString slug, "edit" ]
     in
         "#/" ++ String.join "/" pieces
 

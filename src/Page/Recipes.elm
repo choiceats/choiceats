@@ -8,7 +8,15 @@ import Http
 import List exposing (map)
 import Util exposing (getImageUrl)
 import Task exposing (Task)
-import Route as Route exposing (Route(..))
+
+
+-- THIRD PARTY MODULES
+
+import GraphQL.Client.Http as GraphQLClient
+import GraphQL.Request.Builder as GqlB
+import GraphQL.Request.Builder.Arg as Arg
+import GraphQL.Request.Builder.Variable as Var
+import Route as Route exposing (Route(..), href)
 import Data.Recipe
     exposing
         ( SearchFilter(..)
@@ -19,14 +27,6 @@ import Data.Recipe
         , RecipeTag
         , Slug(..)
         )
-
-
--- THIRD PARTY MODULES
-
-import GraphQL.Client.Http as GraphQLClient
-import GraphQL.Request.Builder as GqlB
-import GraphQL.Request.Builder.Arg as Arg
-import GraphQL.Request.Builder.Variable as Var
 
 
 -- APPLICATION MODULES
@@ -217,7 +217,7 @@ searchBar searchParams =
             [ onInput onFilterChange ]
             filterOptions
         , a
-            [ href ("/recipe/new") ]
+            [ Route.href NewRecipe ]
             [ text "New Recipe" ]
         ]
 

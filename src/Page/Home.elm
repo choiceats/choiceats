@@ -24,49 +24,6 @@ garbageModel =
     }
 
 
-
---init : Session -> Task PageLoadError Model
--- init :
---     Session
---     -> PageLoadError -- Model
--- init session =
---     let
---         handleLoadError _ =
---             pageLoadError Page.Home "Homepage is currently unavailable."
---     in
---         -- Task.map Model
---         --|> Task.mapError handleLoadError
---         -- Task.mapError handleLoadError
---         handleLoadError Model
--- TODO: Make it how it should be
--- Just Route.Home ->
---     transition HomeLoaded (Home.init model.session)
--- init : Session -> Task PageLoadError Model
--- init session =
---     let
---         feedSources =
---             if session.user == Nothing then
---                 SelectList.singleton globalFeed
---             else
---                 SelectList.fromLists [] yourFeed [ globalFeed ]
---
---         loadTags =
---             Request.Article.tags
---                 |> Http.toTask
---
---         loadSources =
---             Feed.init session feedSources
---
---         handleLoadError _ =
---             pageLoadError Page.Home "Homepage is currently unavailable."
---     in
---     Task.map2 Model loadTags loadSources
---         |> Task.mapError handleLoadError
--- init : Session -> Msg
--- init session =
---     Blah
-
-
 init : Session -> Model
 init session =
     garbageModel

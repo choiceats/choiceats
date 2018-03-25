@@ -23,6 +23,7 @@ type ActivePage
     | Signup
     | Randomizer
     | Recipes
+    | NewRecipe
 
 
 {-| Take a page's Html and add a header
