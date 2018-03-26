@@ -7,7 +7,7 @@ To start the React version of the client, run `yarn start`
 
 To start the Elm version of the client, navigate to the project root and run
 ```
-elm-live --output=elm.js src/Main.elm --pushstate --open --debug
+elm-live --output=public/elm.js src/Main.elm --dir=public/ --before-build=clear --pushstate --open --debug
 ```
 
 Note that you will need `elm` and `elm-live` installed. They can be installed by running

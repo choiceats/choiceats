@@ -8,7 +8,6 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Json.Encode.Extra as EncodeExtra
 import Ports
-import Request.Helpers exposing (apiUrl)
 
 
 storeSession : User -> Cmd msg
@@ -34,23 +33,3 @@ login { email, password } =
     in
         Decode.field "user" User.decoder
             |> Http.post ("http://localhost:4000/auth") body
-
-
-
--- TODO: Convert http request in Page/Signup
--- signup : { r | username : String, email : String, password : String } -> Http.Request User
--- signup { username, email, password } =
---     let
---         user =
---             Encode.object
---                 [ ("username", Encode.string username)
---                 , ("email", Encode.string email)
---                 , ("password", Encode.string password)
---                 ]
---
---         body =
---             Encode.object [ ("user", user) ]
---                 |> Http.jsonBody
---     in
---         Decode.field "user" User.decoder
---             |> Http.post (apiUrl "/users") body
