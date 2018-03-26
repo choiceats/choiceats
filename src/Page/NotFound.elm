@@ -1,8 +1,15 @@
 module Page.NotFound exposing (view)
 
-import Data.Session exposing (Session)
+-- ELM-LANG MODULES --
+
 import Html exposing (Html, main_, img)
 import Html.Attributes exposing (src, tabindex, style)
+
+
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
+
+import Data.Session exposing (Session)
 
 
 -- VIEW --

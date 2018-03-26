@@ -29,8 +29,11 @@ module Data.Recipe
         , Unit
           -- HELPER FUNCTIONS
         , mapFilterTypeToString
+        , requestOptions
         , slugToString
         , slugParser
+          -- OTHER
+        , gqlRecipeSummary
         )
 
 import Http
@@ -329,6 +332,19 @@ gqlIngredient =
         |> GqlB.with (GqlB.field "displayQuantity" [] GqlB.string)
         |> GqlB.with (GqlB.field "name" [] GqlB.string)
         |> GqlB.with (GqlB.field "unit" [] gqlUnit)
+
+
+gqlRecipeSummary : GqlB.ValueSpec GqlB.NonNull GqlB.ObjectType RecipeSummary vars
+gqlRecipeSummary =
+    GqlB.object RecipeSummary
+        |> GqlB.with (GqlB.field "author" [] GqlB.string)
+        |> GqlB.with (GqlB.field "authorId" [] GqlB.string)
+        |> GqlB.with (GqlB.field "description" [] GqlB.string)
+        |> GqlB.with (GqlB.field "id" [] GqlB.string)
+        |> GqlB.with (GqlB.field "imageUrl" [] GqlB.string)
+        |> GqlB.with (GqlB.field "likes" [] (GqlB.list GqlB.int))
+        |> GqlB.with (GqlB.field "name" [] GqlB.string)
+        |> GqlB.with (GqlB.field "youLike" [] GqlB.bool)
 
 
 gqlRecipeFull : GqlB.ValueSpec GqlB.NonNull GqlB.ObjectType RecipeFull vars

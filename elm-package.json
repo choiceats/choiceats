@@ -4,13 +4,7 @@
     "repository": "https://github.com/user/project.git",
     "license": "BSD3",
     "source-directories": [
-        "src/",
-        "src/services",
-        "src/pages/",
-        "src/pages/Randomizer/",
-        "src/pages/Randomizer/components/",
-        "src/pages/shared-components/not-found/",
-        "src/pages/shared-components/loading/"
+        "src/"
     ],
     "exposed-modules": [],
     "dependencies": {

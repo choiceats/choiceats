@@ -3,17 +3,27 @@ module Page.Login exposing (ExternalMsg(..), Model, Msg, initialModel, update, v
 {-| The login page.
 -}
 
-import Data.Session exposing (Session)
-import Data.User exposing (User)
+-- ELM-LANG MODULES --
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Decode as Decode exposing (Decoder, decodeString, field, string)
 import Json.Decode.Pipeline exposing (decode, optional)
+
+
+-- THIRD PARTY MODULES --
+
+import Validate exposing (Validator, ifBlank, validate)
+
+
+-- APPLICATION MODULES --
+
+import Data.Session exposing (Session)
+import Data.User exposing (User)
 import Request.User exposing (storeSession)
 import Route exposing (Route)
-import Validate exposing (Validator, ifBlank, validate)
 import Views.Form as Form
 
 

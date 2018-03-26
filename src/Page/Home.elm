@@ -3,11 +3,18 @@ module Page.Home exposing (Model, Msg, init, update, view)
 {-| The homepage. You can get here via either the / or /#/ routes.
 -}
 
-import Data.Session exposing (Session)
+-- ELM-LANG MODULES --
+
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder)
 import Html.Events exposing (onClick)
 import Http
+
+
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
+
+import Data.Session exposing (Session)
 import Page.Errored exposing (PageLoadError(..), pageLoadError)
 import Task exposing (Task)
 import Util exposing (onClickStopPropagation)
