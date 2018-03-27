@@ -1,12 +1,13 @@
 module Page.Recipes exposing (ExternalMsg(..), Model, Msg, update, view, init)
 
+-- ELM-LANG MODULES --
+
 import Array exposing (Array)
 import Html exposing (Html, a, div, i, img, text, input, option, select)
 import Html.Attributes exposing (class, style, href, src, placeholder, value)
 import Html.Events exposing (onInput)
 import Http
 import List exposing (map)
-import Util exposing (getImageUrl)
 import Task exposing (Task)
 
 
@@ -16,7 +17,11 @@ import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Route as Route exposing (Route(..), href)
+
+
+-- APPLICATION MODULES
+
+import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankToken)
 import Data.Recipe
     exposing
         ( SearchFilter(..)
@@ -27,13 +32,10 @@ import Data.Recipe
         , RecipeTag
         , Slug(..)
         )
-
-
--- APPLICATION MODULES
-
-import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankToken)
 import Data.Session exposing (Session)
 import Data.User exposing (User, UserId, decoder)
+import Util exposing (getImageUrl)
+import Route as Route exposing (Route(..), href)
 
 
 type ExternalMsg

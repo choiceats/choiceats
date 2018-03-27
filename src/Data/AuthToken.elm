@@ -1,8 +1,17 @@
 module Data.AuthToken exposing (AuthToken, decoder, encode, withAuthorization, blankToken, getTokenString)
 
-import HttpBuilder exposing (RequestBuilder, withHeader)
+-- ELM-LANG MODULES --
+
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
+
+
+-- THIRD PARTY MODULES --
+
+import HttpBuilder exposing (RequestBuilder, withHeader)
+
+
+-- APPLICATION MODULES --
 
 
 type AuthToken

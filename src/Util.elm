@@ -1,8 +1,14 @@
 module Util exposing (appendErrors, onClickStopPropagation, viewIf, getImageUrl)
 
+-- ELM-LANG MODULES --
+
 import Html exposing (Attribute, Html)
 import Html.Events exposing (defaultOptions, onWithOptions)
 import Json.Decode as Decode
+
+
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
 
 
 viewIf : Bool -> Html msg -> Html msg

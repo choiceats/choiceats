@@ -421,18 +421,6 @@ initEdit session slug =
                 (createUnitsQueryTask token)
 
 
-
--- init : RecipeFlags -> ( Model, Cmd Msg )
--- init flags =
---     ( { recipe = Nothing, editingRecipe = emptyRecipe, units = Nothing, ingredients = Nothing, flags = flags, uiOpenDropdown = Nothing }
---     , Cmd.batch
---         [ convertToLocalCmd (queryForRecipe flags)
---         , convertToLocalCmd (queryForTags flags)
---         , convertToLocalCmd (queryForIngredients flags)
---         ]
---     )
-
-
 recipeFullToEditingRecipe : Model -> Maybe RecipeFull -> EditingRecipeFull
 recipeFullToEditingRecipe model recipeFull =
     case recipeFull of

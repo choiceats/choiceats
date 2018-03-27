@@ -1,10 +1,20 @@
 module Route exposing (Route(..), fromLocation, href, modifyUrl)
 
+-- ELM-LANG MODULES --
+
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import Navigation exposing (Location)
-import Data.Recipe as Recipe
+
+
+-- THIRD PARTY MODULES --
+
 import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, string)
+
+
+-- APPLICATION MODULES --
+
+import Data.Recipe as Recipe
 
 
 type Route

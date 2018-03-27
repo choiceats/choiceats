@@ -1,5 +1,9 @@
 module Data.Session exposing (Session, attempt)
 
+-- ELM-LANG MODULES --
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
+
 import Data.AuthToken exposing (AuthToken)
 import Data.User exposing (User)
 

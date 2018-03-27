@@ -1,7 +1,13 @@
 module Views.Spinner exposing (spinner)
 
+-- ELM-LANG MODULES --
+
 import Html exposing (Attribute, Html, div, li)
 import Html.Attributes exposing (class, style)
+
+
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
 
 
 spinner : Html msg

@@ -32,6 +32,9 @@ DONE
 
 ## Backlog
 * Dictionary of plural/single ingredients on server side (i.e. eggs);
+* Apply tagging system to existing recipes
+* Email recipes to friend, including link to the site, print version of the recipe, and a brief message of who it was sent by.
+* Highlight place where you are in recipe with a tap/click. Slight background color.
 
 ### Missing Ingredients
 * Ground pork

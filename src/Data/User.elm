@@ -16,13 +16,23 @@ module Data.User
         , userIdToString
         )
 
-import Data.AuthToken as AuthToken exposing (AuthToken)
+-- ELM-LANG MODULES --
+
 import Html exposing (Html)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (Value)
+
+
+-- THIRD PARTY MODULES --
+
 import Json.Encode.Extra as EncodeExtra
 import UrlParser
+
+
+-- APPLICATION MODULES --
+
+import Data.AuthToken as AuthToken exposing (AuthToken)
 
 
 type alias User =

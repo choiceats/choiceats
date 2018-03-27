@@ -36,18 +36,25 @@ module Data.Recipe
         , gqlRecipeSummary
         )
 
+-- ELM-LANG MODULES --
+
 import Http
 import Array exposing (Array)
 import Task exposing (Task)
+
+
+-- THIRD PARTY MODULES --
+
 import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankToken)
 import UrlParser
 
 
--- import Page.Errored exposing (PageLoadError(..), pageLoadError)
+-- APPLICATION MODULES --
+
+import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankToken)
 
 
 type alias RecipeId =

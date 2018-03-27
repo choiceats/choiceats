@@ -1,23 +1,30 @@
 module Main exposing (main)
 
-import Data.Recipe exposing (Slug)
-import Data.Session exposing (Session)
-import Data.User as User exposing (User)
+-- ELM-LANG MODULES --
+
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
 import Navigation exposing (Location)
+import Task
+
+
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
+
+import Data.Recipe exposing (Slug)
+import Data.Session exposing (Session)
+import Data.User as User exposing (User)
 import Page.Errored as Errored exposing (PageLoadError)
 import Page.Home as Home
 import Page.Login as Login
-import Page.Signup as Signup
+import Page.NotFound as NotFound
 import Page.Randomizer as Randomizer
 import Page.RecipeDetail as RecipeDetail
-import Page.Recipes as Recipes
 import Page.RecipeEditor as RecipeEditor
-import Page.NotFound as NotFound
+import Page.Recipes as Recipes
+import Page.Signup as Signup
 import Ports
 import Route exposing (Route)
-import Task
 import Views.Page as Page exposing (ActivePage)
 
 

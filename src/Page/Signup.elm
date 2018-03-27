@@ -2,7 +2,6 @@ module Page.Signup exposing (ExternalMsg(..), Model, Msg, initialModel, update, 
 
 -- ELM-LANG MODULES
 
-import Data.User exposing (User)
 import Html exposing (Html, div, text, label, input, button, h1, form)
 import Html.Attributes exposing (disabled, type_, class, style, value, for, id)
 import Html.Events exposing (onWithOptions, onClick, onInput)
@@ -10,6 +9,11 @@ import Http exposing (Error, send, post, stringBody)
 import Json.Decode as JD exposing (string, field, map4)
 import Json.Encode as JE exposing (object, string, encode)
 import Regex exposing (regex, caseInsensitive)
+
+
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
+
 import Data.Session exposing (Session)
 import Data.User exposing (User, decoder)
 import Request.User exposing (storeSession)

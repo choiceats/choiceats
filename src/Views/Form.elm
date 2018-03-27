@@ -1,7 +1,13 @@
 module Views.Form exposing (input, password, textarea, viewErrors)
 
+-- ELM-LANG MODULES --
+
 import Html exposing (Attribute, Html, fieldset, li, text, ul)
 import Html.Attributes exposing (class, type_)
+
+
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
 
 
 password : List (Attribute msg) -> List (Html msg) -> Html msg

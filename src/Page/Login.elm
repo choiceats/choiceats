@@ -75,10 +75,6 @@ view session model =
                     ]
                 ]
             ]
-
-        --  , div
-        --    [class <| "ui error message " ++ (if hasLength model.serverFeedback then "visible" else "hidden")]
-        --    [text model.serverFeedback]
         ]
 
 
