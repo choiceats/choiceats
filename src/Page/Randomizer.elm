@@ -25,14 +25,21 @@ import GraphQL.Client.Http as GraphQLClient
 
 import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankToken)
 import Data.Session exposing (Session)
-import Data.Recipe exposing (requestOptions, RecipeSummary, gqlRecipeSummary)
+import Data.Recipe
+    exposing
+        ( mapFilterTypeToString
+        , requestOptions
+        , RecipeSummary
+        , SearchFilter(..)
+        , gqlRecipeSummary
+        )
 import Data.User exposing (User, decoder)
 import Route exposing (Route)
 
 
 type Msg
     = RequestRecipe
-    | SetFilterType ButtonFilter
+    | SetFilterType SearchFilter
     | ReceiveQueryResponse RecipeResponse
 
 
@@ -48,30 +55,11 @@ type ExternalMsg
 -- Types.elm --
 
 
-type ButtonFilter
-    = My
-    | Fav
-    | All
-
-
 type alias Model =
-    { currentFilter : ButtonFilter
+    { currentFilter : SearchFilter
     , mRecipeSummary : Maybe RecipeResponse
     , token : AuthToken
     }
-
-
-mapFilterTypeToString : ButtonFilter -> String
-mapFilterTypeToString filterType =
-    case filterType of
-        My ->
-            "my"
-
-        Fav ->
-            "fav"
-
-        All ->
-            "all"
 
 
 init : Session -> ( Model, Cmd Msg )
@@ -135,7 +123,7 @@ recipeRequest =
         GqlB.queryDocument queryRoot
 
 
-recipeQueryRequest : ButtonFilter -> GqlB.Request GqlB.Query RecipeSummary
+recipeQueryRequest : SearchFilter -> GqlB.Request GqlB.Query RecipeSummary
 recipeQueryRequest buttonFilter =
     recipeRequest
         |> GqlB.request { searchFilter = (mapFilterTypeToString buttonFilter) }
@@ -146,7 +134,7 @@ sendQueryRequest authToken request =
     GraphQLClient.customSendQuery (requestOptions authToken) request
 
 
-sendRecipeQuery : AuthToken -> ButtonFilter -> Cmd Msg
+sendRecipeQuery : AuthToken -> SearchFilter -> Cmd Msg
 sendRecipeQuery authToken buttonFilter =
     sendQueryRequest authToken (recipeQueryRequest buttonFilter)
         |> Task.attempt ReceiveQueryResponse
@@ -167,7 +155,7 @@ viewFilterButtons model =
         ]
 
 
-filterButton : ButtonFilter -> ButtonFilter -> Html Msg
+filterButton : SearchFilter -> SearchFilter -> Html Msg
 filterButton choice currentFilter =
     button
         [ class
