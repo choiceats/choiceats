@@ -1,0 +1,35 @@
+@-webkit-keyframes slideInLeft {
+  0% {
+    margin-left: 100%;
+  }
+
+  100% {
+    margin-left: 0%;
+  }
+}
+
+@-moz-keyframes slideInLeft {
+  0% {
+    margin-left: 100%;
+  }
+
+  100% {
+    margin-left: 0%;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    margin-left: 100%;
+  }
+
+  100% {
+    margin-left: 0%;
+  }
+}
+
+.slideInLeft {
+  -webkit-animation: slideInLeft 0.25s linear;
+  animation: slideInLeft 0.25s linear;
+}
+
