@@ -413,7 +413,7 @@ updatePage page msg model =
                 -- Disregard incoming messages when on the NotFound page.
                 ( model, Cmd.none )
 
-            ( a, b ) ->
+            ( _, _ ) ->
                 ( model, Cmd.none )
 
 
