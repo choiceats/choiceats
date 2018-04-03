@@ -338,6 +338,7 @@ gqlIngredient =
         |> GqlB.with (GqlB.field "quantity" [] GqlB.float)
         |> GqlB.with (GqlB.field "displayQuantity" [] GqlB.string)
         |> GqlB.with (GqlB.field "name" [] GqlB.string)
+        |> GqlB.with (GqlB.field "id" [] GqlB.string)
         |> GqlB.with (GqlB.field "unit" [] gqlUnit)
 
 
@@ -457,6 +458,7 @@ type alias Ingredient =
     { quantity : Float
     , displayQuantity : String
     , name : String
+    , id : String
     , unit : IngredientUnit
     }
 

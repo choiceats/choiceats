@@ -387,6 +387,18 @@ updatePage page msg model =
                 in
                     ( { newModel | pageState = Loaded (Recipes pageModel) }, Cmd.map RecipesMsg cmd )
 
+            ( RecipeDetailMsg subMsg, RecipeDetail subModel ) ->
+                let
+                    ( ( pageModel, cmd ), msgFromPage ) =
+                        RecipeDetail.update subMsg subModel
+
+                    newModel =
+                        case msgFromPage of
+                            RecipeDetail.NoOp ->
+                                model
+                in
+                    ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
+
             ( RecipeDetailLoaded (Ok subModel), _ ) ->
                 ( { model | pageState = Loaded (RecipeDetail subModel) }, Cmd.none )
 
