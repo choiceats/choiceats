@@ -4,7 +4,7 @@ module Page.RecipeEditor exposing (update, view, initNew, initEdit, Model, Msg(.
 
 import Array exposing (Array, fromList, toList)
 import Html exposing (Html, a, button, div, form, h1, i, input, label, span, text, textarea)
-import Html.Attributes exposing (attribute, class, for, href, id, name, placeholder, rows, src, style, tabindex, type_, value)
+import Html.Attributes exposing (attribute, class, classList, for, href, id, name, placeholder, rows, src, style, tabindex, type_, value)
 import Html.Attributes.Aria exposing (role)
 import Html.Events exposing (defaultOptions, onClick, onInput, onWithOptions)
 import Json.Decode as Decode
@@ -12,6 +12,10 @@ import Task exposing (Task)
 
 
 -- THIRD PARTY MODULES --
+
+import Autocomplete
+
+
 -- APPLICATION MODULES --
 
 import Data.User as User exposing (UserId, blankUserId)
@@ -74,6 +78,7 @@ type alias Model =
 
     -- UI
     , uiOpenDropdown : Maybe DropdownKey
+    , ingredientAutoComplete : Array Autocomplete.State
     }
 
 
@@ -84,7 +89,8 @@ type Msg
     | AddIngredient
     | BodyClick
     | DeleteIngredient Int
-    | SelectIngredient Int IngredientRaw
+    | SetAutocompleteState Int Autocomplete.Msg
+    | SelectIngredient Int String
     | SelectIngredientUnit Int Unit
     | Submit
     | ToggleIngredientDropdown (Maybe DropdownKey)
@@ -126,6 +132,43 @@ submitRecipe model =
 convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
 convertToLocalCmd recipeQueryCmd =
     Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
+
+
+autocompleteViewConfig : Autocomplete.ViewConfig IngredientRaw
+autocompleteViewConfig =
+    let
+        customizedLi keySelected mouseSelected ingredient =
+            { attributes =
+                [ classList [ ( "autocomplete-item", True ), ( "key-selected", keySelected || mouseSelected ) ]
+                , id ingredient.id
+                ]
+            , children = [ Html.text ingredient.name ]
+            }
+    in
+        Autocomplete.viewConfig
+            { toId = .id
+            , ul = [ class "autocomplete-list" ]
+            , li = customizedLi
+            }
+
+
+autocompleteUpdateConfig : Int -> Autocomplete.UpdateConfig Msg IngredientRaw
+autocompleteUpdateConfig ingredientIndex =
+    Autocomplete.updateConfig
+        { toId = .id
+        , onKeyDown =
+            \code ingredient ->
+                if code == 13 then
+                    Maybe.map (SelectIngredient ingredientIndex) ingredient
+                else
+                    Nothing
+        , onTooLow = Nothing
+        , onTooHigh = Nothing
+        , onMouseEnter = \_ -> Nothing
+        , onMouseLeave = \_ -> Nothing
+        , onMouseClick = \ingredient -> Just <| SelectIngredient ingredientIndex ingredient
+        , separateSelections = False
+        }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -244,7 +287,7 @@ update msg model =
                     Nothing ->
                         ( model, Cmd.none )
 
-        SelectIngredient index rawIngredient ->
+        SelectIngredient index ingredientId ->
             let
                 editingRecipe =
                     model.editingRecipe
@@ -253,7 +296,7 @@ update msg model =
                     Just foundIngredient ->
                         let
                             newIngredient =
-                                { foundIngredient | ingredientId = rawIngredient.id }
+                                { foundIngredient | ingredientId = ingredientId }
 
                             newIngredients =
                                 Array.set index newIngredient editingRecipe.ingredients
@@ -303,6 +346,9 @@ update msg model =
             in
                 ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
+        SetAutocompleteState index autocompleteMsg ->
+            ( model, Cmd.none )
+
 
 makeShellModel : Session -> Model
 makeShellModel session =
@@ -331,6 +377,7 @@ makeShellModel session =
         , userId = userId
         , token = token
         , uiOpenDropdown = Nothing
+        , ingredientAutoComplete = Array.empty
         }
 
 
@@ -362,6 +409,7 @@ initNew session =
             , recipeId = 0
             , userId = userId
             , uiOpenDropdown = Nothing
+            , ingredientAutoComplete = Array.empty
             }
     in
         Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
@@ -411,6 +459,7 @@ initEdit session slug =
             , recipeId = recipeIdInt
             , userId = userId
             , uiOpenDropdown = Nothing
+            , ingredientAutoComplete = Array.empty
             }
     in
         Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
@@ -667,47 +716,61 @@ unitsDropdown units ingredientIndex ingredientUnitId openDropdown =
 
 ingredientTypeAhead : Model -> Int -> EditingIngredient -> Maybe DropdownKey -> Html Msg
 ingredientTypeAhead model ingredientIndex ingredient openDropdown =
-    let
-        isVisible =
-            case openDropdown of
-                Just (IngredientDropdown dd) ->
-                    if dd == ingredientIndex then
-                        True
-                    else
-                        False
+    div [ class "autocomplete-menu" ]
+        [ Html.map
+            (SetAutocompleteState ingredientIndex)
+            (Autocomplete.view
+                autocompleteViewConfig
+                10
+                (Maybe.withDefault Autocomplete.empty (Array.get ingredientIndex model.ingredientAutoComplete))
+                (Maybe.withDefault [] model.ingredients)
+            )
+        ]
 
-                _ ->
-                    False
 
-        active =
-            if isVisible then
-                "active"
-            else
-                ""
 
-        visible =
-            if isVisible then
-                "visible"
-            else
-                ""
-    in
-        div
-            [ class ("ui " ++ active ++ " selection dropdown")
-            , tabindex 0
-            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (IngredientDropdown ingredientIndex))))
-            ]
-            [ input [ type_ "hidden", name "gender" ] []
-            , i [ class "dropdown icon" ] []
-            , div [ class "default text" ] [ text (getIngredientName model.ingredients ingredient.ingredientId) ]
-            , div [ class ("menu " ++ visible ++ " transition") ]
-                (case model.ingredients of
-                    Nothing ->
-                        [ div [] [ text "Na uh uh.  You didn't say the magic word" ] ]
-
-                    Just ingred ->
-                        List.map (ingredientItem ingredientIndex ingredient) ingred
-                )
-            ]
+{--let--}
+--    isVisible =
+--        case openDropdown of
+--            Just (IngredientDropdown dd) ->
+--                if dd == ingredientIndex then
+--                    True
+--                else
+--                    False
+--
+--            _ ->
+--                False
+--
+--    active =
+--        if isVisible then
+--            "active"
+--        else
+--            ""
+--
+--    visible =
+--        if isVisible then
+--            "visible"
+--        else
+--            ""
+--in
+--    div
+--        [ class ("ui " ++ active ++ " selection dropdown")
+--        , tabindex 0
+--        , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (IngredientDropdown ingredientIndex))))
+--        ]
+--        [ input [ type_ "hidden", name "gender" ] []
+--        , i [ class "dropdown icon" ] []
+--        , div [ class "default text" ] [ text (getIngredientName model.ingredients ingredient.ingredientId) ]
+--        , div [ class ("menu " ++ visible ++ " transition") ]
+--            (case model.ingredients of
+--                Nothing ->
+--                    [ div [] [ text "Na uh uh.  You didn't say the magic word" ] ]
+--
+--                Just ingred ->
+--                    List.map (ingredientItem ingredientIndex ingredient) ingred
+--            )
+--        ]
+{----}
 
 
 ingredientItem : Int -> EditingIngredient -> IngredientRaw -> Html Msg
@@ -715,7 +778,7 @@ ingredientItem index ingredient ingredientRaw =
     div
         [ class "item"
         , attribute "data-value" "42"
-        , onClick (SelectIngredient index ingredientRaw)
+        , onClick (SelectIngredient index ingredientRaw.id)
         ]
         [ text ingredientRaw.name ]
 
