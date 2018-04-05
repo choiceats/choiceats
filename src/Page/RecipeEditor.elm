@@ -79,6 +79,7 @@ type alias Model =
     -- UI
     , uiOpenDropdown : Maybe DropdownKey
     , ingredientAutoComplete : Array Autocomplete.State
+    , ingredientFilters : Array String
     }
 
 
@@ -94,6 +95,7 @@ type Msg
     | SelectIngredientUnit Int Unit
     | Submit
     | ToggleIngredientDropdown (Maybe DropdownKey)
+    | UpdateTypeaheadFilter Int String
     | UpdateIngredient IngredientField Int String
     | UpdateTextField TextField String
 
@@ -158,10 +160,14 @@ autocompleteUpdateConfig ingredientIndex =
         { toId = .id
         , onKeyDown =
             \code ingredient ->
-                if code == 13 then
-                    Maybe.map (SelectIngredient ingredientIndex) ingredient
-                else
-                    Nothing
+                let
+                    _ =
+                        Debug.log "Keydown" code
+                in
+                    if code == 13 then
+                        Maybe.map (SelectIngredient ingredientIndex) ingredient
+                    else
+                        Nothing
         , onTooLow = Nothing
         , onTooHigh = Nothing
         , onMouseEnter = \_ -> Nothing
@@ -314,6 +320,9 @@ update msg model =
                 editingRecipe =
                     model.editingRecipe
 
+                newIngredientFilters =
+                    Array.push "" model.ingredientFilters
+
                 newIngredientList =
                     Array.push
                         { quantity = ""
@@ -325,29 +334,68 @@ update msg model =
                 newEditingRecipe =
                     { editingRecipe | ingredients = newIngredientList }
             in
-                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
+                ( { model | editingRecipe = newEditingRecipe, ingredientFilters = newIngredientFilters }, Cmd.none )
 
         DeleteIngredient index ->
             let
                 editingRecipe =
                     model.editingRecipe
 
-                beforeIngredientList =
-                    Array.slice 0 index editingRecipe.ingredients
-
-                afterIngredientList =
-                    Array.slice (index + 1) (Array.length editingRecipe.ingredients) editingRecipe.ingredients
-
                 newIngredientList =
-                    Array.append beforeIngredientList afterIngredientList
+                    removeIndexFromArray index editingRecipe.ingredients
+
+                newIngredientFilters =
+                    removeIndexFromArray index model.ingredientFilters
 
                 newEditingRecipe =
                     { editingRecipe | ingredients = newIngredientList }
             in
-                ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
+                ( { model | editingRecipe = newEditingRecipe, ingredientFilters = newIngredientFilters }, Cmd.none )
 
         SetAutocompleteState index autocompleteMsg ->
-            ( model, Cmd.none )
+            let
+                autocompleteState =
+                    Maybe.withDefault Autocomplete.empty (Array.get index model.ingredientAutoComplete)
+
+                ( newState, maybeMsg ) =
+                    Autocomplete.update
+                        (autocompleteUpdateConfig index)
+                        autocompleteMsg
+                        10
+                        autocompleteState
+                        (filteredIngredients index model)
+
+                newIngredientAutoCompletes =
+                    Array.set index newState model.ingredientAutoComplete
+
+                newModel =
+                    { model | ingredientAutoComplete = newIngredientAutoCompletes }
+            in
+                case maybeMsg of
+                    Nothing ->
+                        newModel ! []
+
+                    Just updateMsg ->
+                        update updateMsg newModel
+
+        UpdateTypeaheadFilter index filter ->
+            let
+                newFilterArray =
+                    (Array.set index filter model.ingredientFilters)
+            in
+                ( { model | ingredientFilters = newFilterArray }, Cmd.none )
+
+
+removeIndexFromArray : Int -> Array a -> Array a
+removeIndexFromArray index fromArray =
+    let
+        arrayUpToIndex =
+            Array.slice 0 index fromArray
+
+        arrayAfterIndex =
+            Array.slice (index + 1) (Array.length fromArray) fromArray
+    in
+        Array.append arrayUpToIndex arrayAfterIndex
 
 
 makeShellModel : Session -> Model
@@ -378,6 +426,7 @@ makeShellModel session =
         , token = token
         , uiOpenDropdown = Nothing
         , ingredientAutoComplete = Array.empty
+        , ingredientFilters = Array.empty
         }
 
 
@@ -410,6 +459,7 @@ initNew session =
             , userId = userId
             , uiOpenDropdown = Nothing
             , ingredientAutoComplete = Array.empty
+            , ingredientFilters = Array.empty
             }
     in
         Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
@@ -459,7 +509,8 @@ initEdit session slug =
             , recipeId = recipeIdInt
             , userId = userId
             , uiOpenDropdown = Nothing
-            , ingredientAutoComplete = Array.empty
+            , ingredientAutoComplete = Array.repeat (List.length resultRecipe.ingredients) Autocomplete.empty
+            , ingredientFilters = Array.repeat (List.length resultRecipe.ingredients) ""
             }
     in
         Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
@@ -716,16 +767,31 @@ unitsDropdown units ingredientIndex ingredientUnitId openDropdown =
 
 ingredientTypeAhead : Model -> Int -> EditingIngredient -> Maybe DropdownKey -> Html Msg
 ingredientTypeAhead model ingredientIndex ingredient openDropdown =
-    div [ class "autocomplete-menu" ]
-        [ Html.map
-            (SetAutocompleteState ingredientIndex)
-            (Autocomplete.view
-                autocompleteViewConfig
-                10
-                (Maybe.withDefault Autocomplete.empty (Array.get ingredientIndex model.ingredientAutoComplete))
-                (Maybe.withDefault [] model.ingredients)
-            )
+    div [ class "ingredient-typeahead" ]
+        [ input [ type_ "text", name "ingredientName", onInput (UpdateTypeaheadFilter ingredientIndex) ] []
+        , div [ class "autocomplete-menu" ]
+            [ Html.map
+                (SetAutocompleteState ingredientIndex)
+                (Autocomplete.view
+                    autocompleteViewConfig
+                    10
+                    (Maybe.withDefault Autocomplete.empty (Array.get ingredientIndex model.ingredientAutoComplete))
+                    (filteredIngredients ingredientIndex model)
+                )
+            ]
         ]
+
+
+filteredIngredients : Int -> Model -> List IngredientRaw
+filteredIngredients ingredientIndex model =
+    let
+        filterString =
+            Maybe.withDefault "" (Array.get ingredientIndex model.ingredientFilters)
+
+        ingredientList =
+            Maybe.withDefault [] model.ingredients
+    in
+        List.filter (\a -> (String.contains filterString a.name)) ingredientList
 
 
 
