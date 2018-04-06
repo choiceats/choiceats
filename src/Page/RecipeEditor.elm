@@ -98,6 +98,7 @@ type Msg
     | UpdateTypeaheadFilter Int String
     | UpdateIngredient IngredientField Int String
     | UpdateTextField TextField String
+    | ResetAutocomplete Int Bool
 
 
 emptyRecipe : EditingRecipeFull
@@ -384,6 +385,23 @@ update msg model =
                     (Array.set index filter model.ingredientFilters)
             in
                 ( { model | ingredientFilters = newFilterArray }, Cmd.none )
+
+        ResetAutocomplete index toTop ->
+            ( model, Cmd.none )
+
+
+
+{--Reset index toTop ->--}
+--let
+--    autocomleteState =
+--        Maybe.withDefault Autocomplete.empty (Array.get index model.ingredientAutoComplete)
+--
+--    nextStates =
+--
+--( { model | autoState =
+--    if toTop then
+--        Autocomplete.resetToFirstItem
+{----}
 
 
 removeIndexFromArray : Int -> Array a -> Array a
