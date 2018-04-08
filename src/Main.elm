@@ -161,7 +161,7 @@ viewPage session isLoading page =
 subscriptions model =
     Sub.batch
         [ Sub.map SetUser sessionChange
-        , Sub.map RecipeEditorMsg (Sub.map (RecipeEditor.SetAutocompleteState 1) Autocomplete.subscription)
+        , Sub.map RecipeEditorMsg (Sub.map RecipeEditor.SetAutocompleteState Autocomplete.subscription)
         ]
 
 
