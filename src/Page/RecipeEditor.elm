@@ -2,6 +2,7 @@ module Page.RecipeEditor exposing (update, view, initNew, initEdit, Model, Msg(.
 
 -- ELM-LANG MODULES --
 
+import Debug
 import Array exposing (Array, fromList, toList)
 import Html exposing (Html, a, button, div, form, h1, i, input, label, span, text, textarea)
 import Html.Attributes exposing (attribute, class, classList, for, href, id, name, placeholder, rows, src, style, tabindex, type_, value)
@@ -194,7 +195,11 @@ update msg model =
                     ( { model | units = Result.toMaybe res }, Cmd.none )
 
                 ReceiveIngredients res ->
-                    ( { model | ingredients = Result.toMaybe res }, Cmd.none )
+                    let
+                        _ =
+                            Debug.log "Incoming ingredients" res
+                    in
+                        ( { model | ingredients = Result.toMaybe res }, Cmd.none )
 
         ToggleIngredientDropdown dropdown ->
             let
@@ -556,24 +561,9 @@ ingredientsToEditingIngredients model recipeIngredients =
 ingredientToEditingIngredient : Model -> Ingredient -> EditingIngredient
 ingredientToEditingIngredient model recipeIngredient =
     { quantity = toString recipeIngredient.quantity
-    , ingredientId = getIngredientId model.ingredients recipeIngredient
+    , ingredientId = recipeIngredient.id
     , unitId = recipeIngredient.unit.id
     }
-
-
-getIngredientId : Maybe (List IngredientRaw) -> Ingredient -> String
-getIngredientId ingredients recipeIngredient =
-    case ingredients of
-        Just ingredients ->
-            case List.head (List.filter (\i -> i.name == recipeIngredient.name) ingredients) of
-                Just foundIT ->
-                    foundIT.id
-
-                Nothing ->
-                    ""
-
-        Nothing ->
-            ""
 
 
 getIngredientName : Maybe (List IngredientRaw) -> String -> String
@@ -700,7 +690,7 @@ ingredientRow model ingredientIndex ingredient =
         , div [ class "four wide field" ]
             [ unitsDropdown model.units ingredientIndex ingredient.unitId model.uiOpenDropdown ]
         , div [ class "six wide field" ]
-            [ ingredientTypeAhead model ingredientIndex ingredient model.uiOpenDropdown ]
+            [ ingredientView model ingredientIndex ingredient ]
         , div [ class "six wide field" ]
             [ button [ class "ui negative button", role "button", onClick (DeleteIngredient ingredientIndex) ] [ text "X" ] ]
         ]
@@ -767,28 +757,63 @@ unitsDropdown units ingredientIndex ingredientUnitId openDropdown =
             ]
 
 
-ingredientTypeAhead : Model -> Int -> EditingIngredient -> Maybe DropdownKey -> Html Msg
-ingredientTypeAhead model ingredientIndex ingredient openDropdown =
-    div [ class "ingredient-typeahead" ]
-        [ input [ type_ "text", name "ingredientName", onInput UpdateTypeaheadFilter, onFocus (IngredientFocused ingredientIndex) ] []
-        , case model.selectedIngredientIndex of
-            Just selectedIndex ->
-                if selectedIndex == ingredientIndex then
-                    div [ class "autocomplete-menu" ]
-                        [ Html.map
-                            SetAutocompleteState
-                            (Autocomplete.view
-                                autocompleteViewConfig
-                                10
-                                model.ingredientAutoComplete
-                                (filteredIngredients model)
-                            )
-                        ]
-                else
-                    div [] []
+ingredientView : Model -> Int -> EditingIngredient -> Html Msg
+ingredientView model ingredientIndex ingredient =
+    let
+        _ =
+            Debug.log "Render ingredient" ingredient
+    in
+        div [ class "ingredient-view", onClick (IngredientFocused ingredientIndex) ]
+            [ case model.selectedIngredientIndex of
+                Just selectedIndex ->
+                    if selectedIndex == ingredientIndex then
+                        ingredientTypeAhead model ingredientIndex ingredient
+                    else
+                        text
+                            (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients))
+
+                Nothing ->
+                    text (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients))
+            ]
+
+
+getIngredientNameFromId : String -> Maybe (List IngredientRaw) -> Maybe String
+getIngredientNameFromId id ingredients =
+    let
+        _ =
+            Debug.log "Hmmm" id
+
+        maybeIngredient =
+            findInList (\ingredient -> ingredient.id == id) (Maybe.withDefault [] ingredients)
+    in
+        case maybeIngredient of
+            Just foundIngredient ->
+                Just foundIngredient.name
 
             Nothing ->
-                div [] []
+                Nothing
+
+
+findInList : (a -> Bool) -> List a -> Maybe a
+findInList filter list =
+    List.head
+        (List.filter filter list)
+
+
+ingredientTypeAhead : Model -> Int -> EditingIngredient -> Html Msg
+ingredientTypeAhead model ingredientIndex ingredient =
+    div [ class "ingredient-typeahead" ]
+        [ input [ type_ "text", name "ingredientName", onInput UpdateTypeaheadFilter, onFocus (IngredientFocused ingredientIndex) ] []
+        , div [ class "autocomplete-menu" ]
+            [ Html.map
+                SetAutocompleteState
+                (Autocomplete.view
+                    autocompleteViewConfig
+                    10
+                    model.ingredientAutoComplete
+                    (filteredIngredients model)
+                )
+            ]
         ]
 
 
