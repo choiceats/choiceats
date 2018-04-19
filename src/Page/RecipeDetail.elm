@@ -1,9 +1,12 @@
 module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg, update, view, init)
 
+-- CONTEXT --
+-- TODO: Make this file build, and enable the highlighting feature thing.
 -- ELM-LANG MODULES --
 
-import Html exposing (Html, div, text, button, h1, ul, li, img, i, span, p)
+import Html exposing (Html, a, div, text, button, h1, ul, li, img, i, span, p)
 import Html.Attributes exposing (src, style, class)
+import Html.Events exposing (onClick)
 import Http
 import Task exposing (Task)
 
@@ -26,7 +29,7 @@ import Data.Recipe
         , RecipeFullResponse
         , RecipeId
         , RecipeQueryMsg(..)
-        , Slug
+        , Slug(..)
         , slugToString
         , createRecipeQueryTask
         )
@@ -34,6 +37,7 @@ import Data.Session exposing (Session)
 import Page.Errored exposing (PageLoadError(..), pageLoadError)
 import Views.Page as Page
 import Util exposing (getImageUrl)
+import Route as Route exposing (Route(..), href)
 
 
 type ExternalMsg
@@ -44,6 +48,7 @@ type alias Model =
     { mRecipe : RecipeFullResponse
     , token : AuthToken
     , recipeId : RecipeId
+    , focusedIngredient : Maybe IngredientId
     }
 
 
@@ -73,7 +78,7 @@ init session slug =
 
 initResultMap : AuthToken -> RecipeId -> RecipeFull -> Model
 initResultMap token id recipeFull =
-    { mRecipe = Ok recipeFull, token = token, recipeId = id }
+    { mRecipe = Ok recipeFull, token = token, recipeId = id, focusedIngredient = Nothing }
 
 
 update : Msg -> Model -> ( ( Model, Cmd Msg ), ExternalMsg )
@@ -87,9 +92,34 @@ update msg model =
                 _ ->
                     ( ( model, Cmd.none ), NoOp )
 
+        IngredientFocus ingredientId ->
+            let
+                oldFocus =
+                    model.focusedIngredient
+
+                newFocus =
+                    if Just ingredientId == oldFocus then
+                        Nothing
+                    else
+                        Just ingredientId
+
+                trumm1 =
+                    Debug.log "oldFocus" oldFocus
+
+                trumm2 =
+                    Debug.log "newFocus" newFocus
+            in
+                ( ( { model | focusedIngredient = newFocus }, Cmd.none ), NoOp )
+
+
+type alias IngredientId =
+    String
+
 
 type Msg
     = Query RecipeQueryMsg
+      -- UI
+    | IngredientFocus IngredientId
 
 
 view : Session -> Model -> Html Msg
@@ -98,15 +128,15 @@ view session model =
     case model.mRecipe of
         Ok r ->
             div []
-                [ viewDetailSuccess r
+                [ viewDetailSuccess r model.focusedIngredient
                 ]
 
         Err r ->
             text ("asf, you has err: " ++ (toString r))
 
 
-viewDetailSuccess : RecipeFull -> Html Msg
-viewDetailSuccess r =
+viewDetailSuccess : RecipeFull -> Maybe IngredientId -> Html Msg
+viewDetailSuccess r focusedRecipeId =
     let
         noImage =
             String.isEmpty r.imageUrl
@@ -131,7 +161,8 @@ viewDetailSuccess r =
                     , ( "margin-top", "10px" )
                     ]
                 ]
-                [ div [ style [ ( "margin-top", "25px" ) ] ]
+                [ a [ class "", Route.href (EditRecipe (Slug r.id)) ] [ text "Edit recipe" ]
+                , div [ style [ ( "margin-top", "25px" ) ] ]
                     [ div
                         [ class "slideInLeft"
                         , style [ ( "padding-bottom", "3px" ) ]
@@ -147,30 +178,30 @@ viewDetailSuccess r =
                                     ]
                                 , div [ class "description" ]
                                     [ div [ style [ ( "margin-top", "15px" ), ( "white-space", "pre-wrap" ) ] ] []
-                                    , ul [] (List.map (\i -> viewIngredient <| formatIngredient i) r.ingredients)
+                                    , ul [] (List.map (viewIngredient focusedRecipeId) r.ingredients)
                                     , p [ style [ ( "white-space", "pre-wrap" ) ] ] [ text r.instructions ]
                                     ]
-                                ]
-                            , div
-                                [ class "description"
-                                , style
-                                    [ ( "display", "flex" )
-                                    , ( "justify-content", "space-between" )
-                                    , ( "align-items", "center" )
-                                    ]
-                                ]
-                                [ span []
-                                    [ i
-                                        [ class <|
-                                            "favorite big icon "
-                                                ++ (if r.youLike then
-                                                        "teal"
-                                                    else
-                                                        "grey"
-                                                   )
+                                , div
+                                    [ class "description"
+                                    , style
+                                        [ ( "display", "flex" )
+                                        , ( "justify-content", "space-between" )
+                                        , ( "align-items", "center" )
                                         ]
-                                        []
-                                    , span [] [ text ("Likes: " ++ toString r.likes) ]
+                                    ]
+                                    [ span []
+                                        [ i
+                                            [ class <|
+                                                "favorite big icon "
+                                                    ++ (if r.youLike then
+                                                            "teal"
+                                                        else
+                                                            "grey"
+                                                       )
+                                            ]
+                                            []
+                                        , span [] [ text (likesText r.likes) ]
+                                        ]
                                     ]
                                 ]
                             ]
@@ -180,18 +211,49 @@ viewDetailSuccess r =
             ]
 
 
+likesText : List a -> String
+likesText l =
+    let
+        likes =
+            List.length l
+    in
+        (toString likes)
+            ++ " like"
+            ++ if likes == 1 then
+                ""
+               else
+                "s"
+
+
 formatIngredient : Ingredient -> String
 formatIngredient i =
-    i.displayQuantity ++ " " ++ i.unit.name ++ " " ++ i.name
+    i.displayQuantity ++ " " ++ i.unit.abbr ++ " " ++ i.name
 
 
-viewIngredient : String -> Html Msg
-viewIngredient ingredientText =
-    li
-        [ style
-            [ ( "margin-top", "5px" )
-            , ( "white-space", "pre-wrap" )
+viewIngredient : Maybe IngredientId -> Ingredient -> Html Msg
+viewIngredient focusedIngredientId ingredient =
+    let
+        isFocused =
+            case focusedIngredientId of
+                Nothing ->
+                    False
+
+                Just id ->
+                    ingredient.id == id
+    in
+        li
+            [ style
+                [ ( "margin-top", "5px" )
+                , ( "white-space", "pre-wrap" )
+                , ( "background-color"
+                  , (if isFocused then
+                        "#f9f9f9"
+                     else
+                        "initial"
+                    )
+                  )
+                ]
+            , onClick (IngredientFocus ingredient.id)
             ]
-        ]
-        [ text ingredientText
-        ]
+            [ text (formatIngredient ingredient)
+            ]

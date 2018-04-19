@@ -517,7 +517,7 @@ initEdit session slug =
 
         mapResponses resultRecipe resultIngredients resultTags =
             { recipe = Just resultRecipe
-            , editingRecipe = recipeFullToEditingRecipe shellModel (Just resultRecipe)
+            , editingRecipe = recipeFullToEditingRecipe { shellModel | ingredients = Just resultIngredients } (Just resultRecipe)
             , units = Just resultTags
             , ingredients = Just resultIngredients
             , token = token
@@ -734,27 +734,41 @@ unitsDropdown units ingredientIndex ingredientUnitId openDropdown =
 
                         Just foundUnit ->
                             foundUnit.abbr
-    in
-        div
-            [ class ("ui " ++ active ++ " selection dropdown")
-            , tabindex 0
-            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex))))
-            ]
-            -- needs attr of role "listbox"
-            [ div [ class "text" ] [ text displayUnit ] -- needs role of alert. This div represent the head of the list/the active element
-            , i [ class "dropdown icon" ] []
-            , div
-                [ class
-                    ("menu " ++ visible ++ " transition ")
-                ]
-                (case units of
-                    Nothing ->
-                        [ div [] [ text "no display units..." ] ]
 
-                    Just res ->
-                        List.map (measuringUnit ingredientIndex) res
-                )
-            ]
+        isUnitless =
+            displayUnit == ""
+    in
+        {- Nothing case and UNITLESS case -}
+        if isUnitless && (not isVisible) then
+            a
+                [ class ("ui ")
+                , href "#"
+                , onWithOptions "click" { defaultOptions | stopPropagation = True, preventDefault = True } (Decode.succeed (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex))))
+                , style [ ( "display", "inline-block" ), ( "position", "relative" ), ( "padding", "13px 0" ), ( "text-align", "center" ), ( "width", "100%" ) ]
+                ]
+                [ text "Add meaure"
+                ]
+        else
+            div
+                [ class ("ui " ++ active ++ " selection dropdown")
+                , tabindex 0
+                , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex))))
+                ]
+                -- needs attr of role "listbox"
+                [ div [ class "text" ] [ text displayUnit ] -- needs role of alert. This div represent the head of the list/the active element
+                , i [ class "dropdown icon" ] []
+                , div
+                    [ class
+                        ("menu " ++ visible ++ " transition ")
+                    ]
+                    (case units of
+                        Nothing ->
+                            [ div [] [ text "no display units..." ] ]
+
+                        Just res ->
+                            List.map (measuringUnit ingredientIndex) res
+                    )
+                ]
 
 
 ingredientView : Model -> Int -> EditingIngredient -> Html Msg
