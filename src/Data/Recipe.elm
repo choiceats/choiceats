@@ -336,6 +336,7 @@ gqlIngredient : GqlB.ValueSpec GqlB.NonNull GqlB.ObjectType Ingredient vars
 gqlIngredient =
     GqlB.object Ingredient
         |> GqlB.with (GqlB.field "quantity" [] GqlB.float)
+        |> GqlB.with (GqlB.field "id" [] GqlB.string)
         |> GqlB.with (GqlB.field "displayQuantity" [] GqlB.string)
         |> GqlB.with (GqlB.field "name" [] GqlB.string)
         |> GqlB.with (GqlB.field "id" [] GqlB.string)
@@ -456,6 +457,7 @@ type alias RecipeFull =
 
 type alias Ingredient =
     { quantity : Float
+    , id : String
     , displayQuantity : String
     , name : String
     , id : String

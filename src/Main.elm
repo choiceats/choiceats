@@ -9,6 +9,10 @@ import Task
 
 
 -- THIRD PARTY MODULES --
+
+import Autocomplete
+
+
 -- APPLICATION MODULES --
 
 import Data.Recipe exposing (Slug)
@@ -157,6 +161,7 @@ viewPage session isLoading page =
 subscriptions model =
     Sub.batch
         [ Sub.map SetUser sessionChange
+        , Sub.map RecipeEditorMsg (Sub.map RecipeEditor.SetAutocompleteState Autocomplete.subscription)
         ]
 
 
