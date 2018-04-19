@@ -822,7 +822,7 @@ filteredIngredients model =
         ingredientList =
             Maybe.withDefault [] model.ingredients
     in
-        List.filter (\a -> (String.contains model.ingredientFilter a.name)) ingredientList
+        List.filter (\a -> (String.contains (String.toLower model.ingredientFilter) (String.toLower a.name))) ingredientList
 
 
 measuringUnit : Int -> Unit -> Html Msg
