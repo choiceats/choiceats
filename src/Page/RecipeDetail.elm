@@ -149,8 +149,7 @@ viewDetailSuccess r focusedRecipeId =
     in
         div
             [ style
-                [ ( "height", "calc(100vh - 50px)" )
-                , ( "overflow", "auto" )
+                [ ( "overflow", "auto" )
                 , ( "padding", "20px" )
                 ]
             ]
