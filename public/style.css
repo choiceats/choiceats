@@ -2,7 +2,26 @@
   color: #333333;
 }
 
+.ingredient-typeahead {
+	position: relative;
+}
+
+.autocomplete-menu {
+	position: absolute;
+	background: white;
+	border: 1px solid gainsboro;
+	width: 100%;
+	border-radius: 4px;
+	box-shadow: 2px 2px 4px 1px #eee;
+}
+
+.autocomplete-list {
+	list-style-type: none;
+}
+
+div.ingredient-typeahead ul.autocomplete-list li.item:before {
+	content: none;
+}
+
 .key-selected {
-	color: #224466;
-	border: 1px solid black;
 }

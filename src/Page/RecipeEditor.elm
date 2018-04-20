@@ -145,15 +145,18 @@ autocompleteViewConfig =
     let
         customizedLi keySelected mouseSelected ingredient =
             { attributes =
-                [ classList [ ( "autocomplete-item", True ), ( "key-selected", keySelected || mouseSelected ) ]
+                [ classList [ ( "item", True ), ( "key-selected", keySelected || mouseSelected ) ]
                 , id ingredient.id
                 ]
-            , children = [ Html.text ingredient.name ]
+            , children =
+                [ div [ class "content" ]
+                    [ Html.text ingredient.name ]
+                ]
             }
     in
         Autocomplete.viewConfig
             { toId = .id
-            , ul = [ class "autocomplete-list" ]
+            , ul = [ class "ui middle aligned selection list autocomplete-list" ]
             , li = customizedLi
             }
 
@@ -208,7 +211,7 @@ update msg model =
                 ( { model | uiOpenDropdown = key }, Cmd.none )
 
         BodyClick ->
-            ( { model | uiOpenDropdown = Nothing }, Cmd.none )
+            ( { model | uiOpenDropdown = Nothing, ingredientAutoComplete = Autocomplete.empty }, Cmd.none )
 
         None ->
             ( model, Cmd.none )
@@ -768,11 +771,14 @@ ingredientView model ingredientIndex ingredient =
                     if selectedIndex == ingredientIndex then
                         ingredientTypeAhead model ingredientIndex ingredient
                     else
-                        text
-                            (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients))
+                        div [ class "ui blue label" ]
+                            [ text
+                                (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients))
+                            ]
 
                 Nothing ->
-                    text (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients))
+                    div [ class "ui blue label" ]
+                        [ text (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients)) ]
             ]
 
 
