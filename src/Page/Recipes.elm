@@ -212,14 +212,15 @@ view session model =
 searchBar : SearchParams -> Html Msg
 searchBar searchParams =
     div [ class "searchBar" ]
-        [ input
-            [ placeholder "Search Title or Ingredents", onInput SearchTextChange ]
-            []
+        [ div [ class "ui input" ]
+            [ input [ placeholder "Search Title or Ingredents", onInput SearchTextChange ]
+                []
+            ]
         , select
-            [ onInput onFilterChange ]
+            [ onInput onFilterChange, class "ui dropdown searchBar__filter" ]
             filterOptions
         , a
-            [ Route.href NewRecipe ]
+            [ Route.href NewRecipe, class "ui primary basic button" ]
             [ text "New Recipe" ]
         ]
 
