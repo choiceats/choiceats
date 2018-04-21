@@ -211,13 +211,25 @@ update msg model =
                 ( { model | uiOpenDropdown = key }, Cmd.none )
 
         BodyClick ->
-            ( { model | uiOpenDropdown = Nothing, ingredientAutoComplete = Autocomplete.empty }, Cmd.none )
+            ( { model | uiOpenDropdown = Nothing, selectedIngredientIndex = Nothing, ingredientAutoComplete = Autocomplete.empty }, Cmd.none )
 
         None ->
             ( model, Cmd.none )
 
         IngredientFocused index ->
-            ( { model | selectedIngredientIndex = Just index }, Cmd.none )
+            let
+                maybeIngredient =
+                    Array.get index model.editingRecipe.ingredients
+
+                ingredientName =
+                    case maybeIngredient of
+                        Just ingred ->
+                            Maybe.withDefault "" (getIngredientNameFromId ingred.ingredientId model.ingredients)
+
+                        Nothing ->
+                            ""
+            in
+                ( { model | selectedIngredientIndex = Just index, ingredientFilter = ingredientName }, Cmd.none )
 
         UpdateTextField textfield value ->
             let
@@ -396,6 +408,11 @@ update msg model =
 --    if toTop then
 --        Autocomplete.resetToFirstItem
 {----}
+
+
+stopPropagation : String -> Msg -> Html.Attribute Msg
+stopPropagation event message =
+    onWithOptions event { stopPropagation = True, preventDefault = False } (Decode.succeed message)
 
 
 removeIndexFromArray : Int -> Array a -> Array a
@@ -737,7 +754,7 @@ unitsDropdown units ingredientIndex ingredientUnitId openDropdown =
         div
             [ class ("ui " ++ active ++ " selection dropdown")
             , tabindex 0
-            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Decode.succeed (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex))))
+            , stopPropagation "click" (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex)))
             ]
             -- needs attr of role "listbox"
             [ div [ class "text" ] [ text displayUnit ] -- needs role of alert. This div represent the head of the list/the active element
@@ -761,9 +778,9 @@ ingredientView model ingredientIndex ingredient =
     let
         handler =
             if ingredientIndex == (Maybe.withDefault -1 model.selectedIngredientIndex) then
-                onClick None
+                stopPropagation "click" None
             else
-                onClick (IngredientFocused ingredientIndex)
+                stopPropagation "click" (IngredientFocused ingredientIndex)
     in
         div [ class "ingredient-view", handler ]
             [ case model.selectedIngredientIndex of
@@ -785,9 +802,6 @@ ingredientView model ingredientIndex ingredient =
 getIngredientNameFromId : String -> Maybe (List IngredientRaw) -> Maybe String
 getIngredientNameFromId id ingredients =
     let
-        _ =
-            Debug.log "Hmmm" id
-
         maybeIngredient =
             findInList (\ingredient -> ingredient.id == id) (Maybe.withDefault [] ingredients)
     in
@@ -807,8 +821,8 @@ findInList filter list =
 
 ingredientTypeAhead : Model -> Int -> EditingIngredient -> Html Msg
 ingredientTypeAhead model ingredientIndex ingredient =
-    div [ class "ingredient-typeahead" ]
-        [ input [ type_ "text", name "ingredientName", onInput UpdateTypeaheadFilter, onFocus (IngredientFocused ingredientIndex) ] []
+    div [ class "ingredient-typeahead", (stopPropagation "click" None) ]
+        [ input [ value model.ingredientFilter, type_ "text", name "ingredientName", onInput UpdateTypeaheadFilter, onFocus (IngredientFocused ingredientIndex) ] []
         , div [ class "autocomplete-menu" ]
             [ Html.map
                 SetAutocompleteState
