@@ -96,7 +96,7 @@ update msg model =
 
 view : Session -> Model -> Html Msg
 view session model =
-    div []
+    div [ class "ui container" ]
         [ viewFilterButtons model
         , viewRecipeSummary model.mRecipeSummary
         , viewGetNewRecipe model

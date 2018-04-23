@@ -203,7 +203,7 @@ filterOptions =
 
 view : Session -> Model -> Html Msg
 view session model =
-    div [ class "search" ]
+    div [ class "ui container search" ]
         [ searchBar model.search
         , recipeListView model.recipes
         ]

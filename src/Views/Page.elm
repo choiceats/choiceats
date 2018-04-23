@@ -52,33 +52,58 @@ viewHeader : ActivePage -> Maybe User -> Bool -> Html msg
 viewHeader page user isLoading =
     let
         linkTo =
-            navbarLink page
+            navbarLink page False
 
-        sessionButton =
+        sessionLinkTo =
+            navbarLink page True
+
+        sessionLinkRoute =
             case user of
                 Just user ->
-                    linkTo Route.Logout
-                        [ button [ class "ui button", type_ "button" ] [ text "Logout" ] ]
+                    Route.Logout
 
                 Nothing ->
-                    linkTo Route.Login
-                        [ button [ class "ui button", type_ "button" ] [ text "Login" ] ]
+                    (case page of
+                        Login ->
+                            Route.Signup
+
+                        _ ->
+                            Route.Login
+                    )
+
+        sessionLinkText =
+            case user of
+                Just user ->
+                    "Logout"
+
+                Nothing ->
+                    (case page of
+                        Login ->
+                            "Sign up"
+
+                        _ ->
+                            "Login"
+                    )
     in
-        div [ class "ui secondary menu", style [ ( "height", "50px" ) ] ]
+        div [ class "ui secondary menu" ]
             [ div [ class "header item" ] [ text "ChoicEats" ]
-            , linkTo Route.Recipes [ text "Recipes" ] -- TODO: Change route to / when this route is created. And make recipes the default route.
+            , linkTo Route.Recipes [ text "Recipes" ]
             , linkTo Route.Randomizer [ text "Ideas" ]
-            , div [ class "right menu" ]
-                [ div [ class "item" ]
-                    [ sessionButton ]
-                ]
+            , sessionLinkTo sessionLinkRoute [ text sessionLinkText ]
             ]
 
 
-navbarLink : ActivePage -> Route -> List (Html msg) -> Html msg
-navbarLink page route linkContent =
-    li [ classList [ ( "item", True ), ( "active", isActive page route ) ] ]
-        [ a [ Route.href route ] linkContent ]
+navbarLink : ActivePage -> Bool -> Route -> List (Html msg) -> Html msg
+navbarLink page isSessionLink route linkContent =
+    a
+        [ Route.href route
+        , classList
+            [ ( "item link", True )
+            , ( "active", isActive page route )
+            , ( "right aligned", isSessionLink )
+            ]
+        ]
+        linkContent
 
 
 isActive : ActivePage -> Route -> Bool

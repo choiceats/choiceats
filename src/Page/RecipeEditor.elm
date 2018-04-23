@@ -608,11 +608,15 @@ recipeFormView :
     -> Html Msg
 recipeFormView model r =
     div
-        [ style [ ( "-webkit-animation", "slideInLeft 0.25s linear" ), ( "animation", "slideInLeft 0.25s linear" ), ( "min-width", "260px" ) ]
+        [ style
+            [ ( "-webkit-animation", "slideInLeft 0.25s linear" )
+            , ( "animation", "slideInLeft 0.25s linear" )
+            ]
+        , class "ui container"
         , onClick BodyClick
         ]
         [ div [ class "ui form recipe-editor-form" ]
-            [ h1 [] [ text "Recipe Editor" ]
+            [ h1 [ class "ui header" ] [ text ("Recipe Editor") ]
             , textInput r.name RecipeName False
             , textInput r.description RecipeDescription True
             , viewIngredientList model r
@@ -694,21 +698,30 @@ viewIngredientList model r =
                         )
                    )
     in
-        div []
+        div [ class "field" ]
             ingredientForms
 
 
 ingredientRow : Model -> Int -> EditingIngredient -> Html Msg
 ingredientRow model ingredientIndex ingredient =
     div [ class "fields recipe-editor-group" ]
-        [ div [ class "two wide field" ]
-            [ div [ class "ui input" ] [ input [ type_ "text", value ingredient.quantity, placeholder "#", onInput (UpdateIngredient IngredientQuanity ingredientIndex) ] [] ] ]
-        , div [ class "four wide field" ]
-            [ unitsDropdown model.units ingredientIndex ingredient.unitId model.uiOpenDropdown ]
-        , div [ class "six wide field" ]
-            [ ingredientView model ingredientIndex ingredient ]
-        , div [ class "six wide field" ]
-            [ button [ class "ui negative button", role "button", onClick (DeleteIngredient ingredientIndex) ] [ text "X" ] ]
+        [ div [ class "fields-recipe-quantity fields four wide unstackable column field" ]
+            [ div [ class "eight wide column field" ]
+                [ div [ class "ui input" ] [ input [ type_ "text", value ingredient.quantity, placeholder "#", onInput (UpdateIngredient IngredientQuanity ingredientIndex) ] [] ] ]
+            , div [ class "eight wide column field" ]
+                [ unitsDropdown model.units ingredientIndex ingredient.unitId model.uiOpenDropdown ]
+            ]
+        , div [ class "fields-recipe-ingredient fields twelve wide unstackable column field" ]
+            [ ingredientView model ingredientIndex ingredient
+            , div [ class "four wide column field" ]
+                [ button
+                    [ class "ui basic negative right floated button"
+                    , role "button"
+                    , onClick (DeleteIngredient ingredientIndex)
+                    ]
+                    [ text "X" ]
+                ]
+            ]
         ]
 
 
@@ -752,7 +765,7 @@ unitsDropdown units ingredientIndex ingredientUnitId openDropdown =
                             foundUnit.abbr
     in
         div
-            [ class ("ui " ++ active ++ " selection dropdown")
+            [ class ("ui " ++ active ++ " selection compact dropdown")
             , tabindex 0
             , stopPropagation "click" (ToggleIngredientDropdown (Just (UnitsDropdown ingredientIndex)))
             ]
@@ -781,21 +794,21 @@ ingredientView model ingredientIndex ingredient =
                 stopPropagation "click" None
             else
                 stopPropagation "click" (IngredientFocused ingredientIndex)
+
+        inactiveView =
+            div [ class "ui basic large blue fluid label" ]
+                [ text (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients)) ]
     in
-        div [ class "ingredient-view", handler ]
+        div [ class "twelve wide column field ingredient-view", handler ]
             [ case model.selectedIngredientIndex of
                 Just selectedIndex ->
                     if selectedIndex == ingredientIndex then
                         ingredientTypeAhead model ingredientIndex ingredient
                     else
-                        div [ class "ui blue label" ]
-                            [ text
-                                (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients))
-                            ]
+                        inactiveView
 
                 Nothing ->
-                    div [ class "ui blue label" ]
-                        [ text (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients)) ]
+                    inactiveView
             ]
 
 
@@ -822,7 +835,15 @@ findInList filter list =
 ingredientTypeAhead : Model -> Int -> EditingIngredient -> Html Msg
 ingredientTypeAhead model ingredientIndex ingredient =
     div [ class "ingredient-typeahead", (stopPropagation "click" None) ]
-        [ input [ value model.ingredientFilter, type_ "text", name "ingredientName", onInput UpdateTypeaheadFilter, onFocus (IngredientFocused ingredientIndex) ] []
+        [ input
+            [ value model.ingredientFilter
+            , type_ "text"
+            , class "default text"
+            , name "ingredientName"
+            , onInput UpdateTypeaheadFilter
+            , onFocus (IngredientFocused ingredientIndex)
+            ]
+            []
         , div [ class "autocomplete-menu" ]
             [ Html.map
                 SetAutocompleteState

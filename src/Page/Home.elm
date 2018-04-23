@@ -38,31 +38,15 @@ init session =
 
 
 -- VIEW --
+-- TODO: Determine whether to have a landing page or just redirect
+-- to the login or the recipes list page depending on user session
 
 
 view : Session -> Model -> Html Msg
 view session model =
-    div [ class "home-page" ]
-        [ viewBanner
-        , div [ class "container page" ]
-            [ div [ class "row" ]
-                [ div [ class "col-md-9" ] [ text "viewFeed model.feed" ]
-                , div [ class "sidebar" ]
-                    [ p [] [ text "Popular Tags" ]
-                    , text "viewTags model.tags"
-                    ]
-                ]
-            ]
-        ]
-
-
-viewBanner : Html msg
-viewBanner =
-    div [ class "banner" ]
-        [ div [ class "container" ]
-            [ h1 [ class "logo-font" ] [ text " ChoiceEats" ]
-            , p [] [ text "A place to share your recipes." ]
-            ]
+    div [ class "ui container home-page" ]
+        [ h1 [ class "ui header" ] [ text "ChoiceEats" ]
+        , p [] [ text "A place to share your recipes." ]
         ]
 
 

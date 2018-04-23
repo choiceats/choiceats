@@ -73,10 +73,12 @@ table {
 	width: 100%;
 	border-radius: 4px;
 	box-shadow: 2px 2px 4px 1px #eee;
+    z-index: 1;
 }
 
-.autocomplete-list {
+.ingredient-typeahead .autocomplete-menu .autocomplete-list {
 	list-style-type: none;
+    margin-left: 0;
 }
 
 div.ingredient-typeahead ul.autocomplete-list li.item:before {
@@ -85,3 +87,38 @@ div.ingredient-typeahead ul.autocomplete-list li.item:before {
 
 .key-selected {
 }
+
+.ui.form .fields .field.ingredient-view {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.ui.secondary.menu .item.link {
+    color: #4183c4;
+}
+
+@media screen and (max-width: 360px) { /* Breakpoint for semantic UI*/
+    .ui.secondary.menu .item.link {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+}
+
+@media screen and (max-width: 767px) { /* Breakpoint for semantic UI*/
+    .ui.form .fields .field.fields-recipe-quantity {
+        margin-bottom: 3px;
+    }
+
+    .recipe-editor-group {
+        padding-bottom: 42px; /* Allows swiping in mobile*/
+    }
+}
+
+/*
+Default media queries set by semantic ui in site.variables:
+@mobileBreakpoint            : 320px;
+@tabletBreakpoint            : 768px;
+@computerBreakpoint          : 992px;
+@largeMonitorBreakpoint      : 1280px;
+@widescreenMonitorBreakpoint : 1920px;
+*/
