@@ -1,35 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="theme-color" content="#000000">
-    <title>ChoicEats</title>
-    <link rel="//fonts.googleapis.com/css?family=Titillium+Web:700|Source+Serif+Pro:400,700|Merriweather+Sans:400,700|Source+Sans+Pro:400,300,600,700,300italic,400italic,600italic,700italic" rel="stylesheed" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.min.css">
-    <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="/reset.css">
-    <link rel="stylesheet" href="/keyframes.css">
-    <link rel="shortcut icon" href="/favicon.ico">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="theme-color" content="#000000">
+        <title>ChoicEats</title>
+        <link rel="//fonts.googleapis.com/css?family=Titillium+Web:700|Source+Serif+Pro:400,700|Merriweather+Sans:400,700|Source+Sans+Pro:400,300,600,700,300italic,400italic,600italic,700italic" rel="stylesheed" type="text/css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.min.css">
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/reset.css">
+        <link rel="stylesheet" href="/keyframes.css">
+        <link rel="shortcut icon" href="/favicon.ico">
 
-    <script src="/elm.js"></script>
-  </head>
-  <body id="page-body">
-  <noscript>
-    Enable Javascript to run this app.
-  </noscript>
-  <script>
-    var app = Elm.Main.fullscreen(localStorage.session || null);
+        <script src="/elm.js"></script>
+    </head>
+    <body id="page-body">
+        <noscript>
+            Enable Javascript to run this app.
+        </noscript>
+        <script>
+            var app = Elm.Main.fullscreen(localStorage.session || null);
 
-    app.ports.storeSession.subscribe(function(session) {
-      localStorage.session = session;
-    });
+            app.ports.storeSession.subscribe(function(session) {
+                localStorage.session = session;
+            });
 
-    window.addEventListener("storage", function(event) {
-      if (event.storageArea === localStorage && event.key === "session") {
-        app.ports.onSessionChange.send(event.newValue);
-      }
-    }, false);
-  </script>
-  </body>
+            app.ports.setDocumentTitle.subscribe(function(title) {
+                var appName = "ChoicEats";
+                console.log('title', title)
+
+                if (title.length > 0) {
+                    document.title = appName + ' - ' + title;
+                } else {
+
+                    document.title = appName;
+                }
+            });
+
+            window.addEventListener("storage", function(event) {
+                if (event.storageArea === localStorage && event.key === "session") {
+                    app.ports.onSessionChange.send(event.newValue);
+                }
+            }, false);
+        </script>
+    </body>
 </html>

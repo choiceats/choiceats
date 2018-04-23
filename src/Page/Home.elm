@@ -14,6 +14,7 @@ import Http
 -- THIRD PARTY MODULES --
 -- APPLICATION MODULES --
 
+import Ports
 import Data.Session exposing (Session)
 import Page.Errored exposing (PageLoadError(..), pageLoadError)
 import Task exposing (Task)

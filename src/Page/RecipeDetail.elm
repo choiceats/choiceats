@@ -102,12 +102,6 @@ update msg model =
                         Nothing
                     else
                         Just ingredientId
-
-                trumm1 =
-                    Debug.log "oldFocus" oldFocus
-
-                trumm2 =
-                    Debug.log "newFocus" newFocus
             in
                 ( ( { model | focusedIngredient = newFocus }, Cmd.none ), NoOp )
 

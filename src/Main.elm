@@ -28,7 +28,7 @@ import Page.RecipeEditor as RecipeEditor
 import Page.Recipes as Recipes
 import Page.Signup as Signup
 import Ports
-import Route exposing (Route)
+import Route exposing (Route, routeToTitle)
 import Views.Page as Page exposing (ActivePage)
 
 
@@ -204,7 +204,9 @@ setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
 setRoute maybeRoute model =
     let
         transition toMsg task =
-            ( { model | pageState = TransitioningFrom (getPage model.pageState) }, (Task.attempt toMsg task) )
+            ( { model | pageState = TransitioningFrom (getPage model.pageState) }
+            , (Task.attempt toMsg task)
+            )
 
         errored =
             pageErrored model
@@ -236,7 +238,9 @@ setRoute maybeRoute model =
                 ( model, Route.modifyUrl Route.Home )
 
             Just Route.Login ->
-                ( { model | pageState = Loaded (Login Login.initialModel) }, Cmd.none )
+                ( { model | pageState = Loaded (Login Login.initialModel) }
+                , Ports.setDocumentTitle (routeToTitle Route.Login)
+                )
 
             Just Route.Logout ->
                 let
@@ -251,21 +255,33 @@ setRoute maybeRoute model =
                     )
 
             Just Route.Signup ->
-                ( { model | pageState = Loaded (Signup Signup.initialModel) }, Cmd.none )
+                ( { model | pageState = Loaded (Signup Signup.initialModel) }
+                , Ports.setDocumentTitle (routeToTitle Route.Signup)
+                )
 
             Just Route.Randomizer ->
                 let
                     ( newModel, newMsg ) =
                         (Randomizer.init model.session)
                 in
-                    ( { model | pageState = Loaded (Randomizer newModel) }, Cmd.map RandomizerMsg newMsg )
+                    ( { model | pageState = Loaded (Randomizer newModel) }
+                    , Cmd.batch
+                        [ Ports.setDocumentTitle (routeToTitle Route.Randomizer)
+                        , Cmd.map RandomizerMsg newMsg
+                        ]
+                    )
 
             Just Route.Recipes ->
                 let
                     ( newModel, newMsg ) =
                         (Recipes.init model.session)
                 in
-                    ( { model | pageState = Loaded (Recipes newModel) }, Cmd.map RecipesMsg newMsg )
+                    ( { model | pageState = Loaded (Recipes newModel) }
+                    , Cmd.batch
+                        [ Ports.setDocumentTitle (routeToTitle Route.Recipes)
+                        , Cmd.map RecipesMsg newMsg
+                        ]
+                    )
 
             Just (Route.RecipeDetail slug) ->
                 let
@@ -310,22 +326,34 @@ updatePage page msg model =
                 setRoute route model
 
             ( EditRecipeLoaded slug (Ok subModel), _ ) ->
-                ( { model | pageState = Loaded (RecipeEditor (Just slug) subModel) }, Cmd.none )
+                ( { model | pageState = Loaded (RecipeEditor (Just slug) subModel) }
+                , Ports.setDocumentTitle (routeToTitle (Route.EditRecipe slug))
+                )
 
             ( EditRecipeLoaded slug (Err error), _ ) ->
-                ( { model | pageState = Loaded (Errored error) }, Cmd.none )
+                ( { model | pageState = Loaded (Errored error) }
+                , Ports.setDocumentTitle (routeToTitle (Route.EditRecipe slug) ++ " Error")
+                )
 
             ( NewRecipeLoaded (Ok subModel), _ ) ->
-                ( { model | pageState = Loaded (RecipeEditor Nothing subModel) }, Cmd.none )
+                ( { model | pageState = Loaded (RecipeEditor Nothing subModel) }
+                , Ports.setDocumentTitle (routeToTitle (Route.NewRecipe))
+                )
 
             ( NewRecipeLoaded (Err error), _ ) ->
-                ( { model | pageState = Loaded (Errored error) }, Cmd.none )
+                ( { model | pageState = Loaded (Errored error) }
+                , Ports.setDocumentTitle (routeToTitle (Route.NewRecipe) ++ " Error")
+                )
 
             ( HomeLoaded (Ok subModel), _ ) ->
-                ( { model | pageState = Loaded (Home subModel) }, Cmd.none )
+                ( { model | pageState = Loaded (Home subModel) }
+                , Ports.setDocumentTitle (routeToTitle Route.Home)
+                )
 
             ( HomeLoaded (Err error), _ ) ->
-                ( { model | pageState = Loaded (Errored error) }, Cmd.none )
+                ( { model | pageState = Loaded (Errored error) }
+                , Ports.setDocumentTitle "Error"
+                )
 
             ( SetUser user, _ ) ->
                 let
@@ -405,10 +433,23 @@ updatePage page msg model =
                     ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
 
             ( RecipeDetailLoaded (Ok subModel), _ ) ->
-                ( { model | pageState = Loaded (RecipeDetail subModel) }, Cmd.none )
+                let
+                    title =
+                        case subModel.mRecipe of
+                            Ok r ->
+                                r.name
+
+                            Err trumm ->
+                                routeToTitle (Route.RecipeDetail (Data.Recipe.Slug ""))
+                in
+                    ( { model | pageState = Loaded (RecipeDetail subModel) }
+                    , Ports.setDocumentTitle title
+                    )
 
             ( RecipeDetailLoaded (Err error), _ ) ->
-                ( { model | pageState = Loaded (Errored error) }, Cmd.none )
+                ( { model | pageState = Loaded (Errored error) }
+                , Ports.setDocumentTitle (routeToTitle (Route.RecipeDetail (Data.Recipe.Slug "")) ++ " Error")
+                )
 
             ( HomeMsg subMsg, Home subModel ) ->
                 toPage Home HomeMsg (Home.update session) subMsg subModel

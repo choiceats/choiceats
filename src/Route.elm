@@ -1,4 +1,4 @@
-module Route exposing (Route(..), fromLocation, href, modifyUrl)
+module Route exposing (Route(..), fromLocation, href, modifyUrl, routeToTitle)
 
 -- ELM-LANG MODULES --
 
@@ -107,3 +107,37 @@ fromLocation location =
         Just Root
     else
         parseHash route location
+
+
+routeToTitle : Route -> String
+routeToTitle route =
+    case route of
+        Home ->
+            ""
+
+        Root ->
+            ""
+
+        Login ->
+            "Login"
+
+        Logout ->
+            ""
+
+        Signup ->
+            "Sign up"
+
+        Randomizer ->
+            "New Idea"
+
+        Recipes ->
+            "Recipes"
+
+        NewRecipe ->
+            "New Recipe"
+
+        RecipeDetail slug ->
+            "Recipe Details"
+
+        EditRecipe slug ->
+            "Edit Recipe"
