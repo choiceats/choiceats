@@ -389,10 +389,10 @@ view session model =
         f =
             model.formFields
     in
-        div [ style [ ( "max-width", "500px" ), ( "margin", "auto" ) ] ]
-            [ form [ class "ui form" ]
+        div [ class "ui container" ]
+            [ form [ class "ui form", style [ ( "max-width", "700px" ), ( "margin", "0 auto" ) ] ]
                 [ h1
-                    [ style [ ( "font-family", "Fira Code" ), ( "font-size", "25px" ) ] ]
+                    [ class "ui header", style [ ( "font-family", "fira-code" ) ] ]
                     [ text "Signup!" ]
                 , viewInput f.email "Email" "text" Email
                 , viewInput f.firstName "First Name" "text" FirstName
@@ -411,7 +411,6 @@ view session model =
                         (JD.succeed RequestAccount)
                     ]
                     [ text "Signup" ]
-                , div [] [ text <| toString model ]
                 ]
             ]
 

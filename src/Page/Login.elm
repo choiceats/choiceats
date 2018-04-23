@@ -48,31 +48,32 @@ initialModel =
 view : Session -> Model -> Html Msg
 view session model =
     div
-        [ style [ ( "height", "calc(100vh - 50px)" ), ( "overflow", "auto" ), ( "padding", "20px" ) ] ]
-        [ div
-            [ style [ ( "max-width", "500px" ), ( "margin", "auto" ) ] ]
-            [ Html.form [ class "ui form", onSubmit SubmitForm ]
-                [ h1 [ style [ ( "font-family", "Fira Code" ), ( "font-size", "25px" ) ] ] [ text "Login" ]
-                , viewInput model.email "Email" "text" SetEmail
-                , viewInput model.password "Password" "password" SetPassword
-                , br [] []
-                , div []
-                    [ button
-                        [ type_ "submit"
-                        , class "ui primary button"
-                        , disabled (not (hasLength model.email) || not (hasLength model.password))
-                        ]
-                        [ text "Login" ]
+        [ class "ui container" ]
+        [ Html.form
+            [ class "ui form"
+            , style [ ( "max-width", "700px" ), ( "margin", "0 auto" ) ]
+            , onSubmit SubmitForm
+            ]
+            [ h1 [ class "ui header", style [ ( "font-family", "fira-code" ) ] ] [ text "Login" ]
+            , viewInput model.email "Email" "text" SetEmail
+            , viewInput model.password "Password" "password" SetPassword
+            , br [] []
+            , div []
+                [ button
+                    [ type_ "submit"
+                    , class "ui primary button"
+                    , disabled (not (hasLength model.email) || not (hasLength model.password))
                     ]
-                , br [] []
-                , br [] []
-                , a [ Route.href Route.Signup ]
-                    [ button
-                        [ type_ "button"
-                        , class "ui button"
-                        ]
-                        [ text "Sign up" ]
+                    [ text "Login" ]
+                ]
+            , br [] []
+            , br [] []
+            , a [ Route.href Route.Signup ]
+                [ button
+                    [ type_ "button"
+                    , class "ui button"
                     ]
+                    [ text "Sign up" ]
                 ]
             ]
         ]

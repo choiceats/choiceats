@@ -127,9 +127,7 @@ view session model =
     --case model.mRecipe of
     case model.mRecipe of
         Ok r ->
-            div []
-                [ viewDetailSuccess r model.focusedIngredient
-                ]
+            viewDetailSuccess r model.focusedIngredient
 
         Err r ->
             text ("asf, you has err: " ++ (toString r))
@@ -145,63 +143,49 @@ viewDetailSuccess r focusedRecipeId =
             if noImage then
                 (text "")
             else
-                img [ class "ui image", src (getImageUrl r.imageUrl) ] []
+                div [] [ img [ class "ui medium centered image", src (getImageUrl r.imageUrl) ] [] ]
     in
         div
-            [ style
-                [ ( "overflow", "auto" )
-                , ( "padding", "20px" )
+            [ class "ui container" ]
+            [ a [ class "link", Route.href (EditRecipe (Slug r.id)) ] [ text "Edit recipe" ]
+            , div
+                [ class "slideInLeft"
+                , style [ ( "padding-bottom", "3px" ), ( "margin-top", "25px" ) ]
                 ]
-            ]
-            [ div
-                [ style
-                    [ ( "margin", "auto" )
-                    , ( "max-width", "1000px" )
-                    , ( "margin-top", "10px" )
-                    ]
-                ]
-                [ a [ class "", Route.href (EditRecipe (Slug r.id)) ] [ text "Edit recipe" ]
-                , div [ style [ ( "margin-top", "25px" ) ] ]
-                    [ div
-                        [ class "slideInLeft"
-                        , style [ ( "padding-bottom", "3px" ) ]
-                        ]
-                        [ div [ class "ui fluid card" ]
-                            [ mImg
-                            , div [ class "content" ]
-                                [ div [ class "header" ] [ text r.name ]
-                                , div [ class "meta" ] [ text r.author ]
-                                , div [ class "meta" ]
-                                    [ div [ style [ ( "display", "flex" ), ( "margin-top", "5px" ) ] ]
-                                        []
+                [ div [ class "ui fluid card" ]
+                    [ mImg
+                    , div [ class "content" ]
+                        [ div [ class "header" ] [ text r.name ]
+                        , div [ class "meta" ] [ text r.author ]
+                        , div [ class "meta" ]
+                            [ div [ style [ ( "display", "flex" ), ( "margin-top", "5px" ) ] ]
+                                []
+                            ]
+                        , div [ class "description" ]
+                            [ div [ style [ ( "margin-top", "15px" ), ( "white-space", "pre-wrap" ) ] ] []
+                            , ul [] (List.map (viewIngredient focusedRecipeId) r.ingredients)
+                            , p [ style [ ( "white-space", "pre-wrap" ) ] ] [ text r.instructions ]
+                            ]
+                        , div
+                            [ class "description"
+                            , style
+                                [ ( "display", "flex" )
+                                , ( "justify-content", "space-between" )
+                                , ( "align-items", "center" )
+                                ]
+                            ]
+                            [ span []
+                                [ i
+                                    [ class <|
+                                        "favorite big icon "
+                                            ++ (if r.youLike then
+                                                    "teal"
+                                                else
+                                                    "grey"
+                                               )
                                     ]
-                                , div [ class "description" ]
-                                    [ div [ style [ ( "margin-top", "15px" ), ( "white-space", "pre-wrap" ) ] ] []
-                                    , ul [] (List.map (viewIngredient focusedRecipeId) r.ingredients)
-                                    , p [ style [ ( "white-space", "pre-wrap" ) ] ] [ text r.instructions ]
-                                    ]
-                                , div
-                                    [ class "description"
-                                    , style
-                                        [ ( "display", "flex" )
-                                        , ( "justify-content", "space-between" )
-                                        , ( "align-items", "center" )
-                                        ]
-                                    ]
-                                    [ span []
-                                        [ i
-                                            [ class <|
-                                                "favorite big icon "
-                                                    ++ (if r.youLike then
-                                                            "teal"
-                                                        else
-                                                            "grey"
-                                                       )
-                                            ]
-                                            []
-                                        , span [] [ text (likesText r.likes) ]
-                                        ]
-                                    ]
+                                    []
+                                , span [] [ text (likesText r.likes) ]
                                 ]
                             ]
                         ]

@@ -122,22 +122,22 @@ viewPage session isLoading page =
 
             Login subModel ->
                 Login.view session subModel
-                    |> frame Page.Other
+                    |> frame Page.Login
                     |> Html.map LoginMsg
 
             Signup subModel ->
                 Signup.view session subModel
-                    |> frame Page.Other
+                    |> frame Page.Signup
                     |> Html.map SignupMsg
 
             Randomizer subModel ->
                 Randomizer.view session subModel
-                    |> frame Page.Other
+                    |> frame Page.Randomizer
                     |> Html.map RandomizerMsg
 
             Recipes subModel ->
                 Recipes.view session subModel
-                    |> frame Page.Other
+                    |> frame Page.Recipes
                     |> Html.map RecipesMsg
 
             RecipeDetail subModel ->
