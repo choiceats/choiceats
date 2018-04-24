@@ -3,8 +3,8 @@ module Page.RecipeEditor exposing (update, view, initNew, initEdit, Model, Msg(.
 -- ELM-LANG MODULES --
 
 import Array exposing (Array, fromList, toList)
-import Html exposing (Html, a, button, div, form, h1, i, input, label, span, text, textarea)
-import Html.Attributes exposing (attribute, class, classList, for, href, id, name, placeholder, rows, src, style, tabindex, type_, value)
+import Html exposing (Html, a, button, div, form, h1, i, input, label, li, span, text, textarea, ul)
+import Html.Attributes exposing (attribute, class, classList, disabled, for, href, id, name, placeholder, rows, src, style, tabindex, type_, value)
 import Html.Attributes.Aria exposing (role)
 import Html.Events exposing (defaultOptions, onClick, onInput, onFocus, onWithOptions)
 import Json.Decode as Decode
@@ -344,11 +344,28 @@ update msg model =
                 editingRecipe =
                     model.editingRecipe
 
+                defaultUnitId =
+                    case model.units of
+                        Just units ->
+                            let
+                                mUnitless =
+                                    (List.head (List.filter (\x -> x.name == "UNITLESS") units))
+                            in
+                                case mUnitless of
+                                    Just unitless ->
+                                        unitless.id
+
+                                    Nothing ->
+                                        ""
+
+                        Nothing ->
+                            ""
+
                 newIngredientList =
                     Array.push
                         { quantity = ""
                         , ingredientId = ""
-                        , unitId = ""
+                        , unitId = defaultUnitId
                         }
                         editingRecipe.ingredients
 
@@ -414,6 +431,11 @@ update msg model =
 stopPropagation : String -> Msg -> Html.Attribute Msg
 stopPropagation event message =
     onWithOptions event { stopPropagation = True, preventDefault = False } (Decode.succeed message)
+
+
+preventDefault : String -> Msg -> Html.Attribute Msg
+preventDefault event message =
+    onWithOptions event { stopPropagation = False, preventDefault = True } (Decode.succeed message)
 
 
 removeIndexFromArray : Int -> Array a -> Array a
@@ -628,9 +650,21 @@ recipeFormView model r =
                 [ class "field" ]
                 [ button [ class "ui primary button", role "button", onClick AddIngredient ] [ text "Add Ingredient" ] ]
             , textInput r.instructions RecipeInstructions True
-            , button [ class "ui button", onClick Submit ] [ text "Save" ]
+            , button [ disabled (not (formIsSubmittable r)), class "ui button", onClick Submit ] [ text "Save" ]
             ]
         ]
+
+
+formIsSubmittable : EditingRecipeFull -> Bool
+formIsSubmittable r =
+    let
+        ingredientsValid =
+            List.isEmpty (List.filter (\i -> i.ingredientId == "" || i.quantity == "" || i.unitId == "") (Array.toList r.ingredients))
+
+        nameValid =
+            r.name /= ""
+    in
+        (ingredientsValid && nameValid)
 
 
 textFieldToLabel : TextField -> String
@@ -705,25 +739,76 @@ viewIngredientList model r =
 
 ingredientRow : Model -> Int -> EditingIngredient -> Html Msg
 ingredientRow model ingredientIndex ingredient =
-    div [ class "fields recipe-editor-group" ]
-        [ div [ class "fields-recipe-quantity fields four wide unstackable column field" ]
-            [ div [ class "eight wide column field" ]
-                [ div [ class "ui input" ] [ input [ type_ "text", value ingredient.quantity, placeholder "#", onInput (UpdateIngredient IngredientQuanity ingredientIndex) ] [] ] ]
-            , div [ class "eight wide column field" ]
-                [ unitsDropdown model.units ingredientIndex ingredient.unitId model.uiOpenDropdown ]
-            ]
-        , div [ class "fields-recipe-ingredient fields twelve wide unstackable column field" ]
-            [ ingredientView model ingredientIndex ingredient
-            , div [ class "four wide column field" ]
-                [ button
-                    [ class "ui basic negative right floated button"
-                    , role "button"
-                    , onClick (DeleteIngredient ingredientIndex)
+    let
+        validations =
+            validationElements ingredient
+    in
+        div [ class "recipe-editor-group" ]
+            [ div [ class "fields" ]
+                [ div [ class "fields-recipe-quantity fields four wide unstackable column field" ]
+                    [ div [ class "eight wide column field" ]
+                        [ div [ class "ui input" ] [ input [ type_ "text", value ingredient.quantity, placeholder "#", onInput (UpdateIngredient IngredientQuanity ingredientIndex) ] [] ] ]
+                    , div [ class "eight wide column field" ]
+                        [ unitsDropdown model.units ingredientIndex ingredient.unitId model.uiOpenDropdown ]
                     ]
-                    [ text "X" ]
+                , div [ class "fields-recipe-ingredient fields twelve wide unstackable column field" ]
+                    [ ingredientView model ingredientIndex ingredient
+                    , div [ class "four wide column field" ]
+                        [ button
+                            [ class "ui basic negative right floated button"
+                            , role "button"
+                            , onClick (DeleteIngredient ingredientIndex)
+                            ]
+                            [ text "X" ]
+                        ]
+                    ]
                 ]
+            , if (List.isEmpty validations) then
+                text ""
+              else
+                ul [ style [ ( "display", "block" ) ], class "ui error message recipe-editor-group-error" ] validations
             ]
-        ]
+
+
+validationElements : EditingIngredient -> List (Html Msg)
+validationElements ingredient =
+    let
+        error m =
+            li [] [ text m ]
+
+        unitsValidation =
+            if ingredient.unitId == "" then
+                Just (error "Ingredient needs unit type.")
+            else
+                Nothing
+
+        quantityValidation =
+            if ingredient.quantity == "" then
+                Just (error "Ingredient needs quantity.")
+            else
+                Nothing
+
+        ingredientValidation =
+            if ingredient.ingredientId == "" then
+                Just (error "Choose an ingredient.")
+            else
+                Nothing
+
+        mValidations =
+            [ ingredientValidation
+            , unitsValidation
+            , quantityValidation
+            ]
+
+        fromMaybe x =
+            case x of
+                Just x ->
+                    x
+
+                Nothing ->
+                    error ""
+    in
+        List.map fromMaybe (List.filter (\x -> x /= Nothing) mValidations)
 
 
 unitsDropdown : Maybe (List Unit) -> Int -> String -> Maybe DropdownKey -> Html Msg
@@ -797,8 +882,18 @@ ingredientView model ingredientIndex ingredient =
                 stopPropagation "click" (IngredientFocused ingredientIndex)
 
         inactiveView =
-            div [ class "ui basic large blue fluid label" ]
-                [ text (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients)) ]
+            let
+                inactiveText =
+                    (Maybe.withDefault "" (getIngredientNameFromId ingredient.ingredientId model.ingredients))
+
+                innerElement =
+                    if inactiveText == "" then
+                        span [ style [ ( "opacity", "0.5" ) ] ] [ text "Choose an ingredient" ]
+                    else
+                        text inactiveText
+            in
+                div [ class "ui basic large blue fluid label" ]
+                    [ innerElement ]
     in
         div [ class "twelve wide column field ingredient-view", handler ]
             [ case model.selectedIngredientIndex of

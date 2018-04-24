@@ -34,7 +34,7 @@ import Data.Recipe
         , gqlRecipeSummary
         )
 import Data.User exposing (User, decoder)
-import Route exposing (Route)
+import Route exposing (Route, href)
 
 
 type Msg
@@ -199,7 +199,7 @@ viewRecipeSummary mRecipeSummary =
         Just res ->
             case res of
                 Ok r ->
-                    a [ href <| "/recipe/" ++ r.id ]
+                    a [ Route.href (Route.RecipeDetail (Data.Recipe.Slug r.id)) ]
                         [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
                             [ img [ class "ui image", src r.imageUrl ] []
                             , div [ class "content" ]

@@ -97,6 +97,12 @@ div.ingredient-typeahead ul.autocomplete-list li.item:before {
     color: #4183c4;
 }
 
+.recipe-editor-group .recipe-editor-group-error,
+.recipe-editor-group .recipe-editor-group-error:last-child {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
 @media screen and (max-width: 360px) { /* Breakpoint for semantic UI*/
     .ui.secondary.menu .item.link {
         padding-left: 5px;
@@ -111,6 +117,19 @@ div.ingredient-typeahead ul.autocomplete-list li.item:before {
 
     .recipe-editor-group {
         padding-bottom: 42px; /* Allows swiping in mobile*/
+    }
+
+    .recipe-editor-group .recipe-editor-group-error,
+    .recipe-editor-group .recipe-editor-group-error:last-child {
+        margin-top: 3px;
+    }
+}
+
+@media screen and (min-width: 768px) { /* Breakpoint for semantic UI*/
+
+    .recipe-editor-group .recipe-editor-group-error,
+    .recipe-editor-group .recipe-editor-group-error:last-child {
+        margin-bottom: 25px;
     }
 }
 
