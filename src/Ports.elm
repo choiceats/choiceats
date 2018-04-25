@@ -3,6 +3,7 @@ port module Ports
         ( onSessionChange
         , setDocumentTitle
         , storeSession
+        , selectText
         )
 
 -- ELM-LANG MODULES --
@@ -21,3 +22,6 @@ port onSessionChange : (Value -> msg) -> Sub msg
 
 
 port setDocumentTitle : String -> Cmd msg
+
+
+port selectText : String -> Cmd msg
