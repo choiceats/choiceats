@@ -11,6 +11,7 @@ import Json.Decode as Decode
 import Task exposing (Task)
 import Ports
 import Route exposing (Route(..), routeToTitle)
+import Regex exposing (contains, regex)
 
 
 -- THIRD PARTY MODULES --
@@ -103,6 +104,7 @@ type Msg
     | UpdateTextField TextField String
     | ResetAutocomplete Bool
     | IngredientFocused Int
+    | RecipeSubmitted Recipe.RecipeFullResponse
 
 
 emptyRecipe : EditingRecipeFull
@@ -131,9 +133,9 @@ queryForIngredients flags =
     sendIngredientsQuery flags.token ReceiveIngredients
 
 
-submitRecipe : Model -> Cmd RecipeQueryMsg
+submitRecipe : Model -> Cmd Msg
 submitRecipe model =
-    submitRecipeMutation model.token model.editingRecipe ReceiveRecipeFull
+    submitRecipeMutation model.token model.editingRecipe RecipeSubmitted
 
 
 convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
@@ -185,7 +187,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Submit ->
-            ( model, convertToLocalCmd (submitRecipe model) )
+            ( model, (submitRecipe model) )
 
         Query subMsg ->
             case subMsg of
@@ -200,6 +202,18 @@ update msg model =
 
                 ReceiveIngredients res ->
                     ( { model | ingredients = Result.toMaybe res }, Cmd.none )
+
+        RecipeSubmitted recipeSubmitResult ->
+            case recipeSubmitResult of
+                Ok recipe ->
+                    ( model, Cmd.none )
+
+                _ ->
+                    let
+                        _ =
+                            Debug.log "failed to save recipe" ""
+                    in
+                        ( model, Cmd.none )
 
         ToggleIngredientDropdown dropdown ->
             let
@@ -269,26 +283,31 @@ update msg model =
                             ( { model | editingRecipe = newEditingRecipe }, Cmd.none )
 
         UpdateIngredient field ingredientIndex value ->
-            let
-                editingRecipe =
-                    model.editingRecipe
-            in
-                case Array.get ingredientIndex editingRecipe.ingredients of
-                    Just foundIngredient ->
-                        let
-                            newIngredient =
-                                { foundIngredient | quantity = value }
+            if contains (regex "[^0-9.]") value then
+                ( model, Cmd.none )
+            else if (contains (regex ".*[.].*[.]") value) then
+                ( model, Cmd.none )
+            else
+                let
+                    editingRecipe =
+                        model.editingRecipe
+                in
+                    case Array.get ingredientIndex editingRecipe.ingredients of
+                        Just foundIngredient ->
+                            let
+                                newIngredient =
+                                    { foundIngredient | quantity = value }
 
-                            newIngredients =
-                                Array.set ingredientIndex newIngredient editingRecipe.ingredients
+                                newIngredients =
+                                    Array.set ingredientIndex newIngredient editingRecipe.ingredients
 
-                            newEditingRecipe =
-                                { editingRecipe | ingredients = newIngredients }
-                        in
-                            ( { model | editingRecipe = newEditingRecipe, ingredientAutoComplete = Autocomplete.empty }, Cmd.none )
+                                newEditingRecipe =
+                                    { editingRecipe | ingredients = newIngredients }
+                            in
+                                ( { model | editingRecipe = newEditingRecipe, ingredientAutoComplete = Autocomplete.empty }, Cmd.none )
 
-                    Nothing ->
-                        ( model, Cmd.none )
+                        Nothing ->
+                            ( model, Cmd.none )
 
         SelectIngredientUnit ingredientIndex unit ->
             let
@@ -747,7 +766,16 @@ ingredientRow model ingredientIndex ingredient =
             [ div [ class "fields" ]
                 [ div [ class "fields-recipe-quantity fields four wide unstackable column field" ]
                     [ div [ class "eight wide column field" ]
-                        [ div [ class "ui input" ] [ input [ type_ "text", value ingredient.quantity, placeholder "#", onInput (UpdateIngredient IngredientQuanity ingredientIndex) ] [] ] ]
+                        [ div [ class "ui input" ]
+                            [ input
+                                [ type_ "text"
+                                , value ingredient.quantity
+                                , placeholder "#"
+                                , onInput (UpdateIngredient IngredientQuanity ingredientIndex)
+                                ]
+                                [ text ingredient.quantity ]
+                            ]
+                        ]
                     , div [ class "eight wide column field" ]
                         [ unitsDropdown model.units ingredientIndex ingredient.unitId model.uiOpenDropdown ]
                     ]

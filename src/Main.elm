@@ -465,7 +465,17 @@ updatePage page msg model =
                                 "You must be signed in to edit recipes."
 
                     Just user ->
-                        toPage (RecipeEditor slug) RecipeEditorMsg RecipeEditor.update subMsg subModel
+                        case subMsg of
+                            RecipeEditor.RecipeSubmitted recipeSubmitResult ->
+                                case recipeSubmitResult of
+                                    Ok recipe ->
+                                        ( model, Route.modifyUrl (Route.RecipeDetail (Data.Recipe.Slug recipe.id)) )
+
+                                    _ ->
+                                        toPage (RecipeEditor slug) RecipeEditorMsg RecipeEditor.update subMsg subModel
+
+                            _ ->
+                                toPage (RecipeEditor slug) RecipeEditorMsg RecipeEditor.update subMsg subModel
 
             ( _, NotFound ) ->
                 -- Disregard incoming messages when on the NotFound page.
