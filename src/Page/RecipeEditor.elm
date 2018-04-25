@@ -244,7 +244,7 @@ update msg model =
                         Nothing ->
                             ""
             in
-                ( { model | selectedIngredientIndex = Just index, ingredientFilter = ingredientName }, Cmd.none )
+                ( { model | selectedIngredientIndex = Just index, ingredientFilter = ingredientName }, Ports.selectText ".ingredient-view .selected input" )
 
         UpdateTextField textfield value ->
             let
@@ -958,7 +958,7 @@ findInList filter list =
 
 ingredientTypeAhead : Model -> Int -> EditingIngredient -> Html Msg
 ingredientTypeAhead model ingredientIndex ingredient =
-    div [ class "ingredient-typeahead", (stopPropagation "click" None) ]
+    div [ classList [ ( "ingredient-typeahead", True ), ( "selected", ingredientIndex == Maybe.withDefault -1 model.selectedIngredientIndex ) ], (stopPropagation "click" None) ]
         [ input
             [ value model.ingredientFilter
             , type_ "text"

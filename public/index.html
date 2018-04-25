@@ -37,6 +37,19 @@
                 }
             });
 
+						app.ports.selectText.subscribe(selector => {
+							setTimeout(() => {
+								window.selectText(selector);
+							}, 50)
+						});
+
+						window.selectText = function (selector) {
+							const element = document.querySelector(selector);
+							if (element) {
+									element.select();
+							}
+						};
+
             window.addEventListener("storage", function(event) {
                 if (event.storageArea === localStorage && event.key === "session") {
                     app.ports.onSessionChange.send(event.newValue);
