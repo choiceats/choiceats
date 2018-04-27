@@ -25,7 +25,6 @@ Note that we don't enumerate every page here, because the navbar doesn't have li
 -}
 type ActivePage
     = Other
-    | Home
     | Login
     | Signup
     | Randomizer
@@ -109,9 +108,6 @@ navbarLink page isSessionLink route linkContent =
 isActive : ActivePage -> Route -> Bool
 isActive page route =
     case ( page, route ) of
-        ( Home, Route.Home ) ->
-            True
-
         ( Login, Route.Login ) ->
             True
 

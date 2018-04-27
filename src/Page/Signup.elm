@@ -353,7 +353,7 @@ update msg model =
             ( ( model, requestAccount model ), NoOp )
 
         ReceiveResponse (Ok user) ->
-            ( ( { model | loggedIn = True }, Cmd.batch [ storeSession user, Route.modifyUrl Route.Home ] ), SetUser user )
+            ( ( { model | loggedIn = True }, Cmd.batch [ storeSession user, Route.modifyUrl Route.Recipes ] ), SetUser user )
 
         ReceiveResponse (Err err) ->
             ( ( { model | serverFeedback = toString err }, Cmd.none ), NoOp )

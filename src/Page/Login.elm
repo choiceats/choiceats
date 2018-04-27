@@ -151,7 +151,7 @@ update msg model =
                 )
 
         LoginCompleted (Ok user) ->
-            ( ( model, Cmd.batch [ storeSession user, Route.modifyUrl Route.Home ] )
+            ( ( model, Cmd.batch [ storeSession user, Route.modifyUrl Route.Recipes ] )
             , SetUser user
             )
 

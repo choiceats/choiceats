@@ -18,8 +18,7 @@ import Data.Recipe as Recipe
 
 
 type Route
-    = Home
-    | Root
+    = Root
     | Login
     | Logout
     | Signup
@@ -33,8 +32,7 @@ type Route
 route : Parser (Route -> a) a
 route =
     oneOf
-        [ Url.map Home (s "")
-        , Url.map Login (s "login")
+        [ Url.map Login (s "login")
         , Url.map Logout (s "logout")
         , Url.map Signup (s "signup")
         , Url.map Randomizer (s "random")
@@ -54,9 +52,6 @@ routeToString page =
     let
         pieces =
             case page of
-                Home ->
-                    []
-
                 Root ->
                     []
 
@@ -112,9 +107,6 @@ fromLocation location =
 routeToTitle : Route -> String
 routeToTitle route =
     case route of
-        Home ->
-            ""
-
         Root ->
             ""
 

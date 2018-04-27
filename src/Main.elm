@@ -19,7 +19,6 @@ import Data.Recipe exposing (Slug)
 import Data.Session exposing (Session)
 import Data.User as User exposing (User)
 import Page.Errored as Errored exposing (PageLoadError)
-import Page.Home as Home
 import Page.Login as Login
 import Page.NotFound as NotFound
 import Page.Randomizer as Randomizer
@@ -36,7 +35,6 @@ type Page
     = Blank
     | NotFound
     | Errored PageLoadError
-    | Home Home.Model
     | Login Login.Model
     | Signup Signup.Model
     | Randomizer Randomizer.Model
@@ -115,11 +113,6 @@ viewPage session isLoading page =
                 Errored.view session subModel
                     |> frame Page.Other
 
-            Home subModel ->
-                Home.view session subModel
-                    |> frame Page.Home
-                    |> Html.map HomeMsg
-
             Login subModel ->
                 Login.view session subModel
                     |> frame Page.Login
@@ -186,8 +179,6 @@ getPage pageState =
 
 type Msg
     = SetRoute (Maybe Route)
-    | HomeLoaded (Result PageLoadError Home.Model)
-    | HomeMsg Home.Msg
     | SetUser (Maybe User)
     | LoginMsg Login.Msg
     | SignupMsg Signup.Msg
@@ -231,11 +222,13 @@ setRoute maybeRoute model =
                     Nothing ->
                         errored Page.Other "You must be signed in to edit a recipe."
 
-            Just Route.Home ->
-                transition HomeLoaded (Task.succeed (Home.init model.session))
-
             Just Route.Root ->
-                ( model, Route.modifyUrl Route.Home )
+                case model.session.user of
+                    Just user ->
+                        ( model, Route.modifyUrl Route.Recipes )
+
+                    Nothing ->
+                        ( model, Route.modifyUrl Route.Login )
 
             Just Route.Login ->
                 ( { model | pageState = Loaded (Login Login.initialModel) }
@@ -250,7 +243,7 @@ setRoute maybeRoute model =
                     ( { model | session = { session | user = Nothing } }
                     , Cmd.batch
                         [ Ports.storeSession Nothing
-                        , Route.modifyUrl Route.Home
+                        , Route.modifyUrl Route.Login
                         ]
                     )
 
@@ -345,22 +338,12 @@ updatePage page msg model =
                 , Ports.setDocumentTitle (routeToTitle (Route.NewRecipe) ++ " Error")
                 )
 
-            ( HomeLoaded (Ok subModel), _ ) ->
-                ( { model | pageState = Loaded (Home subModel) }
-                , Ports.setDocumentTitle (routeToTitle Route.Home)
-                )
-
-            ( HomeLoaded (Err error), _ ) ->
-                ( { model | pageState = Loaded (Errored error) }
-                , Ports.setDocumentTitle "Error"
-                )
-
             ( SetUser user, _ ) ->
                 let
                     cmd =
-                        -- If just signed out, then redirect to Home.
+                        -- If just signed out, then redirect to Login
                         if session.user /= Nothing && user == Nothing then
-                            Route.modifyUrl Route.Home
+                            Route.modifyUrl Route.Login
                         else
                             Cmd.none
                 in
@@ -450,9 +433,6 @@ updatePage page msg model =
                 ( { model | pageState = Loaded (Errored error) }
                 , Ports.setDocumentTitle (routeToTitle (Route.RecipeDetail (Data.Recipe.Slug "")) ++ " Error")
                 )
-
-            ( HomeMsg subMsg, Home subModel ) ->
-                toPage Home HomeMsg (Home.update session) subMsg subModel
 
             ( RecipeEditorMsg subMsg, RecipeEditor slug subModel ) ->
                 case model.session.user of
