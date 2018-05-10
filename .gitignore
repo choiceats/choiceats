@@ -12,6 +12,7 @@
 
 # Elm
 /elm-stuff
+tests/elm-stuff
 elm.js
 
 # misc
