@@ -1,4 +1,4 @@
-module Page.Signup exposing (ExternalMsg(..), Model, Msg, initialModel, update, view)
+module Page.Signup exposing (ExternalMsg(..), Model, Msg, initModel, update, view)
 
 -- ELM-LANG MODULES
 
@@ -65,6 +65,7 @@ type alias Model =
     , token : String
     , serverFeedback : String
     , canSubmitForm : Bool
+    , apiUrl : String
     }
 
 
@@ -83,8 +84,8 @@ type alias InputAttr =
     String
 
 
-initialModel : Model
-initialModel =
+initModel : String -> Model
+initModel apiUrl =
     { formFields =
         { email = emptyUserData
         , firstName = emptyUserData
@@ -96,6 +97,7 @@ initialModel =
     , canSubmitForm = False
     , loggedIn = False
     , serverFeedback = ""
+    , apiUrl = apiUrl
     }
 
 
@@ -277,6 +279,9 @@ update msg model =
             let
                 newFields =
                     setEmail str model.formFields
+
+                trumm =
+                    Debug.log "apiUrl" model.apiUrl
             in
                 ( ( { model
                         | formFields = newFields

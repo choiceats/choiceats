@@ -7,16 +7,7 @@ module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg, update, view, in
 import Html exposing (Html, a, div, text, button, h1, ul, li, img, i, span, p)
 import Html.Attributes exposing (src, style, class)
 import Html.Events exposing (onClick)
-import Http
 import Task exposing (Task)
-
-
--- THIRD PARTY MODULES --
-
-import GraphQL.Client.Http as GraphQLClient
-import GraphQL.Request.Builder as GqlB
-import GraphQL.Request.Builder.Arg as Arg
-import GraphQL.Request.Builder.Variable as Var
 
 
 -- APPLICATION MODULES --
@@ -52,8 +43,8 @@ type alias Model =
     }
 
 
-init : Session -> Slug -> Task PageLoadError Model
-init session slug =
+init : Session -> Slug -> String -> Task PageLoadError Model
+init session slug apiUrl =
     let
         token =
             case session.user of
@@ -71,7 +62,7 @@ init session slug =
                 _ ->
                     0
     in
-        (createRecipeQueryTask token recipeIdInt)
+        (createRecipeQueryTask token recipeIdInt apiUrl)
             |> Task.mapError (\_ -> pageLoadError Page.Other "Unable to load recipe")
             |> Task.map (initResultMap token recipeIdInt)
 

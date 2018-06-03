@@ -2,11 +2,9 @@ module Page.Recipes exposing (ExternalMsg(..), Model, Msg, update, view, init)
 
 -- ELM-LANG MODULES --
 
-import Array exposing (Array)
 import Html exposing (Html, a, div, i, img, text, input, option, select)
 import Html.Attributes exposing (class, style, href, src, placeholder, value)
 import Html.Events exposing (onInput)
-import Http
 import List exposing (map)
 import Task exposing (Task)
 
@@ -35,7 +33,6 @@ import Data.Recipe
         , Slug(..)
         )
 import Data.Session exposing (Session)
-import Data.User exposing (User, UserId, decoder)
 import Util exposing (getImageUrl)
 import Route as Route exposing (Route(..), href)
 
@@ -111,6 +108,7 @@ type alias Model =
     { recipes : Maybe RecipesResponse
     , userId : String
     , token : AuthToken
+    , apiUrl : String
     , search : SearchParams
     }
 
@@ -142,7 +140,7 @@ updateSearch msg model =
                     { searchParams | text = text }
 
                 command =
-                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
+                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text model.apiUrl
             in
                 ( { model | search = updatedSearchParms }, command )
 
@@ -157,7 +155,7 @@ updateSearch msg model =
                     { searchParams | filter = filter }
 
                 command =
-                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text
+                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text model.apiUrl
             in
                 ( { model | search = updatedSearchParms }, command )
 
@@ -165,8 +163,8 @@ updateSearch msg model =
             ( model, Cmd.none )
 
 
-init : Session -> ( Model, Cmd Msg )
-init session =
+init : Session -> String -> ( Model, Cmd Msg )
+init session apiUrl =
     let
         authToken =
             case session.user of
@@ -185,9 +183,10 @@ init session =
         ( { recipes = Nothing
           , userId = ""
           , token = authToken
+          , apiUrl = apiUrl
           , search = defaultSearchParams
           }
-        , sendRecipesQuery authToken All [] "he"
+        , sendRecipesQuery authToken All [] "he" apiUrl
         )
 
 
@@ -299,14 +298,14 @@ recipesQueryRequest searchFilter tags searchText =
             }
 
 
-sendQueryRequest : AuthToken -> GqlB.Request GqlB.Query a -> Task GraphQLClient.Error a
-sendQueryRequest authToken request =
-    GraphQLClient.customSendQuery (requestOptions authToken) request
+sendQueryRequest : AuthToken -> GqlB.Request GqlB.Query a -> String -> Task GraphQLClient.Error a
+sendQueryRequest authToken request apiUrl =
+    GraphQLClient.customSendQuery (requestOptions authToken apiUrl) request
 
 
-sendRecipesQuery : AuthToken -> SearchFilter -> List String -> String -> Cmd Msg
-sendRecipesQuery authToken searchFilter tags searchText =
-    sendQueryRequest authToken (recipesQueryRequest searchFilter tags searchText)
+sendRecipesQuery : AuthToken -> SearchFilter -> List String -> String -> String -> Cmd Msg
+sendRecipesQuery authToken searchFilter tags searchText apiUrl =
+    sendQueryRequest authToken (recipesQueryRequest searchFilter tags searchText) apiUrl
         |> Task.attempt GetRecipesResponse
 
 
@@ -333,7 +332,7 @@ tagsQueryRequest searchFilter tags searchText =
         |> GqlB.request {}
 
 
-sendTagsQuery : AuthToken -> SearchFilter -> List String -> String -> Cmd Msg
-sendTagsQuery authToken searchFilter tags searchText =
-    sendQueryRequest authToken (tagsQueryRequest searchFilter tags searchText)
+sendTagsQuery : AuthToken -> SearchFilter -> List String -> String -> String -> Cmd Msg
+sendTagsQuery authToken searchFilter tags searchText apiUrl =
+    sendQueryRequest authToken (tagsQueryRequest searchFilter tags searchText) apiUrl
         |> Task.attempt GetTagsResponse

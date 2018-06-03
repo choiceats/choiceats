@@ -10,7 +10,6 @@ import Html.Events exposing (defaultOptions, onClick, onInput, onFocus, onWithOp
 import Json.Decode as Decode
 import Task exposing (Task)
 import Ports
-import Route exposing (Route(..), routeToTitle)
 import Regex exposing (contains, regex)
 
 
@@ -78,6 +77,7 @@ type alias Model =
     , recipeId : Int
     , token : AuthToken
     , userId : UserId
+    , apiUrl : String
 
     -- UI
     , uiOpenDropdown : Maybe DropdownKey
@@ -119,14 +119,14 @@ emptyRecipe =
     }
 
 
-queryForRecipe : AuthToken -> RecipeId -> Cmd RecipeQueryMsg
-queryForRecipe token recipeId =
-    sendRecipeQuery token recipeId ReceiveRecipeFull
+queryForRecipe : AuthToken -> RecipeId -> String -> Cmd RecipeQueryMsg
+queryForRecipe token recipeId apiUrl =
+    sendRecipeQuery token recipeId ReceiveRecipeFull apiUrl
 
 
-queryForTags : AuthToken -> Cmd RecipeQueryMsg
-queryForTags token =
-    sendUnitsQuery token ReceiveUnits
+queryForTags : AuthToken -> String -> Cmd RecipeQueryMsg
+queryForTags token apiUrl =
+    sendUnitsQuery token ReceiveUnits apiUrl
 
 
 queryForIngredients flags =
@@ -135,7 +135,7 @@ queryForIngredients flags =
 
 submitRecipe : Model -> Cmd Msg
 submitRecipe model =
-    submitRecipeMutation model.token model.editingRecipe RecipeSubmitted
+    submitRecipeMutation model.token model.editingRecipe RecipeSubmitted model.apiUrl
 
 
 convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
@@ -192,7 +192,7 @@ update msg model =
         Query subMsg ->
             case subMsg of
                 RequestRecipe ->
-                    ( model, convertToLocalCmd (queryForRecipe model.token model.recipeId) )
+                    ( model, convertToLocalCmd (queryForRecipe model.token model.recipeId model.apiUrl) )
 
                 ReceiveRecipeFull res ->
                     ( { model | recipe = Result.toMaybe res, editingRecipe = (recipeFullToEditingRecipe model (Result.toMaybe res)) }, Cmd.none )
@@ -469,8 +469,8 @@ removeIndexFromArray index fromArray =
         Array.append arrayUpToIndex arrayAfterIndex
 
 
-makeShellModel : Session -> Model
-makeShellModel session =
+makeShellModel : Session -> String -> Model
+makeShellModel session apiUrl =
     let
         token =
             case session.user of
@@ -498,12 +498,13 @@ makeShellModel session =
         , uiOpenDropdown = Nothing
         , ingredientAutoComplete = Autocomplete.empty
         , ingredientFilter = ""
+        , apiUrl = apiUrl
         , selectedIngredientIndex = Nothing
         }
 
 
-initNew : Session -> Task PageLoadError Model
-initNew session =
+initNew : Session -> String -> Task PageLoadError Model
+initNew session apiUrl =
     let
         token =
             case session.user of
@@ -529,6 +530,7 @@ initNew session =
             , token = token
             , recipeId = 0
             , userId = userId
+            , apiUrl = apiUrl
             , uiOpenDropdown = Nothing
             , ingredientAutoComplete = Autocomplete.empty
             , ingredientFilter = ""
@@ -538,12 +540,12 @@ initNew session =
         Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
             Task.map2
                 (mapResponses)
-                (createIngredientsQueryTask token)
-                (createUnitsQueryTask token)
+                (createIngredientsQueryTask token apiUrl)
+                (createUnitsQueryTask token apiUrl)
 
 
-initEdit : Session -> Recipe.Slug -> Task PageLoadError Model
-initEdit session slug =
+initEdit : Session -> Recipe.Slug -> String -> Task PageLoadError Model
+initEdit session slug apiUrl =
     let
         token =
             case session.user of
@@ -571,7 +573,7 @@ initEdit session slug =
 
         shellModel =
             -- Enables conversion to EditingRecipeFull
-            makeShellModel session
+            makeShellModel session apiUrl
 
         mapResponses resultRecipe resultIngredients resultTags =
             { recipe = Just resultRecipe
@@ -581,6 +583,7 @@ initEdit session slug =
             , token = token
             , recipeId = recipeIdInt
             , userId = userId
+            , apiUrl = apiUrl
             , uiOpenDropdown = Nothing
             , ingredientAutoComplete = Autocomplete.empty
             , ingredientFilter = ""
@@ -590,9 +593,9 @@ initEdit session slug =
         Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
             Task.map3
                 (mapResponses)
-                (createRecipeQueryTask token recipeIdInt)
-                (createIngredientsQueryTask token)
-                (createUnitsQueryTask token)
+                (createRecipeQueryTask token recipeIdInt apiUrl)
+                (createIngredientsQueryTask token apiUrl)
+                (createUnitsQueryTask token apiUrl)
 
 
 recipeFullToEditingRecipe : Model -> Maybe RecipeFull -> EditingRecipeFull

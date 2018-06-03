@@ -5,9 +5,6 @@ module Page.Randomizer exposing (ExternalMsg(..), Model, Msg, update, view, init
 import Html exposing (Html, div, a, text, label, input, button, h1, form, img, i)
 import Html.Attributes exposing (disabled, type_, class, style, value, for, id, href, src)
 import Html.Events exposing (onWithOptions, onClick, onInput)
-import Http exposing (Error, send, post, stringBody)
-import Json.Decode as JD exposing (bool, decodeString, field, int, map4, string)
-import Json.Encode as JE exposing (object, string, encode)
 import Task exposing (Task)
 import Result exposing (withDefault)
 
@@ -33,7 +30,6 @@ import Data.Recipe
         , SearchFilter(..)
         , gqlRecipeSummary
         )
-import Data.User exposing (User, decoder)
 import Route exposing (Route, href)
 
 
@@ -59,11 +55,12 @@ type alias Model =
     { currentFilter : SearchFilter
     , mRecipeSummary : Maybe RecipeResponse
     , token : AuthToken
+    , apiUrl : String
     }
 
 
-init : Session -> ( Model, Cmd Msg )
-init session =
+init : Session -> String -> ( Model, Cmd Msg )
+init session apiUrl =
     let
         authToken =
             case session.user of
@@ -75,9 +72,10 @@ init session =
     in
         ( { currentFilter = All
           , mRecipeSummary = Nothing
+          , apiUrl = apiUrl
           , token = authToken
           }
-        , sendRecipeQuery authToken All
+        , sendRecipeQuery authToken All apiUrl
         )
 
 
@@ -85,7 +83,7 @@ update : Msg -> Model -> ( ( Model, Cmd Msg ), ExternalMsg )
 update msg model =
     case msg of
         RequestRecipe ->
-            ( ( model, sendRecipeQuery model.token model.currentFilter ), NoOp )
+            ( ( model, sendRecipeQuery model.token model.currentFilter model.apiUrl ), NoOp )
 
         SetFilterType msg ->
             ( ( { model | currentFilter = msg }, Cmd.none ), NoOp )
@@ -129,14 +127,14 @@ recipeQueryRequest buttonFilter =
         |> GqlB.request { searchFilter = (mapFilterTypeToString buttonFilter) }
 
 
-sendQueryRequest : AuthToken -> GqlB.Request GqlB.Query a -> Task GraphQLClient.Error a
-sendQueryRequest authToken request =
-    GraphQLClient.customSendQuery (requestOptions authToken) request
+sendQueryRequest : AuthToken -> GqlB.Request GqlB.Query a -> String -> Task GraphQLClient.Error a
+sendQueryRequest authToken request apiUrl =
+    GraphQLClient.customSendQuery (requestOptions authToken apiUrl) request
 
 
-sendRecipeQuery : AuthToken -> SearchFilter -> Cmd Msg
-sendRecipeQuery authToken buttonFilter =
-    sendQueryRequest authToken (recipeQueryRequest buttonFilter)
+sendRecipeQuery : AuthToken -> SearchFilter -> String -> Cmd Msg
+sendRecipeQuery authToken buttonFilter apiUrl =
+    sendQueryRequest authToken (recipeQueryRequest buttonFilter) apiUrl
         |> Task.attempt ReceiveQueryResponse
 
 

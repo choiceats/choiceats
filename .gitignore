@@ -9,6 +9,7 @@
 # production
 /build
 /server/build
+dist/
 
 # Elm
 /elm-stuff
