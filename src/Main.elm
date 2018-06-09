@@ -314,7 +314,7 @@ setRoute maybeRoute model =
                         ( model, Route.modifyUrl Route.Login )
 
             Just Route.Login ->
-                ( { model | pageState = Loaded (Login Login.initialModel) }
+                ( { model | pageState = Loaded (Login (Login.init model.apiUrl)) }
                 , Ports.setDocumentTitle (routeToTitle Route.Login)
                 )
 

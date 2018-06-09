@@ -1,4 +1,4 @@
-module Page.Login exposing (ExternalMsg(..), Model, Msg, initialModel, update, view)
+module Page.Login exposing (ExternalMsg(..), Model, Msg, init, update, view)
 
 {-| The login page.
 -}
@@ -24,7 +24,6 @@ import Data.Session exposing (Session)
 import Data.User exposing (User)
 import Request.User exposing (storeSession)
 import Route exposing (Route)
-import Views.Form as Form
 
 
 -- MODEL --
@@ -34,14 +33,16 @@ type alias Model =
     { errors : List Error
     , email : String
     , password : String
+    , apiUrl : String
     }
 
 
-initialModel : Model
-initialModel =
+init : String -> Model
+init apiUrl =
     { errors = []
     , email = ""
     , password = ""
+    , apiUrl = apiUrl
     }
 
 

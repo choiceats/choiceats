@@ -28,8 +28,8 @@ storeSession user =
         |> Ports.storeSession
 
 
-login : { r | email : String, password : String } -> Http.Request User
-login { email, password } =
+login : { r | apiUrl : String, email : String, password : String } -> Http.Request User
+login { apiUrl, email, password } =
     let
         user =
             Encode.object
@@ -42,4 +42,4 @@ login { email, password } =
                 |> Http.jsonBody
     in
         Decode.field "user" User.decoder
-            |> Http.post ("http://localhost:4000/auth") body
+            |> Http.post apiUrl body

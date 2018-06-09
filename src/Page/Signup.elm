@@ -69,6 +69,7 @@ type alias Model =
     }
 
 
+emptyUserData : FormField
 emptyUserData =
     { userInput = ""
     , isValid = True
@@ -101,6 +102,7 @@ initModel apiUrl =
     }
 
 
+emailRegex : Regex.Regex
 emailRegex =
     caseInsensitive (regex "^\\S+@\\S+\\.\\S+$")
 
@@ -174,10 +176,12 @@ setLastName lastNameInput fields =
         }
 
 
+createWordRegex : String -> Regex.Regex
 createWordRegex word =
     caseInsensitive (regex ("^.*" ++ word ++ ".*$"))
 
 
+passwordRegex : Regex.Regex
 passwordRegex =
     createWordRegex "password"
 
@@ -376,7 +380,7 @@ requestAccount model =
     in
         Http.send ReceiveResponse
             (Http.post
-                "http://localhost:4000/user"
+                (model.apiUrl ++ "/user")
                 (Http.stringBody
                     "application/json; charset=utf-8"
                  <|
