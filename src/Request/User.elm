@@ -7,15 +7,8 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 
 
--- THIRD PARTY MODULES --
-
-import HttpBuilder exposing (RequestBuilder, withExpect, withQueryParams)
-import Json.Encode.Extra as EncodeExtra
-
-
 -- APPLICATION MODULES --
 
-import Data.AuthToken exposing (AuthToken, withAuthorization)
 import Data.User as User exposing (User)
 import Ports
 
@@ -42,4 +35,4 @@ login { apiUrl, email, password } =
                 |> Http.jsonBody
     in
         Decode.field "user" User.decoder
-            |> Http.post apiUrl body
+            |> Http.post (apiUrl ++ "/auth") body

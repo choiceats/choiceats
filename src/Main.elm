@@ -90,20 +90,24 @@ decodeUserId =
         |> Decode.map User.UserId
 
 
-sessionDecoder : String -> Result String Flags
-sessionDecoder =
+flagsDecoder : String -> Result String User
+flagsDecoder =
     Decode.decodeString
-        (Decode.map2 Flags
-            (Decode.field "api_url" Decode.string)
-            (Decode.field "session"
-                (Decode.map4 User
-                    (Decode.field "email" Decode.string)
-                    (Decode.field "token" decodeToken)
-                    (Decode.field "name" decodeName)
-                    (Decode.field "userId" decodeUserId)
-                )
+        (Decode.field "session"
+            (Decode.map4 User
+                (Decode.field "email" Decode.string)
+                (Decode.field "token" decodeToken)
+                (Decode.field "name" decodeName)
+                (Decode.field "userId" decodeUserId)
             )
         )
+
+
+apiUrlDecoder :
+    String
+    -> Result String String -- Success string is apiUrl
+apiUrlDecoder =
+    Decode.decodeString (Decode.field "api_url" Decode.string)
 
 
 init : Value -> Location -> ( Model, Cmd Msg )
@@ -112,7 +116,7 @@ init val location =
         resultStringFlags =
             (Decode.decodeValue Decode.string val)
 
-        deresultedFlags =
+        stringifiedFlags =
             case resultStringFlags of
                 Ok flags ->
                     flags
@@ -120,21 +124,18 @@ init val location =
                 Err _ ->
                     """{"bad": "deal dewd"}"""
 
-        maybeFlags =
-            sessionDecoder deresultedFlags
-
         apiUrl =
-            case maybeFlags of
-                Ok flags ->
-                    flags.apiUrl
+            case (apiUrlDecoder stringifiedFlags) of
+                Ok url ->
+                    url
 
                 _ ->
                     "choiceats.com"
 
         session =
-            case maybeFlags of
+            case (flagsDecoder stringifiedFlags) of
                 Ok flags ->
-                    { user = Just flags.session }
+                    { user = Just flags }
 
                 _ ->
                     { user = Nothing }
@@ -144,16 +145,6 @@ init val location =
             , session = session
             , apiUrl = apiUrl
             }
-
-
-
--- TODO: Should the decoder look more like this?
---decodeUserFromJson : Value -> Maybe User
---decodeUserFromJson json =
---    json
---        |> Decode.decodeValue Decode.string
---        |> Result.toMaybe
---        |> Maybe.andThen (Decode.decodeString User.decoder >> Result.toMaybe)
 
 
 initialPage : Page
