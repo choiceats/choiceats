@@ -16,6 +16,7 @@
   "scripts": {
     "build-prod": "webpack --config ./webpack.config.prod.js",
     "build-dev": "webpack --config ./webpack.config.dev.js",
+    "build-elm": "webpack --config ./webpack.config.elm.js",
     "start": "webpack-serve ./webpack.config.dev.js"
   }
 }

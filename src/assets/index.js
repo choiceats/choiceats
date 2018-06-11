@@ -12,7 +12,7 @@ const Elm = require('../Main.elm');
 
 const sessionString = localStorage.session
 const flags = {
-    api_url: api_url,
+    api_url: api_url, // set by webpack
     session: sessionString ? JSON.parse(localStorage.session) : null
 }
 const app = Elm.Main.fullscreen(JSON.stringify(flags));
