@@ -209,11 +209,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 _ ->
-                    let
-                        _ =
-                            Debug.log "failed to save recipe" ""
-                    in
-                        ( model, Cmd.none )
+                    ( model, Cmd.none )
 
         ToggleIngredientDropdown dropdown ->
             let

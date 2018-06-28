@@ -283,9 +283,6 @@ update msg model =
             let
                 newFields =
                     setEmail str model.formFields
-
-                trumm =
-                    Debug.log "apiUrl" model.apiUrl
             in
                 ( ( { model
                         | formFields = newFields

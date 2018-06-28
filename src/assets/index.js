@@ -23,7 +23,6 @@ app.ports.storeSession.subscribe(function(session) {
 
 app.ports.setDocumentTitle.subscribe(function(title) {
     const appName = "ChoicEats";
-    console.log('title', title)
 
     if (title.length > 0) {
         document.title = appName + ' - ' + title;

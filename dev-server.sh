@@ -1,6 +1,6 @@
 #!/bin/sh
 
-function before_build_function {
+before_build_function() {
     cp src/assets/index-elm.html dist/index.html
     yarn build-elm
 }

@@ -27,7 +27,6 @@ storeSession.subscribe(function(session) {
 
 setDocumentTitle.subscribe(function(title) {
     const appName = "ChoicEats"
-    console.log('title', title)
 
     if (title.length > 0) {
         document.title = appName + ' - ' + title
