@@ -1,4 +1,4 @@
-module Data.AuthToken exposing (AuthToken, decoder, encode, withAuthorization, blankToken, getTokenString)
+module Data.AuthToken exposing (AuthToken(..), decoder, encode, withAuthorization, blankToken, getTokenString)
 
 -- ELM-LANG MODULES --
 

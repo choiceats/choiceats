@@ -75,11 +75,11 @@ type alias RequestOptions a =
 -- request
 
 
-requestOptions : AuthToken -> RequestOptions a
-requestOptions token =
+requestOptions : AuthToken -> String -> RequestOptions a
+requestOptions token apiUrl =
     { method = "POST"
     , headers = [ (Http.header "Authorization" ("Bearer " ++ (getTokenString token))) ]
-    , url = "http://localhost:4000/graphql/"
+    , url = apiUrl ++ "/graphql/"
     , timeout = Nothing
     , withCredentials = False -- value of True makes CORS active, breaking the request
     }
@@ -130,56 +130,60 @@ type alias IngredientsResponse =
 --
 
 
-createUnitsQueryTask : AuthToken -> Task GraphQLClient.Error (List Unit)
-createUnitsQueryTask authToken =
+type alias ApiUrl =
+    String
+
+
+createUnitsQueryTask : AuthToken -> ApiUrl -> Task GraphQLClient.Error (List Unit)
+createUnitsQueryTask authToken apiUrl =
     (GraphQLClient.customSendQuery
-        (requestOptions authToken)
+        (requestOptions authToken apiUrl)
         (GqlB.request {} unitsRequest)
     )
 
 
-sendUnitsQuery : AuthToken -> (UnitsResponse -> a) -> Cmd a
-sendUnitsQuery authToken msg =
+sendUnitsQuery : AuthToken -> (UnitsResponse -> a) -> ApiUrl -> Cmd a
+sendUnitsQuery authToken msg apiUrl =
     Task.attempt
         msg
         (GraphQLClient.customSendQuery
-            (requestOptions authToken)
+            (requestOptions authToken apiUrl)
             (GqlB.request {} unitsRequest)
         )
 
 
-sendIngredientsQuery : AuthToken -> (IngredientsResponse -> a) -> Cmd a
-sendIngredientsQuery authToken msg =
+sendIngredientsQuery : AuthToken -> (IngredientsResponse -> a) -> ApiUrl -> Cmd a
+sendIngredientsQuery authToken msg apiUrl =
     Task.attempt
         msg
         (GraphQLClient.customSendQuery
-            (requestOptions authToken)
+            (requestOptions authToken apiUrl)
             (GqlB.request {} ingredientsRequest)
         )
 
 
-createIngredientsQueryTask : AuthToken -> Task GraphQLClient.Error (List IngredientRaw)
-createIngredientsQueryTask authToken =
+createIngredientsQueryTask : AuthToken -> ApiUrl -> Task GraphQLClient.Error (List IngredientRaw)
+createIngredientsQueryTask authToken apiUrl =
     (GraphQLClient.customSendQuery
-        (requestOptions authToken)
+        (requestOptions authToken apiUrl)
         (GqlB.request {} ingredientsRequest)
     )
 
 
-sendRecipeQuery : AuthToken -> RecipeId -> (RecipeFullResponse -> a) -> Cmd a
-sendRecipeQuery authToken recipeId msg =
+sendRecipeQuery : AuthToken -> RecipeId -> (RecipeFullResponse -> a) -> ApiUrl -> Cmd a
+sendRecipeQuery authToken recipeId msg apiUrl =
     Task.attempt
         msg
         (GraphQLClient.customSendQuery
-            (requestOptions authToken)
+            (requestOptions authToken apiUrl)
             (GqlB.request { recipeId = recipeId } recipeRequest)
         )
 
 
-createRecipeQueryTask : AuthToken -> RecipeId -> Task GraphQLClient.Error RecipeFull
-createRecipeQueryTask authToken recipeId =
+createRecipeQueryTask : AuthToken -> RecipeId -> ApiUrl -> Task GraphQLClient.Error RecipeFull
+createRecipeQueryTask authToken recipeId apiUrl =
     (GraphQLClient.customSendQuery
-        (requestOptions authToken)
+        (requestOptions authToken apiUrl)
         (GqlB.request { recipeId = recipeId } recipeRequest)
     )
 
@@ -214,12 +218,12 @@ convertRecipeArraysToList recipe =
         { recipe | ingredients = Array.toList recipe.ingredients, id = recipeId }
 
 
-submitRecipeMutation : AuthToken -> EditingRecipeFull -> (RecipeFullResponse -> a) -> Cmd a
-submitRecipeMutation authToken recipe msg =
+submitRecipeMutation : AuthToken -> EditingRecipeFull -> (RecipeFullResponse -> a) -> ApiUrl -> Cmd a
+submitRecipeMutation authToken recipe msg apiUrl =
     Task.attempt
         msg
         (GraphQLClient.customSendMutation
-            (requestOptions authToken)
+            (requestOptions authToken apiUrl)
             (GqlB.request { recipe = (convertRecipeArraysToList recipe) } saveRecipeMutation)
         )
 

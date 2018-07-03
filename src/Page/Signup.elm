@@ -1,4 +1,4 @@
-module Page.Signup exposing (ExternalMsg(..), Model, Msg, initialModel, update, view)
+module Page.Signup exposing (ExternalMsg(..), Model, Msg, initModel, update, view)
 
 -- ELM-LANG MODULES
 
@@ -65,9 +65,11 @@ type alias Model =
     , token : String
     , serverFeedback : String
     , canSubmitForm : Bool
+    , apiUrl : String
     }
 
 
+emptyUserData : FormField
 emptyUserData =
     { userInput = ""
     , isValid = True
@@ -83,8 +85,8 @@ type alias InputAttr =
     String
 
 
-initialModel : Model
-initialModel =
+initModel : String -> Model
+initModel apiUrl =
     { formFields =
         { email = emptyUserData
         , firstName = emptyUserData
@@ -96,9 +98,11 @@ initialModel =
     , canSubmitForm = False
     , loggedIn = False
     , serverFeedback = ""
+    , apiUrl = apiUrl
     }
 
 
+emailRegex : Regex.Regex
 emailRegex =
     caseInsensitive (regex "^\\S+@\\S+\\.\\S+$")
 
@@ -172,10 +176,12 @@ setLastName lastNameInput fields =
         }
 
 
+createWordRegex : String -> Regex.Regex
 createWordRegex word =
     caseInsensitive (regex ("^.*" ++ word ++ ".*$"))
 
 
+passwordRegex : Regex.Regex
 passwordRegex =
     createWordRegex "password"
 
@@ -371,7 +377,7 @@ requestAccount model =
     in
         Http.send ReceiveResponse
             (Http.post
-                "http://localhost:4000/user"
+                (model.apiUrl ++ "/user")
                 (Http.stringBody
                     "application/json; charset=utf-8"
                  <|

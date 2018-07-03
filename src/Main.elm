@@ -3,7 +3,8 @@ module Main exposing (main)
 -- ELM-LANG MODULES --
 
 import Html exposing (..)
-import Json.Decode as Decode exposing (Value)
+import Json.Decode as Decode exposing (Value, Decoder)
+import Json.Encode as Encode
 import Navigation exposing (Location)
 import Task
 
@@ -15,9 +16,10 @@ import Autocomplete
 
 -- APPLICATION MODULES --
 
+import Data.AuthToken as AuthToken exposing (AuthToken(..))
 import Data.Recipe exposing (Slug)
 import Data.Session exposing (Session)
-import Data.User as User exposing (User)
+import Data.User as User exposing (User, UserId(..), Name(..))
 import Page.Errored as Errored exposing (PageLoadError)
 import Page.Login as Login
 import Page.NotFound as NotFound
@@ -55,23 +57,94 @@ type PageState
 type alias Model =
     { session : Session
     , pageState : PageState
+    , apiUrl : String
     }
+
+
+type alias Flags =
+    { apiUrl : String
+    , session : User
+    }
+
+
+encodeToken : AuthToken -> Value
+encodeToken (AuthToken token) =
+    Encode.string token
+
+
+decodeToken : Decoder AuthToken
+decodeToken =
+    Decode.string
+        |> Decode.map AuthToken
+
+
+decodeName : Decoder User.Name
+decodeName =
+    Decode.string
+        |> Decode.map User.Name
+
+
+decodeUserId : Decoder User.UserId
+decodeUserId =
+    Decode.string
+        |> Decode.map User.UserId
+
+
+flagsDecoder : String -> Result String User
+flagsDecoder =
+    Decode.decodeString
+        (Decode.field "session"
+            (Decode.map4 User
+                (Decode.field "email" Decode.string)
+                (Decode.field "token" decodeToken)
+                (Decode.field "name" decodeName)
+                (Decode.field "userId" decodeUserId)
+            )
+        )
+
+
+apiUrlDecoder :
+    String
+    -> Result String String -- Success string is apiUrl
+apiUrlDecoder =
+    Decode.decodeString (Decode.field "api_url" Decode.string)
 
 
 init : Value -> Location -> ( Model, Cmd Msg )
 init val location =
-    setRoute (Route.fromLocation location)
-        { pageState = Loaded initialPage
-        , session = { user = decodeUserFromJson val }
-        }
+    let
+        resultStringFlags =
+            (Decode.decodeValue Decode.string val)
 
+        stringifiedFlags =
+            case resultStringFlags of
+                Ok flags ->
+                    flags
 
-decodeUserFromJson : Value -> Maybe User
-decodeUserFromJson json =
-    json
-        |> Decode.decodeValue Decode.string
-        |> Result.toMaybe
-        |> Maybe.andThen (Decode.decodeString User.decoder >> Result.toMaybe)
+                Err _ ->
+                    """{"bad": "deal dewd"}"""
+
+        apiUrl =
+            case (apiUrlDecoder stringifiedFlags) of
+                Ok url ->
+                    url
+
+                _ ->
+                    "choiceats.com"
+
+        session =
+            case (flagsDecoder stringifiedFlags) of
+                Ok flags ->
+                    { user = Just flags }
+
+                _ ->
+                    { user = Nothing }
+    in
+        setRoute (Route.fromLocation location)
+            { pageState = Loaded initialPage
+            , session = session
+            , apiUrl = apiUrl
+            }
 
 
 initialPage : Page
@@ -151,6 +224,7 @@ viewPage session isLoading page =
                         |> Html.map RecipeEditorMsg
 
 
+subscriptions : a -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map SetUser sessionChange
@@ -209,7 +283,7 @@ setRoute maybeRoute model =
             Just Route.NewRecipe ->
                 case model.session.user of
                     Just user ->
-                        transition NewRecipeLoaded (RecipeEditor.initNew model.session)
+                        transition NewRecipeLoaded (RecipeEditor.initNew model.session model.apiUrl)
 
                     Nothing ->
                         errored Page.NewRecipe "You must be signed in to add a recipe."
@@ -217,7 +291,7 @@ setRoute maybeRoute model =
             Just (Route.EditRecipe slug) ->
                 case model.session.user of
                     Just user ->
-                        transition (EditRecipeLoaded slug) (RecipeEditor.initEdit model.session slug)
+                        transition (EditRecipeLoaded slug) (RecipeEditor.initEdit model.session slug model.apiUrl)
 
                     Nothing ->
                         errored Page.Other "You must be signed in to edit a recipe."
@@ -231,7 +305,7 @@ setRoute maybeRoute model =
                         ( model, Route.modifyUrl Route.Login )
 
             Just Route.Login ->
-                ( { model | pageState = Loaded (Login Login.initialModel) }
+                ( { model | pageState = Loaded (Login (Login.init model.apiUrl)) }
                 , Ports.setDocumentTitle (routeToTitle Route.Login)
                 )
 
@@ -248,14 +322,14 @@ setRoute maybeRoute model =
                     )
 
             Just Route.Signup ->
-                ( { model | pageState = Loaded (Signup Signup.initialModel) }
+                ( { model | pageState = Loaded (Signup (Signup.initModel model.apiUrl)) }
                 , Ports.setDocumentTitle (routeToTitle Route.Signup)
                 )
 
             Just Route.Randomizer ->
                 let
                     ( newModel, newMsg ) =
-                        (Randomizer.init model.session)
+                        (Randomizer.init model.session model.apiUrl)
                 in
                     ( { model | pageState = Loaded (Randomizer newModel) }
                     , Cmd.batch
@@ -267,7 +341,7 @@ setRoute maybeRoute model =
             Just Route.Recipes ->
                 let
                     ( newModel, newMsg ) =
-                        (Recipes.init model.session)
+                        (Recipes.init model.session model.apiUrl)
                 in
                     ( { model | pageState = Loaded (Recipes newModel) }
                     , Cmd.batch
@@ -279,7 +353,7 @@ setRoute maybeRoute model =
             Just (Route.RecipeDetail slug) ->
                 let
                     init =
-                        (RecipeDetail.init model.session slug)
+                        (RecipeDetail.init model.session slug model.apiUrl)
                 in
                     transition RecipeDetailLoaded init
 

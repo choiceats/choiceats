@@ -7,15 +7,8 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 
 
--- THIRD PARTY MODULES --
-
-import HttpBuilder exposing (RequestBuilder, withExpect, withQueryParams)
-import Json.Encode.Extra as EncodeExtra
-
-
 -- APPLICATION MODULES --
 
-import Data.AuthToken exposing (AuthToken, withAuthorization)
 import Data.User as User exposing (User)
 import Ports
 
@@ -28,8 +21,8 @@ storeSession user =
         |> Ports.storeSession
 
 
-login : { r | email : String, password : String } -> Http.Request User
-login { email, password } =
+login : { r | apiUrl : String, email : String, password : String } -> Http.Request User
+login { apiUrl, email, password } =
     let
         user =
             Encode.object
@@ -42,4 +35,4 @@ login { email, password } =
                 |> Http.jsonBody
     in
         Decode.field "user" User.decoder
-            |> Http.post ("http://localhost:4000/auth") body
+            |> Http.post (apiUrl ++ "/auth") body

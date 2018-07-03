@@ -1,8 +1,8 @@
 module Data.User
     exposing
         ( User
-        , Name
-        , UserId
+        , Name(..)
+        , UserId(..)
         , blankUserId
         , decoder
         , encode
