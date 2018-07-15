@@ -188,7 +188,7 @@ viewDetailSuccess r focusedRecipeId =
                                            )
                                 ]
                                 []
-                            , span [] [ text (likesText r.likes) ]
+                            , span [] [ text (likesText (List.length r.likes) r.youLike) ]
                             ]
                         ]
                     ]
@@ -196,18 +196,35 @@ viewDetailSuccess r focusedRecipeId =
             ]
 
 
-likesText : List a -> String
-likesText l =
-    let
-        likes =
-            List.length l
-    in
-        (toString likes)
-            ++ " like"
-            ++ if likes == 1 then
-                ""
-               else
-                "s"
+likesText : Int -> Bool -> String
+likesText likes youLike =
+    case ( likes, youLike ) of
+        ( 0, _ ) ->
+            "Be the first to like this."
+
+        ( 1, True ) ->
+            "You like this."
+
+        ( 1, False ) ->
+            "1 person likes this."
+
+        ( _, True ) ->
+            let
+                otherLikes =
+                    likes - 1
+            in
+                "You and "
+                    ++ (toString otherLikes)
+                    ++ " other"
+                    ++ (if (otherLikes > 0) then
+                            "s"
+                        else
+                            ""
+                       )
+                    ++ " like this."
+
+        ( _, False ) ->
+            (toString (likes - 1)) ++ " others like this."
 
 
 formatIngredient : Ingredient -> String
