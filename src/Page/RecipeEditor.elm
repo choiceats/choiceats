@@ -74,7 +74,7 @@ type alias Model =
     , editingRecipe : EditingRecipeFull
     , ingredients : Maybe (List IngredientRaw)
     , units : Maybe (List Unit)
-    , recipeId : Int
+    , recipeId : String
     , token : AuthToken
     , userId : UserId
     , apiUrl : String
@@ -488,7 +488,7 @@ makeShellModel session apiUrl =
         , editingRecipe = emptyRecipe
         , units = Nothing
         , ingredients = Nothing
-        , recipeId = 0
+        , recipeId = "0"
         , userId = userId
         , token = token
         , uiOpenDropdown = Nothing
@@ -524,7 +524,7 @@ initNew session apiUrl =
             , units = Just resultTags
             , ingredients = Just resultIngredients
             , token = token
-            , recipeId = 0
+            , recipeId = "0"
             , userId = userId
             , apiUrl = apiUrl
             , uiOpenDropdown = Nothing
@@ -551,13 +551,8 @@ initEdit session slug apiUrl =
                 Just user ->
                     user.token
 
-        recipeIdInt =
-            case (String.toInt (slugToString slug)) of
-                Ok int ->
-                    int
-
-                _ ->
-                    0
+        recipeId =
+            (slugToString slug)
 
         userId =
             case session.user of
@@ -577,7 +572,7 @@ initEdit session slug apiUrl =
             , units = Just resultTags
             , ingredients = Just resultIngredients
             , token = token
-            , recipeId = recipeIdInt
+            , recipeId = recipeId
             , userId = userId
             , apiUrl = apiUrl
             , uiOpenDropdown = Nothing
@@ -589,7 +584,7 @@ initEdit session slug apiUrl =
         Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
             Task.map3
                 (mapResponses)
-                (createRecipeQueryTask token recipeIdInt apiUrl)
+                (createRecipeQueryTask token recipeId apiUrl)
                 (createIngredientsQueryTask token apiUrl)
                 (createUnitsQueryTask token apiUrl)
 

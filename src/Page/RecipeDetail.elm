@@ -1,7 +1,5 @@
 module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg, update, view, init)
 
--- CONTEXT --
--- TODO: Make this file build, and enable the highlighting feature thing.
 -- ELM-LANG MODULES --
 
 import Html exposing (Html, a, div, text, button, h1, ul, li, img, i, span, p)
@@ -23,6 +21,7 @@ import Data.Recipe
         , Slug(..)
         , slugToString
         , createRecipeQueryTask
+        , submitLikeMutation
         )
 import Data.Session exposing (Session)
 import Page.Errored exposing (PageLoadError(..), pageLoadError)
@@ -37,10 +36,18 @@ type ExternalMsg
 
 type alias Model =
     { mRecipe : RecipeFullResponse
+    , session : Session
     , token : AuthToken
     , recipeId : RecipeId
     , focusedIngredient : Maybe IngredientId
+    , isChangingLike : Bool
+    , apiUrl : String
     }
+
+
+toggleLike : AuthToken -> String -> RecipeId -> String -> Cmd RecipeQueryMsg
+toggleLike token userId recipeId apiUrl =
+    submitLikeMutation token ReceiveRecipeFull userId recipeId apiUrl
 
 
 init : Session -> Slug -> String -> Task PageLoadError Model
@@ -54,22 +61,24 @@ init session slug apiUrl =
                 Just user ->
                     user.token
 
-        recipeIdInt =
-            case (String.toInt (slugToString slug)) of
-                Ok int ->
-                    int
-
-                _ ->
-                    0
+        recipeId =
+            (slugToString slug)
     in
-        (createRecipeQueryTask token recipeIdInt apiUrl)
+        (createRecipeQueryTask token recipeId apiUrl)
             |> Task.mapError (\_ -> pageLoadError Page.Other "Unable to load recipe")
-            |> Task.map (initResultMap token recipeIdInt)
+            |> Task.map (initResultMap apiUrl session token recipeId)
 
 
-initResultMap : AuthToken -> RecipeId -> RecipeFull -> Model
-initResultMap token id recipeFull =
-    { mRecipe = Ok recipeFull, token = token, recipeId = id, focusedIngredient = Nothing }
+initResultMap : String -> Session -> AuthToken -> RecipeId -> RecipeFull -> Model
+initResultMap apiUrl session token id recipeFull =
+    { mRecipe = Ok recipeFull
+    , token = token
+    , session = session
+    , recipeId = id
+    , focusedIngredient = Nothing
+    , isChangingLike = False
+    , apiUrl = apiUrl
+    }
 
 
 update : Msg -> Model -> ( ( Model, Cmd Msg ), ExternalMsg )
@@ -78,7 +87,7 @@ update msg model =
         Query subMsg ->
             case subMsg of
                 ReceiveRecipeFull r ->
-                    ( ( { model | mRecipe = r }, Cmd.none ), NoOp )
+                    ( ( { model | mRecipe = r, isChangingLike = False }, Cmd.none ), NoOp )
 
                 _ ->
                     ( ( model, Cmd.none ), NoOp )
@@ -96,6 +105,9 @@ update msg model =
             in
                 ( ( { model | focusedIngredient = newFocus }, Cmd.none ), NoOp )
 
+        ToggleLike ingredientId ->
+            ( ( { model | isChangingLike = True }, convertToLocalCmd (toggleLike model.token "DUMMY_USER_ID" model.recipeId model.apiUrl) ), NoOp )
+
 
 type alias IngredientId =
     String
@@ -105,6 +117,12 @@ type Msg
     = Query RecipeQueryMsg
       -- UI
     | IngredientFocus IngredientId
+    | ToggleLike IngredientId
+
+
+convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
+convertToLocalCmd recipeQueryCmd =
+    Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
 
 
 view : Session -> Model -> Html Msg
@@ -115,7 +133,7 @@ view session model =
             viewDetailSuccess r model.focusedIngredient
 
         Err r ->
-            text ("asf, you has err: " ++ (toString r))
+            text ("you has err: " ++ (toString r))
 
 
 viewDetailSuccess : RecipeFull -> Maybe IngredientId -> Html Msg
@@ -155,23 +173,22 @@ viewDetailSuccess r focusedRecipeId =
                             [ class "description"
                             , style
                                 [ ( "display", "flex" )
-                                , ( "justify-content", "space-between" )
+                                , ( "justify-content", "flex-start" )
                                 , ( "align-items", "center" )
                                 ]
+                            , onClick (ToggleLike r.id)
                             ]
-                            [ span []
-                                [ i
-                                    [ class <|
-                                        "favorite big icon "
-                                            ++ (if r.youLike then
-                                                    "teal"
-                                                else
-                                                    "grey"
-                                               )
-                                    ]
-                                    []
-                                , span [] [ text (likesText r.likes) ]
+                            [ i
+                                [ class <|
+                                    "favorite big icon "
+                                        ++ (if r.youLike then
+                                                "teal"
+                                            else
+                                                "grey"
+                                           )
                                 ]
+                                []
+                            , span [] [ text (likesText r.likes) ]
                             ]
                         ]
                     ]

@@ -7,7 +7,9 @@ module Data.Recipe
         , sendIngredientsQuery
         , sendRecipeQuery
         , sendUnitsQuery
+          -- , sendLikesQuery
         , submitRecipeMutation
+        , submitLikeMutation
           -- TYPES --
         , EditingIngredient
         , EditingRecipeFull
@@ -15,6 +17,7 @@ module Data.Recipe
         , Ingredient
         , IngredientRaw
         , IngredientUnit
+        , LikeRequestBody
         , RecipeFull
         , RecipeFullResponse
         , RecipeId
@@ -58,7 +61,7 @@ import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankTok
 
 
 type alias RecipeId =
-    Int
+    String
 
 
 type alias RequestOptions a =
@@ -152,6 +155,17 @@ sendUnitsQuery authToken msg apiUrl =
         )
 
 
+
+-- sendLikesQuery : AuthToken -> (RecipeFullResponse -> a) -> String -> String -> ApiUrl -> Cmd a
+-- sendLikesQuery authToken msg userId recipeId apiUrl =
+--     Task.attempt
+--         msg
+--         (GraphQLClient.customSendQuery
+--             (requestOptions authToken apiUrl)
+--             (GqlB.request { userId = userId, recipeId = recipeId } likesRequest)
+--         )
+
+
 sendIngredientsQuery : AuthToken -> (IngredientsResponse -> a) -> ApiUrl -> Cmd a
 sendIngredientsQuery authToken msg apiUrl =
     Task.attempt
@@ -234,6 +248,29 @@ submitRecipeMutation authToken recipe msg apiUrl =
 --
 
 
+submitLikeMutation : AuthToken -> (RecipeFullResponse -> a) -> String -> String -> ApiUrl -> Cmd a
+submitLikeMutation authToken msg userId recipeId apiUrl =
+    Task.attempt
+        msg
+        (GraphQLClient.customSendMutation
+            (requestOptions authToken apiUrl)
+            (GqlB.request { userId = userId, recipeId = recipeId } likeRecipeMutation)
+        )
+
+
+likeRecipeMutation =
+    GqlB.mutationDocument
+        (GqlB.extract
+            (GqlB.field
+                "likeRecipe"
+                [ ( "userId", Arg.variable (Var.required "userId" .userId Var.string) )
+                , ( "recipeId", Arg.variable (Var.required "recipeId" .recipeId Var.string) )
+                ]
+                gqlRecipeFull
+            )
+        )
+
+
 unitsRequest : GqlB.Document GqlB.Query (List Unit) {}
 unitsRequest =
     GqlB.queryDocument
@@ -246,14 +283,14 @@ unitsRequest =
         )
 
 
-recipeRequest : GqlB.Document GqlB.Query RecipeFull { vars | recipeId : Int }
+recipeRequest : GqlB.Document GqlB.Query RecipeFull { vars | recipeId : String }
 recipeRequest =
     GqlB.queryDocument
         (GqlB.extract
             (GqlB.field
                 "recipe"
                 [ ( "recipeId"
-                  , Arg.variable (Var.required "recipeId" .recipeId Var.int)
+                  , Arg.variable (Var.required "recipeId" .recipeId Var.string)
                   )
                 ]
                 gqlRecipeFull
@@ -421,7 +458,7 @@ gqlIngredientList =
 
 type alias Flags =
     { token : String
-    , recipeId : Int
+    , recipeId : String
     , userId : String
     }
 
@@ -486,6 +523,19 @@ type alias Unit =
     { id : String
     , name : String
     , abbr : String
+    }
+
+
+type alias LikeRequestBody =
+    { recipeId : String
+    , userId : String
+    }
+
+
+type alias LikeResponseBody =
+    { recipeId : String
+    , userId : String
+    , youLike : Bool
     }
 
 
