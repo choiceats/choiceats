@@ -175,6 +175,7 @@ viewDetailSuccess r focusedRecipeId =
                                 [ ( "display", "flex" )
                                 , ( "justify-content", "flex-start" )
                                 , ( "align-items", "center" )
+                                , ( "margin-top", "15px" )
                                 ]
                             , onClick (ToggleLike r.id)
                             ]
