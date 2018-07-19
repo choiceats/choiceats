@@ -478,16 +478,21 @@ updatePage page msg model =
                     ( { newModel | pageState = Loaded (Recipes pageModel) }, Cmd.map RecipesMsg cmd )
 
             ( RecipeDetailMsg subMsg, RecipeDetail subModel ) ->
-                let
-                    ( ( pageModel, cmd ), msgFromPage ) =
-                        RecipeDetail.update subMsg subModel
+                case subMsg of
+                    RecipeDetail.ReceiveDeleteRecipe res ->
+                        ( model, Route.modifyUrl Route.Recipes )
 
-                    newModel =
-                        case msgFromPage of
-                            RecipeDetail.NoOp ->
-                                model
-                in
-                    ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
+                    _ ->
+                        let
+                            ( ( pageModel, cmd ), msgFromPage ) =
+                                RecipeDetail.update subMsg subModel
+
+                            newModel =
+                                case msgFromPage of
+                                    RecipeDetail.NoOp ->
+                                        model
+                        in
+                            ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
 
             ( RecipeDetailLoaded (Ok subModel), _ ) ->
                 let

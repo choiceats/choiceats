@@ -1,10 +1,11 @@
-module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg, update, view, init)
+module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg(..), update, view, init)
 
 -- ELM-LANG MODULES --
 
+import Json.Decode as Decode
 import Html exposing (Html, a, div, text, button, h1, ul, li, img, i, span, p)
-import Html.Attributes exposing (src, style, class)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (src, style, class, tabindex, href)
+import Html.Events exposing (onClick, onWithOptions)
 import Task exposing (Task)
 
 
@@ -16,17 +17,20 @@ import Data.Recipe
         ( Ingredient
         , RecipeFull
         , RecipeFullResponse
+        , DeleteRecipeResponse
         , RecipeId
         , RecipeQueryMsg(..)
         , Slug(..)
         , slugToString
         , createRecipeQueryTask
         , submitLikeMutation
+        , submitDeleteMutation
         )
 import Data.Session exposing (Session)
+import Data.User exposing (UserId(..))
 import Page.Errored exposing (PageLoadError(..), pageLoadError)
 import Views.Page as Page
-import Util exposing (getImageUrl)
+import Util exposing (getImageUrl, getDetailsLikesText)
 import Route as Route exposing (Route(..), href)
 
 
@@ -40,6 +44,7 @@ type alias Model =
     , token : AuthToken
     , recipeId : RecipeId
     , focusedIngredient : Maybe IngredientId
+    , showConfirmDelete : Bool
     , isChangingLike : Bool
     , apiUrl : String
     }
@@ -76,6 +81,7 @@ initResultMap apiUrl session token id recipeFull =
     , session = session
     , recipeId = id
     , focusedIngredient = Nothing
+    , showConfirmDelete = False
     , isChangingLike = False
     , apiUrl = apiUrl
     }
@@ -108,6 +114,18 @@ update msg model =
         ToggleLike ingredientId ->
             ( ( { model | isChangingLike = True }, convertToLocalCmd (toggleLike model.token "DUMMY_USER_ID" model.recipeId model.apiUrl) ), NoOp )
 
+        DeleteRecipe recipeId ->
+            ( ( { model | showConfirmDelete = False }, (submitDeleteMutation model.token ReceiveDeleteRecipe recipeId model.apiUrl) ), NoOp )
+
+        ReceiveDeleteRecipe res ->
+            ( ( model, Cmd.none ), NoOp )
+
+        ShowConfirmDelete ->
+            ( ( { model | showConfirmDelete = True }, Cmd.none ), NoOp )
+
+        CancelDelete ->
+            ( ( { model | showConfirmDelete = False }, Cmd.none ), NoOp )
+
 
 type alias IngredientId =
     String
@@ -118,6 +136,10 @@ type Msg
       -- UI
     | IngredientFocus IngredientId
     | ToggleLike IngredientId
+    | DeleteRecipe IngredientId
+    | ShowConfirmDelete
+    | CancelDelete
+    | ReceiveDeleteRecipe DeleteRecipeResponse
 
 
 convertToLocalCmd : Cmd RecipeQueryMsg -> Cmd Msg
@@ -125,19 +147,74 @@ convertToLocalCmd recipeQueryCmd =
     Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
 
 
+convertToLocalDeleteMessage : Cmd DeleteRecipeResponse -> Cmd Msg
+convertToLocalDeleteMessage x =
+    Cmd.map (\y -> ReceiveDeleteRecipe y) x
+
+
+
+-- map cu
+
+
 view : Session -> Model -> Html Msg
 view session model =
-    --case model.mRecipe of
     case model.mRecipe of
         Ok r ->
-            viewDetailSuccess r model.focusedIngredient
+            viewDetailSuccess r model.focusedIngredient model.session model.showConfirmDelete
 
         Err r ->
             text ("you has err: " ++ (toString r))
 
 
-viewDetailSuccess : RecipeFull -> Maybe IngredientId -> Html Msg
-viewDetailSuccess r focusedRecipeId =
+adminLinks : Session -> String -> String -> Html Msg
+adminLinks session authorId recipeId =
+    let
+        userId =
+            case session.user of
+                Just user ->
+                    case user.userId of
+                        UserId x ->
+                            x
+
+                Nothing ->
+                    "0"
+    in
+        if (userId == authorId) then
+            div [ class "recipe-detail__admin-links" ]
+                [ a [ class "link", Route.href (EditRecipe (Slug recipeId)) ] [ text "Edit recipe" ]
+                , a
+                    [ class "link recipe-detail__delete-link"
+                    , Html.Attributes.href "/"
+                    , onWithOptions "click" { stopPropagation = False, preventDefault = True } (Decode.succeed ShowConfirmDelete)
+                    ]
+                    [ text "Delete recipe" ]
+                ]
+        else
+            text ""
+
+
+confirmDeleteModal : Bool -> String -> Html Msg
+confirmDeleteModal showConfirmDelete recipeId =
+    if showConfirmDelete then
+        div [ class "ui dimmer modals page transition visible active" ]
+            [ div
+                [ class "ui fullscreen modal visible active recipe-detail__confirm-delete" ]
+                [ div
+                    [ class "content" ]
+                    [ div [] [ text "Are you sure you want to delete this recipe?" ]
+                    ]
+                , div [ class "actions" ]
+                    [ button [ class "ui button", onClick CancelDelete ] [ text "No" ]
+                    , button [ class "ui button danger", onClick (DeleteRecipe recipeId) ] [ text "Yes" ]
+                    ]
+                ]
+            ]
+    else
+        text ""
+
+
+viewDetailSuccess : RecipeFull -> Maybe IngredientId -> Session -> Bool -> Html Msg
+viewDetailSuccess r focusedRecipeId session showConfirmDelete =
     let
         noImage =
             String.isEmpty r.imageUrl
@@ -149,8 +226,8 @@ viewDetailSuccess r focusedRecipeId =
                 div [] [ img [ class "ui medium centered image", src (getImageUrl r.imageUrl) ] [] ]
     in
         div
-            [ class "ui container" ]
-            [ a [ class "link", Route.href (EditRecipe (Slug r.id)) ] [ text "Edit recipe" ]
+            [ class "ui container recipe-detail" ]
+            [ adminLinks session r.authorId r.id
             , div
                 [ class "slideInLeft"
                 , style [ ( "padding-bottom", "3px" ), ( "margin-top", "25px" ) ]
@@ -187,45 +264,16 @@ viewDetailSuccess r focusedRecipeId =
                                             else
                                                 "grey"
                                            )
+                                , tabindex 0
                                 ]
                                 []
-                            , span [] [ text (likesText (List.length r.likes) r.youLike) ]
+                            , span [] [ text (getDetailsLikesText (List.length r.likes) r.youLike) ]
                             ]
                         ]
                     ]
                 ]
+            , confirmDeleteModal showConfirmDelete r.id
             ]
-
-
-likesText : Int -> Bool -> String
-likesText likes youLike =
-    case ( likes, youLike ) of
-        ( 0, _ ) ->
-            "Be the first to like this."
-
-        ( 1, True ) ->
-            "You like this."
-
-        ( 1, False ) ->
-            "1 person likes this."
-
-        ( _, True ) ->
-            let
-                otherLikes =
-                    likes - 1
-            in
-                "You and "
-                    ++ (toString otherLikes)
-                    ++ " other"
-                    ++ (if (otherLikes > 0) then
-                            "s"
-                        else
-                            ""
-                       )
-                    ++ " like this."
-
-        ( _, False ) ->
-            (toString (likes - 1)) ++ " others like this."
 
 
 formatIngredient : Ingredient -> String

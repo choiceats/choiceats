@@ -2,7 +2,7 @@ module Page.Recipes exposing (ExternalMsg(..), Model, Msg, update, view, init)
 
 -- ELM-LANG MODULES --
 
-import Html exposing (Html, a, div, i, img, text, input, option, select)
+import Html exposing (Html, a, div, i, img, text, input, option, select, span)
 import Html.Attributes exposing (class, style, href, src, placeholder, value)
 import Html.Events exposing (onInput)
 import List exposing (map)
@@ -33,7 +33,11 @@ import Data.Recipe
         , Slug(..)
         )
 import Data.Session exposing (Session)
-import Util exposing (getImageUrl)
+import Util
+    exposing
+        ( getImageUrl
+        , getSummaryLikesText
+        )
 import Route as Route exposing (Route(..), href)
 
 
@@ -51,50 +55,42 @@ type Msg
 
 recipeCard : RecipeSummary -> Html Msg
 recipeCard recipe =
-    let
-        noImage =
-            String.isEmpty recipe.imageUrl
-
-        mImg =
-            if noImage then
-                (text "")
-            else
-                img [ class "ui image", src (getImageUrl recipe.imageUrl) ] []
-    in
-        a [ class "recipe-card", Route.href (RecipeDetail (Slug recipe.id)) ]
-            [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
-                [ mImg
-                , div [ class "content" ]
-                    [ div [ class "header" ] [ text recipe.name ]
-                    , div [ class "meta" ] [ text recipe.author ]
-                    , div [ class "meta" ]
-                        [ i [ class "grey favorite large icon" ] []
-                        , text (getLikesText recipe.likes)
+    a [ class "recipe-card", Route.href (RecipeDetail (Slug recipe.id)) ]
+        [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
+            [ recipeImage recipe.imageUrl
+            , div [ class "content" ]
+                [ div [ class "header" ] [ text recipe.name ]
+                , div [ class "meta" ] [ text recipe.author ]
+                , div
+                    [ class "meta recipe-summary__likes" ]
+                    [ i
+                        [ class <|
+                            "favorite large icon "
+                                ++ (if recipe.youLike then
+                                        "teal"
+                                    else
+                                        "grey"
+                                   )
                         ]
+                        []
+                    , span [ class "recipe-summary__likes-count" ] [ text (getSummaryLikesText (List.length recipe.likes) recipe.youLike) ]
                     ]
                 , div [ class "description" ] [ text recipe.description ]
                 ]
             ]
+        ]
 
 
-getLikesText likes =
+recipeImage : String -> Html Msg
+recipeImage url =
     let
-        numberLikes =
-            List.length likes
-
-        pluralize =
-            if numberLikes == 1 then
-                ""
-            else
-                "s"
-
-        text =
-            if numberLikes == 0 then
-                "Be the first to like this"
-            else
-                ((toString numberLikes) ++ " like" ++ pluralize)
+        noImage =
+            String.isEmpty url
     in
-        text
+        if noImage then
+            (text "")
+        else
+            img [ class "ui image", src (getImageUrl url) ] []
 
 
 type alias SearchParams =

@@ -1,4 +1,12 @@
-module Util exposing (appendErrors, onClickStopPropagation, viewIf, getImageUrl)
+module Util
+    exposing
+        ( appendErrors
+        , onClickStopPropagation
+        , viewIf
+        , getImageUrl
+        , getDetailsLikesText
+        , getSummaryLikesText
+        )
 
 -- ELM-LANG MODULES --
 
@@ -40,3 +48,44 @@ getImageUrl str =
             "/"
         else
             str
+
+
+getLikesText : String -> Int -> Bool -> String
+getLikesText noLikesText likes youLike =
+    case ( likes, youLike ) of
+        ( 0, _ ) ->
+            noLikesText
+
+        ( 1, True ) ->
+            "You like this."
+
+        ( 1, False ) ->
+            "1 person likes this."
+
+        ( _, True ) ->
+            let
+                otherLikes =
+                    likes - 1
+            in
+                "You and "
+                    ++ (toString otherLikes)
+                    ++ " other"
+                    ++ (if (otherLikes > 0) then
+                            "s"
+                        else
+                            ""
+                       )
+                    ++ " like this."
+
+        ( _, False ) ->
+            (toString (likes - 1)) ++ " others like this."
+
+
+getDetailsLikesText : Int -> Bool -> String
+getDetailsLikesText =
+    getLikesText "Be the first to like this."
+
+
+getSummaryLikesText : Int -> Bool -> String
+getSummaryLikesText =
+    getLikesText "0 likes"

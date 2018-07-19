@@ -7,9 +7,9 @@ module Data.Recipe
         , sendIngredientsQuery
         , sendRecipeQuery
         , sendUnitsQuery
-          -- , sendLikesQuery
         , submitRecipeMutation
         , submitLikeMutation
+        , submitDeleteMutation
           -- TYPES --
         , EditingIngredient
         , EditingRecipeFull
@@ -17,9 +17,10 @@ module Data.Recipe
         , Ingredient
         , IngredientRaw
         , IngredientUnit
-        , LikeRequestBody
+        , DeleteResponseBody
         , RecipeFull
         , RecipeFullResponse
+        , DeleteRecipeResponse
         , RecipeId
         , RecipeMsg
         , RecipeQueryMsg(..)
@@ -127,6 +128,10 @@ type alias IngredientsResponse =
     Result GraphQLClient.Error (List IngredientRaw)
 
 
+type alias DeleteRecipeResponse =
+    Result GraphQLClient.Error DeleteResponseBody
+
+
 
 --
 -- GRAPHQL Queries
@@ -153,17 +158,6 @@ sendUnitsQuery authToken msg apiUrl =
             (requestOptions authToken apiUrl)
             (GqlB.request {} unitsRequest)
         )
-
-
-
--- sendLikesQuery : AuthToken -> (RecipeFullResponse -> a) -> String -> String -> ApiUrl -> Cmd a
--- sendLikesQuery authToken msg userId recipeId apiUrl =
---     Task.attempt
---         msg
---         (GraphQLClient.customSendQuery
---             (requestOptions authToken apiUrl)
---             (GqlB.request { userId = userId, recipeId = recipeId } likesRequest)
---         )
 
 
 sendIngredientsQuery : AuthToken -> (IngredientsResponse -> a) -> ApiUrl -> Cmd a
@@ -255,6 +249,28 @@ submitLikeMutation authToken msg userId recipeId apiUrl =
         (GraphQLClient.customSendMutation
             (requestOptions authToken apiUrl)
             (GqlB.request { userId = userId, recipeId = recipeId } likeRecipeMutation)
+        )
+
+
+submitDeleteMutation : AuthToken -> (DeleteRecipeResponse -> a) -> String -> ApiUrl -> Cmd a
+submitDeleteMutation authToken msg recipeId apiUrl =
+    Task.attempt
+        msg
+        (GraphQLClient.customSendMutation
+            (requestOptions authToken apiUrl)
+            (GqlB.request { recipeId = recipeId } deleteRecipeMutation)
+        )
+
+
+deleteRecipeMutation =
+    GqlB.mutationDocument
+        (GqlB.extract
+            (GqlB.field
+                "deleteRecipe"
+                [ ( "recipeId", Arg.variable (Var.required "recipeId" .recipeId Var.string) )
+                ]
+                gqlDeleteRecipeResult
+            )
         )
 
 
@@ -452,6 +468,13 @@ gqlIngredientList =
         )
 
 
+gqlDeleteRecipeResult : GqlB.ValueSpec GqlB.NonNull GqlB.ObjectType DeleteResponseBody vars
+gqlDeleteRecipeResult =
+    GqlB.object DeleteResponseBody
+        |> GqlB.with (GqlB.field "recipeId" [] GqlB.string)
+        |> GqlB.with (GqlB.field "deleted" [] GqlB.bool)
+
+
 
 -- WAS Recipes/Types
 
@@ -526,9 +549,9 @@ type alias Unit =
     }
 
 
-type alias LikeRequestBody =
+type alias DeleteResponseBody =
     { recipeId : String
-    , userId : String
+    , deleted : Bool
     }
 
 

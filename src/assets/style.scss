@@ -7,6 +7,16 @@ $largeMonitorBreakpoint      : 1280px;
 $widescreenMonitorBreakpoint : 1920px;
 
 $white: #ffffff;
+$grey: #cccccc;
+$black: #1b1c1d;
+$yellow: #f2c61f;
+$teal: #00b5ad;
+$red: #d95c5c;
+$purple: #564f8a;
+$pink: #d9499a;
+$orange: #e07b53;
+$green: #5bbd72;
+$blue: #3b83c0;
 
 .recipe-card .description {
     color: #333333;
@@ -20,6 +30,13 @@ $white: #ffffff;
     margin : 0 1em;
     border-radius: 4px;
     background-color: $white;
+}
+
+select.ui.dropdown {
+  &.searchBar__filter {
+    height: 42px;
+    bottom: 2px;
+  }
 }
 
 .autocomplete-menu {
@@ -101,3 +118,37 @@ div.ingredient-typeahead ul.autocomplete-list li.item:before {
         }
     }
 }
+
+.ui.card .meta {
+  &.recipe-summary {
+    &__likes {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-top: 5px;
+    }
+
+    &__likes-count {
+      margin-top: 3px;
+    }
+  }
+}
+
+.recipe-detail {
+  &__admin-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .link {
+    &.recipe-detail__delete-link {
+      color: $red;
+    }
+  }
+
+  &__confirm-delete {
+    background-color: $white;
+  }
+}
+
