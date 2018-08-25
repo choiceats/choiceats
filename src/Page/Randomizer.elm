@@ -176,11 +176,9 @@ filterButton choice currentFilter =
 viewGetNewRecipe : Model -> Html Msg
 viewGetNewRecipe model =
     div
-        [ style
-            [ ( "width", "100%" )
-            , ( "text-align", "center" )
-            , ( "margin-top", "15px" )
-            ]
+        [ style "width" "100%"
+        , style "text-align" "center" 
+        , style "margin-top" "15px" 
         ]
         [ button
             [ type_ "submit"
@@ -198,7 +196,7 @@ viewRecipeSummary mRecipeSummary =
             case res of
                 Ok r ->
                     a [ Route.href (Route.RecipeDetail (Data.Recipe.Slug r.id)) ]
-                        [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
+                        [ div [ class "ui fluid card", style "margin-bottom" "15px" ]
                             [ img [ class "ui image", src r.imageUrl ] []
                             , div [ class "content" ]
                                 [ div [ class "header" ] [ text r.name ]

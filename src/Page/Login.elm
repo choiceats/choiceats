@@ -52,10 +52,11 @@ view session model =
         [ class "ui container" ]
         [ Html.form
             [ class "ui form"
-            , style [ ( "max-width", "700px" ), ( "margin", "0 auto" ) ]
+            , style "max-width" "700px"
+            , style "margin" "0 auto"
             , onSubmit SubmitForm
             ]
-            [ h1 [ class "ui header", style [ ( "font-family", "fira-code" ) ] ] [ text "Login" ]
+            [ h1 [ class "ui header", style "font-family" "fira-code" ] [ text "Login" ]
             , viewInput model.email "Email" "text" SetEmail
             , viewInput model.password "Password" "password" SetPassword
             , br [] []

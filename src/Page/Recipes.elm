@@ -56,7 +56,7 @@ type Msg
 recipeCard : RecipeSummary -> Html Msg
 recipeCard recipe =
     a [ class "recipe-card", Route.href (RecipeDetail (Slug recipe.id)) ]
-        [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
+        [ div [ class "ui fluid card", style "margin-bottom" "15px" ]
             [ recipeImage recipe.imageUrl
             , div [ class "content" ]
                 [ div [ class "header" ] [ text recipe.name ]

@@ -4,12 +4,12 @@ module Route exposing (Route(..), fromLocation, href, modifyUrl, routeToTitle)
 
 import Html exposing (Attribute)
 import Html.Attributes as Attr
-import Navigation exposing (Location)
+import Browser.Navigation exposing (Location, modifyUrl)
 
 
 -- THIRD PARTY MODULES --
 
-import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, string)
+import Url.Parser exposing ((</>), Parser, oneOf, parseHash, s, string)
 
 
 -- APPLICATION MODULES --
@@ -93,7 +93,7 @@ href route =
 
 modifyUrl : Route -> Cmd msg
 modifyUrl =
-    routeToString >> Navigation.modifyUrl
+    routeToString >> modifyUrl
 
 
 fromLocation : Location -> Maybe Route

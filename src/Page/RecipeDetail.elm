@@ -230,7 +230,8 @@ viewDetailSuccess r focusedRecipeId session showConfirmDelete =
             [ adminLinks session r.authorId r.id
             , div
                 [ class "slideInLeft"
-                , style [ ( "padding-bottom", "3px" ), ( "margin-top", "25px" ) ]
+                , style "padding-bottom" "3px"
+                , style "margin-top" "25px"
                 ]
                 [ div [ class "ui fluid card" ]
                     [ mImg
@@ -238,22 +239,21 @@ viewDetailSuccess r focusedRecipeId session showConfirmDelete =
                         [ div [ class "header" ] [ text r.name ]
                         , div [ class "meta" ] [ text r.author ]
                         , div [ class "meta" ]
-                            [ div [ style [ ( "display", "flex" ), ( "margin-top", "5px" ) ] ]
+                            [ div [ style "display" "flex" , style "margin-top", "5px" ]
                                 []
                             ]
                         , div [ class "description" ]
-                            [ div [ style [ ( "margin-top", "15px" ), ( "white-space", "pre-wrap" ) ] ] []
+                            [ div [ style "margin-top" "15px" , style "white-space" "pre-wrap" ] []
                             , ul [] (List.map (viewIngredient focusedRecipeId) r.ingredients)
-                            , p [ style [ ( "white-space", "pre-wrap" ) ] ] [ text r.instructions ]
+                            , p [ style "white-space" "pre-wrap" ] [ text r.instructions ]
                             ]
                         , div
                             [ class "description"
-                            , style
-                                [ ( "display", "flex" )
-                                , ( "justify-content", "flex-start" )
-                                , ( "align-items", "center" )
-                                , ( "margin-top", "15px" )
-                                ]
+                            , style "display" "flex"
+                            , style "justify-content" "flex-start"
+                            , style "align-items" "center"
+                            , style "margin-top""15px"
+                            ]
                             , onClick (ToggleLike r.id)
                             ]
                             [ i
@@ -293,17 +293,9 @@ viewIngredient focusedIngredientId ingredient =
                     ingredient.id == id
     in
         li
-            [ style
-                [ ( "margin-top", "5px" )
-                , ( "white-space", "pre-wrap" )
-                , ( "background-color"
-                  , (if isFocused then
-                        "#f9f9f9"
-                     else
-                        "initial"
-                    )
-                  )
-                ]
+            [ style "margin-top" "5px"
+            , style "white-space", "pre-wrap" )
+            , style "background-color" (if isFocused then "#f9f9f9" else "initial")
             , onClick (IngredientFocus ingredient.id)
             ]
             [ text (formatIngredient ingredient)

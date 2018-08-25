@@ -27,7 +27,7 @@ import Json.Encode as Encode exposing (Value)
 -- THIRD PARTY MODULES --
 
 import Json.Encode.Extra as EncodeExtra
-import UrlParser
+import Url.Parser
 
 
 -- APPLICATION MODULES --
@@ -92,14 +92,14 @@ userIdToString (Name userId) =
     userId
 
 
-nameParser : UrlParser.Parser (Name -> a) a
+nameParser : Url.Parser (Name -> a) a
 nameParser =
-    UrlParser.custom "NAME" (Ok << Name)
+    Url.custom "NAME" (Ok << Name)
 
 
-userIdParser : UrlParser.Parser (UserId -> a) a
+userIdParser : Url.Parser (UserId -> a) a
 userIdParser =
-    UrlParser.custom "USERID" (Ok << UserId)
+    Url.custom "USERID" (Ok << UserId)
 
 
 nameDecoder : Decoder Name

@@ -5,7 +5,8 @@ module Page.RecipeEditor exposing (update, view, initNew, initEdit, Model, Msg(.
 import Array exposing (Array, fromList, toList)
 import Html exposing (Html, a, button, div, form, h1, i, input, label, li, span, text, textarea, ul)
 import Html.Attributes exposing (attribute, class, classList, disabled, for, href, id, name, placeholder, rows, src, style, tabindex, type_, value)
-import Html.Attributes.Aria exposing (role)
+-- TODO: Add back in when this package is upgraded
+-- import Html.Attributes.Aria exposing (role)
 import Html.Events exposing (defaultOptions, onClick, onInput, onFocus, onWithOptions)
 import Json.Decode as Decode
 import Task exposing (Task)
@@ -15,7 +16,7 @@ import Regex exposing (contains, regex)
 
 -- THIRD PARTY MODULES --
 
-import Autocomplete
+import Menu
 
 
 -- APPLICATION MODULES --
@@ -81,7 +82,7 @@ type alias Model =
 
     -- UI
     , uiOpenDropdown : Maybe DropdownKey
-    , ingredientAutoComplete : Autocomplete.State
+    , ingredientAutoComplete : Menu.State
     , ingredientFilter : String
     , selectedIngredientIndex : Maybe Int
     }
@@ -94,7 +95,7 @@ type Msg
     | AddIngredient
     | BodyClick
     | DeleteIngredient Int
-    | SetAutocompleteState Autocomplete.Msg
+    | SetAutocompleteState Menu.Msg
     | SelectIngredient String
     | SelectIngredientUnit Int Unit
     | Submit
@@ -143,7 +144,7 @@ convertToLocalCmd recipeQueryCmd =
     Cmd.map (\queryCmd -> Query queryCmd) recipeQueryCmd
 
 
-autocompleteViewConfig : Autocomplete.ViewConfig IngredientRaw
+autocompleteViewConfig : Menu.ViewConfig IngredientRaw
 autocompleteViewConfig =
     let
         customizedLi keySelected mouseSelected ingredient =
@@ -157,16 +158,16 @@ autocompleteViewConfig =
                 ]
             }
     in
-        Autocomplete.viewConfig
+        Menu.viewConfig
             { toId = .id
             , ul = [ class "ui middle aligned selection list autocomplete-list" ]
             , li = customizedLi
             }
 
 
-autocompleteUpdateConfig : Autocomplete.UpdateConfig Msg IngredientRaw
+autocompleteUpdateConfig : Menu.UpdateConfig Msg IngredientRaw
 autocompleteUpdateConfig =
-    Autocomplete.updateConfig
+    Menu.updateConfig
         { toId = .id
         , onKeyDown =
             \code ingredient ->
@@ -222,7 +223,7 @@ update msg model =
                 ( { model | uiOpenDropdown = key }, Cmd.none )
 
         BodyClick ->
-            ( { model | uiOpenDropdown = Nothing, selectedIngredientIndex = Nothing, ingredientAutoComplete = Autocomplete.empty }, Cmd.none )
+            ( { model | uiOpenDropdown = Nothing, selectedIngredientIndex = Nothing, ingredientAutoComplete = Menu.empty }, Cmd.none )
 
         None ->
             ( model, Cmd.none )
@@ -300,7 +301,7 @@ update msg model =
                                 newEditingRecipe =
                                     { editingRecipe | ingredients = newIngredients }
                             in
-                                ( { model | editingRecipe = newEditingRecipe, ingredientAutoComplete = Autocomplete.empty }, Cmd.none )
+                                ( { model | editingRecipe = newEditingRecipe, ingredientAutoComplete = Menu.empty }, Cmd.none )
 
                         Nothing ->
                             ( model, Cmd.none )
@@ -346,7 +347,7 @@ update msg model =
                                     newEditingRecipe =
                                         { editingRecipe | ingredients = newIngredients }
                                 in
-                                    ( { model | editingRecipe = newEditingRecipe, selectedIngredientIndex = Nothing, ingredientAutoComplete = Autocomplete.empty }, Cmd.none )
+                                    ( { model | editingRecipe = newEditingRecipe, selectedIngredientIndex = Nothing, ingredientAutoComplete = Menu.empty }, Cmd.none )
 
                             Nothing ->
                                 ( model, Cmd.none )
@@ -405,7 +406,7 @@ update msg model =
         SetAutocompleteState autocompleteMsg ->
             let
                 ( newState, maybeMsg ) =
-                    Autocomplete.update
+                    Menu.update
                         autocompleteUpdateConfig
                         autocompleteMsg
                         10
@@ -433,13 +434,13 @@ update msg model =
 {--Reset index toTop ->--}
 --let
 --    autocomleteState =
---        Maybe.withDefault Autocomplete.empty (Array.get index model.ingredientAutoComplete)
+--        Maybe.withDefault Menu.empty (Array.get index model.ingredientAutoComplete)
 --
 --    nextStates =
 --
 --( { model | autoState =
 --    if toTop then
---        Autocomplete.resetToFirstItem
+--        Menu.resetToFirstItem
 {----}
 
 
@@ -492,7 +493,7 @@ makeShellModel session apiUrl =
         , userId = userId
         , token = token
         , uiOpenDropdown = Nothing
-        , ingredientAutoComplete = Autocomplete.empty
+        , ingredientAutoComplete = Menu.empty
         , ingredientFilter = ""
         , apiUrl = apiUrl
         , selectedIngredientIndex = Nothing
@@ -528,7 +529,7 @@ initNew session apiUrl =
             , userId = userId
             , apiUrl = apiUrl
             , uiOpenDropdown = Nothing
-            , ingredientAutoComplete = Autocomplete.empty
+            , ingredientAutoComplete = Menu.empty
             , ingredientFilter = ""
             , selectedIngredientIndex = Nothing
             }
@@ -576,7 +577,7 @@ initEdit session slug apiUrl =
             , userId = userId
             , apiUrl = apiUrl
             , uiOpenDropdown = Nothing
-            , ingredientAutoComplete = Autocomplete.empty
+            , ingredientAutoComplete = Menu.empty
             , ingredientFilter = ""
             , selectedIngredientIndex = Nothing
             }
@@ -644,10 +645,8 @@ recipeFormView :
     -> Html Msg
 recipeFormView model r =
     div
-        [ style
-            [ ( "-webkit-animation", "slideInLeft 0.25s linear" )
-            , ( "animation", "slideInLeft 0.25s linear" )
-            ]
+        [ style "-webkit-animation" "slideInLeft 0.25s linear"
+        , style "animation" "slideInLeft 0.25s linear"
         , class "ui container"
         , onClick BodyClick
         ]
@@ -661,7 +660,7 @@ recipeFormView model r =
                 []
             , div
                 [ class "field" ]
-                [ button [ class "ui primary button", role "button", onClick AddIngredient ] [ text "Add Ingredient" ] ]
+                [ button [ class "ui primary button", {-role "button",-} onClick AddIngredient ] [ text "Add Ingredient" ] ]
             , textInput r.instructions RecipeInstructions True
             , button [ disabled (not (formIsSubmittable r)), class "ui button", onClick Submit ] [ text "Save" ]
             ]
@@ -788,7 +787,7 @@ ingredientRow model ingredientIndex ingredient =
             , if (List.isEmpty validations) then
                 text ""
               else
-                ul [ style [ ( "display", "block" ) ], class "ui error message recipe-editor-group-error" ] validations
+                ul [ style "display" "block", class "ui error message recipe-editor-group-error" ] validations
             ]
 
 
@@ -910,7 +909,7 @@ ingredientView model ingredientIndex ingredient =
 
                 innerElement =
                     if inactiveText == "" then
-                        span [ style [ ( "opacity", "0.5" ) ] ] [ text "Choose an ingredient" ]
+                        span [ style "opacity" "0.5" ] [ text "Choose an ingredient" ]
                     else
                         text inactiveText
             in
@@ -965,7 +964,7 @@ ingredientTypeAhead model ingredientIndex ingredient =
         , div [ class "autocomplete-menu" ]
             [ Html.map
                 SetAutocompleteState
-                (Autocomplete.view
+                (Menu.view
                     autocompleteViewConfig
                     10
                     model.ingredientAutoComplete
@@ -988,7 +987,7 @@ measuringUnit : Int -> Unit -> Html Msg
 measuringUnit index unit =
     div
         [ class "item"
-        , style [ ( "pointer-events", "all" ) ]
+        , style "pointer-events" "all"
         , onClick (SelectIngredientUnit index unit)
         ]
         --, onClick (SelectUnit unit.id) ]

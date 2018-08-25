@@ -5,13 +5,13 @@ module Main exposing (main)
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value, Decoder)
 import Json.Encode as Encode
-import Navigation exposing (Location)
+import Browser.Navigation exposing (Location, programWithFlags)
 import Task
 
 
 -- THIRD PARTY MODULES --
 
-import Autocomplete
+import Menu
 
 
 -- APPLICATION MODULES --
@@ -228,7 +228,7 @@ subscriptions : a -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map SetUser sessionChange
-        , Sub.map RecipeEditorMsg (Sub.map RecipeEditor.SetAutocompleteState Autocomplete.subscription)
+        , Sub.map RecipeEditorMsg (Sub.map RecipeEditor.SetAutocompleteState Menu.subscription)
         ]
 
 
@@ -550,7 +550,7 @@ updatePage page msg model =
 
 main : Program Value Model Msg
 main =
-    Navigation.programWithFlags (Route.fromLocation >> SetRoute)
+    programWithFlags (Route.fromLocation >> SetRoute)
         { init = init
         , view = view
         , update = update

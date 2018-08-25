@@ -45,6 +45,7 @@ module Data.Recipe
 import Http
 import Array exposing (Array)
 import Task exposing (Task)
+import Url
 
 
 -- THIRD PARTY MODULES --
@@ -53,7 +54,6 @@ import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import UrlParser
 
 
 -- APPLICATION MODULES --
@@ -524,7 +524,6 @@ type alias Ingredient =
     , id : String
     , displayQuantity : String
     , name : String
-    , id : String
     , unit : IngredientUnit
     }
 
@@ -611,9 +610,9 @@ mapFilterTypeToString filterType =
 -- Routing types
 
 
-slugParser : UrlParser.Parser (Slug -> a) a
+slugParser : Url.Parser (Slug -> a) a
 slugParser =
-    UrlParser.custom "SLUG" (Ok << Slug)
+    Url.custom "SLUG" (Ok << Slug)
 
 
 type Slug
