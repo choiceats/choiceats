@@ -45,7 +45,7 @@ module Data.Recipe
 import Http
 import Array exposing (Array)
 import Task exposing (Task)
-import Url
+import Url.Parser exposing (Parser, custom)
 
 
 -- THIRD PARTY MODULES --
@@ -610,9 +610,9 @@ mapFilterTypeToString filterType =
 -- Routing types
 
 
-slugParser : Url.Parser (Slug -> a) a
+slugParser : Parser (Slug -> a) a
 slugParser =
-    Url.custom "SLUG" (Ok << Slug)
+    custom "SLUG" (Just << Slug)
 
 
 type Slug

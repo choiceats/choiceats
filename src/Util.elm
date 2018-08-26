@@ -11,9 +11,13 @@ module Util
 -- ELM-LANG MODULES --
 
 import Html exposing (Attribute, Html)
-import Html.Events exposing (defaultOptions, onWithOptions)
+import Html.Events exposing (custom, stopPropagationOn )
 import Json.Decode as Decode
+import String exposing (fromInt)
 
+defaultOptions = { stopPropagation = False
+  , preventDefault = False
+  }
 
 -- THIRD PARTY MODULES --
 -- APPLICATION MODULES --
@@ -26,13 +30,12 @@ viewIf condition content =
     else
         Html.text ""
 
-
-onClickStopPropagation : msg -> Attribute msg
 onClickStopPropagation msg =
-    onWithOptions "click"
-        { defaultOptions | stopPropagation = True }
-        (Decode.succeed msg)
+  stopPropagationOn "click" (Decode.map alwaysStopPropagation (Decode.succeed msg))
 
+alwaysStopPropagation : msg -> ( msg, Bool )
+alwaysStopPropagation msg =
+  ( msg, True )
 
 appendErrors : { model | errors : List error } -> List error -> { model | errors : List error }
 appendErrors model errors =
@@ -68,7 +71,7 @@ getLikesText noLikesText likes youLike =
                     likes - 1
             in
                 "You and "
-                    ++ (toString otherLikes)
+                    ++ (fromInt otherLikes)
                     ++ " other"
                     ++ (if (otherLikes > 0) then
                             "s"
@@ -78,7 +81,7 @@ getLikesText noLikesText likes youLike =
                     ++ " like this."
 
         ( _, False ) ->
-            (toString (likes - 1)) ++ " others like this."
+            (fromInt (likes - 1)) ++ " others like this."
 
 
 getDetailsLikesText : Int -> Bool -> String
