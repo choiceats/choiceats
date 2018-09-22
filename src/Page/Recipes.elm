@@ -1,44 +1,38 @@
-module Page.Recipes exposing (ExternalMsg(..), Model, Msg, update, view, init)
+module Page.Recipes exposing (ExternalMsg(..), Model, Msg, init, update, view)
 
 -- ELM-LANG MODULES --
-
-import Html exposing (Html, a, div, i, img, text, input, option, select, span)
-import Html.Attributes exposing (class, style, href, src, placeholder, value)
-import Html.Events exposing (onInput)
-import List exposing (map)
-import Task exposing (Task)
-
-
 -- THIRD PARTY MODULES
+-- APPLICATION MODULES
 
+import Data.AuthToken as AuthToken exposing (AuthToken, blankToken, getTokenString)
+import Data.Recipe
+    exposing
+        ( RecipeSummary
+        , RecipeTag
+        , RecipesResponse
+        , SearchFilter(..)
+        , Slug(..)
+        , TagsResponse
+        , gqlRecipeSummary
+        , mapFilterTypeToString
+        , requestOptions
+        )
+import Data.Session exposing (Session)
 import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-
-
--- APPLICATION MODULES
-
-import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankToken)
-import Data.Recipe
-    exposing
-        ( SearchFilter(..)
-        , gqlRecipeSummary
-        , mapFilterTypeToString
-        , requestOptions
-        , RecipeSummary
-        , RecipesResponse
-        , TagsResponse
-        , RecipeTag
-        , Slug(..)
-        )
-import Data.Session exposing (Session)
+import Html exposing (Html, a, div, i, img, input, option, select, span, text)
+import Html.Attributes exposing (class, href, placeholder, src, style, value)
+import Html.Events exposing (onInput)
+import List exposing (map)
+import Route as Route exposing (Route(..), href)
+import Task exposing (Task)
 import Util
     exposing
         ( getImageUrl
         , getSummaryLikesText
         )
-import Route as Route exposing (Route(..), href)
 
 
 type ExternalMsg
@@ -68,6 +62,7 @@ recipeCard recipe =
                             "favorite large icon "
                                 ++ (if recipe.youLike then
                                         "teal"
+
                                     else
                                         "grey"
                                    )
@@ -87,10 +82,11 @@ recipeImage url =
         noImage =
             String.isEmpty url
     in
-        if noImage then
-            (text "")
-        else
-            img [ class "ui image", src (getImageUrl url) ] []
+    if noImage then
+        text ""
+
+    else
+        img [ class "ui image", src (getImageUrl url) ] []
 
 
 type alias SearchParams =
@@ -122,7 +118,7 @@ update msg model =
             ( ( model, Cmd.none ), NoOp )
 
         _ ->
-            ( (updateSearch msg model), NoOp )
+            ( updateSearch msg model, NoOp )
 
 
 updateSearch msg model =
@@ -138,7 +134,7 @@ updateSearch msg model =
                 command =
                     sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text model.apiUrl
             in
-                ( { model | search = updatedSearchParms }, command )
+            ( { model | search = updatedSearchParms }, command )
 
         SearchFilterChange filter ->
             -- TODO: This is very simular to the SearchTextChange,
@@ -153,7 +149,7 @@ updateSearch msg model =
                 command =
                     sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text model.apiUrl
             in
-                ( { model | search = updatedSearchParms }, command )
+            ( { model | search = updatedSearchParms }, command )
 
         _ ->
             ( model, Cmd.none )
@@ -176,18 +172,18 @@ init session apiUrl =
             , filter = All
             }
     in
-        ( { recipes = Nothing
-          , userId = ""
-          , token = authToken
-          , apiUrl = apiUrl
-          , search = defaultSearchParams
-          }
-        , sendRecipesQuery authToken All [] "he" apiUrl
-        )
+    ( { recipes = Nothing
+      , userId = ""
+      , token = authToken
+      , apiUrl = apiUrl
+      , search = defaultSearchParams
+      }
+    , sendRecipesQuery authToken All [] "he" apiUrl
+    )
 
 
 filterOption filter =
-    option [ value (toString filter) ] [ text (toString filter) ]
+    option [ value (mapFilterTypeToString filter) ] [ text (mapFilterTypeToString filter) ]
 
 
 filterOptions =
@@ -243,16 +239,17 @@ recipeListView recipes =
                 Just res ->
                     case res of
                         Ok r ->
-                            (map recipeCard r)
+                            map recipeCard r
 
                         Err r ->
-                            [ text ("ERROR: " ++ (toString r)) ]
+                            [ text ("ERROR: " ++ Debug.toString r) ]
 
+                -- TODO: Make or import a proper decoder
                 Nothing ->
                     [ text "no recipes" ]
     in
-        div [ class "list" ]
-            recipeCards
+    div [ class "list" ]
+        recipeCards
 
 
 
@@ -281,14 +278,14 @@ recipesRequest =
                     (GqlB.list gqlRecipeSummary)
                 )
     in
-        GqlB.queryDocument queryRoot
+    GqlB.queryDocument queryRoot
 
 
 recipesQueryRequest : SearchFilter -> List String -> String -> GqlB.Request GqlB.Query (List RecipeSummary)
 recipesQueryRequest searchFilter tags searchText =
     recipesRequest
         |> GqlB.request
-            { searchFilter = (mapFilterTypeToString searchFilter)
+            { searchFilter = mapFilterTypeToString searchFilter
             , tags = tags
             , searchText = searchText
             }
@@ -319,7 +316,7 @@ tagsRequest =
             GqlB.extract
                 (GqlB.field "tags" [] tagDescriptor)
     in
-        GqlB.queryDocument queryRoot
+    GqlB.queryDocument queryRoot
 
 
 tagsQueryRequest : SearchFilter -> List String -> String -> GqlB.Request GqlB.Query (List RecipeTag)

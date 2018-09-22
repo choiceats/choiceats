@@ -1,14 +1,14 @@
-port module Ports
-    exposing
-        ( onSessionChange
-        , setDocumentTitle
-        , storeSession
-        , selectText
-        )
+port module Ports exposing
+    ( onSessionChange
+    , selectText
+    , setDocumentTitle
+    , storeSession
+    )
 
 -- ELM-LANG MODULES --
 
 import Json.Encode exposing (Value)
+
 
 
 -- THIRD PARTY MODULES --

@@ -1,37 +1,34 @@
-module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg(..), update, view, init)
+module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg(..), init, update, view)
 
 -- ELM-LANG MODULES --
-
-import Json.Decode as Decode
-import Html exposing (Html, a, div, text, button, h1, ul, li, img, i, span, p)
-import Html.Attributes exposing (src, style, class, tabindex, href)
-import Html.Events exposing (onClick, onWithOptions)
-import Task exposing (Task)
-
-
 -- APPLICATION MODULES --
 
-import Data.AuthToken exposing (AuthToken, getTokenString, blankToken)
+import Data.AuthToken exposing (AuthToken, blankToken, getTokenString)
 import Data.Recipe
     exposing
-        ( Ingredient
+        ( DeleteRecipeResponse
+        , Ingredient
         , RecipeFull
         , RecipeFullResponse
-        , DeleteRecipeResponse
         , RecipeId
         , RecipeQueryMsg(..)
         , Slug(..)
-        , slugToString
         , createRecipeQueryTask
-        , submitLikeMutation
+        , slugToString
         , submitDeleteMutation
+        , submitLikeMutation
         )
 import Data.Session exposing (Session)
 import Data.User exposing (UserId(..))
+import Html exposing (Html, a, button, div, h1, i, img, li, p, span, text, ul)
+import Html.Attributes exposing (class, href, src, style, tabindex)
+import Html.Events exposing (custom, onClick)
+import Json.Decode as Decode
 import Page.Errored exposing (PageLoadError(..), pageLoadError)
-import Views.Page as Page
-import Util exposing (getImageUrl, getDetailsLikesText)
 import Route as Route exposing (Route(..), href)
+import Task exposing (Task)
+import Util exposing (getDetailsLikesText, getImageUrl)
+import Views.Page as Page
 
 
 type ExternalMsg
@@ -67,11 +64,11 @@ init session slug apiUrl =
                     user.token
 
         recipeId =
-            (slugToString slug)
+            slugToString slug
     in
-        (createRecipeQueryTask token recipeId apiUrl)
-            |> Task.mapError (\_ -> pageLoadError Page.Other "Unable to load recipe")
-            |> Task.map (initResultMap apiUrl session token recipeId)
+    createRecipeQueryTask token recipeId apiUrl
+        |> Task.mapError (\_ -> pageLoadError Page.Other "Unable to load recipe")
+        |> Task.map (initResultMap apiUrl session token recipeId)
 
 
 initResultMap : String -> Session -> AuthToken -> RecipeId -> RecipeFull -> Model
@@ -106,16 +103,17 @@ update msg model =
                 newFocus =
                     if Just ingredientId == oldFocus then
                         Nothing
+
                     else
                         Just ingredientId
             in
-                ( ( { model | focusedIngredient = newFocus }, Cmd.none ), NoOp )
+            ( ( { model | focusedIngredient = newFocus }, Cmd.none ), NoOp )
 
         ToggleLike ingredientId ->
             ( ( { model | isChangingLike = True }, convertToLocalCmd (toggleLike model.token "DUMMY_USER_ID" model.recipeId model.apiUrl) ), NoOp )
 
         DeleteRecipe recipeId ->
-            ( ( { model | showConfirmDelete = False }, (submitDeleteMutation model.token ReceiveDeleteRecipe recipeId model.apiUrl) ), NoOp )
+            ( ( { model | showConfirmDelete = False }, submitDeleteMutation model.token ReceiveDeleteRecipe recipeId model.apiUrl ), NoOp )
 
         ReceiveDeleteRecipe res ->
             ( ( model, Cmd.none ), NoOp )
@@ -163,7 +161,11 @@ view session model =
             viewDetailSuccess r model.focusedIngredient model.session model.showConfirmDelete
 
         Err r ->
-            text ("you has err: " ++ (toString r))
+            text ("you has err: " ++ Debug.toString r)
+
+
+
+-- TODO: Do not use Debug.toString
 
 
 adminLinks : Session -> String -> String -> Html Msg
@@ -179,18 +181,19 @@ adminLinks session authorId recipeId =
                 Nothing ->
                     "0"
     in
-        if (userId == authorId) then
-            div [ class "recipe-detail__admin-links" ]
-                [ a [ class "link", Route.href (EditRecipe (Slug recipeId)) ] [ text "Edit recipe" ]
-                , a
-                    [ class "link recipe-detail__delete-link"
-                    , Html.Attributes.href "/"
-                    , onWithOptions "click" { stopPropagation = False, preventDefault = True } (Decode.succeed ShowConfirmDelete)
-                    ]
-                    [ text "Delete recipe" ]
+    if userId == authorId then
+        div [ class "recipe-detail__admin-links" ]
+            [ a [ class "link", Route.href (EditRecipe (Slug recipeId)) ] [ text "Edit recipe" ]
+            , a
+                [ class "link recipe-detail__delete-link"
+                , Html.Attributes.href "/"
+                , custom "click" (Decode.succeed { message = ShowConfirmDelete, stopPropagation = False, preventDefault = True })
                 ]
-        else
-            text ""
+                [ text "Delete recipe" ]
+            ]
+
+    else
+        text ""
 
 
 confirmDeleteModal : Bool -> String -> Html Msg
@@ -209,6 +212,7 @@ confirmDeleteModal showConfirmDelete recipeId =
                     ]
                 ]
             ]
+
     else
         text ""
 
@@ -221,59 +225,60 @@ viewDetailSuccess r focusedRecipeId session showConfirmDelete =
 
         mImg =
             if noImage then
-                (text "")
+                text ""
+
             else
                 div [] [ img [ class "ui medium centered image", src (getImageUrl r.imageUrl) ] [] ]
     in
-        div
-            [ class "ui container recipe-detail" ]
-            [ adminLinks session r.authorId r.id
-            , div
-                [ class "slideInLeft"
-                , style "padding-bottom" "3px"
-                , style "margin-top" "25px"
-                ]
-                [ div [ class "ui fluid card" ]
-                    [ mImg
-                    , div [ class "content" ]
-                        [ div [ class "header" ] [ text r.name ]
-                        , div [ class "meta" ] [ text r.author ]
-                        , div [ class "meta" ]
-                            [ div [ style "display" "flex" , style "margin-top", "5px" ]
-                                []
-                            ]
-                        , div [ class "description" ]
-                            [ div [ style "margin-top" "15px" , style "white-space" "pre-wrap" ] []
-                            , ul [] (List.map (viewIngredient focusedRecipeId) r.ingredients)
-                            , p [ style "white-space" "pre-wrap" ] [ text r.instructions ]
-                            ]
-                        , div
-                            [ class "description"
-                            , style "display" "flex"
-                            , style "justify-content" "flex-start"
-                            , style "align-items" "center"
-                            , style "margin-top""15px"
-                            ]
+    div
+        [ class "ui container recipe-detail" ]
+        [ adminLinks session r.authorId r.id
+        , div
+            [ class "slideInLeft"
+            , style "padding-bottom" "3px"
+            , style "margin-top" "25px"
+            ]
+            [ div [ class "ui fluid card" ]
+                [ mImg
+                , div [ class "content" ]
+                    [ div [ class "header" ] [ text r.name ]
+                    , div [ class "meta" ] [ text r.author ]
+                    , div [ class "meta" ]
+                        [ div [ style "display" "flex", style "margin-top" "5px" ]
+                            []
+                        ]
+                    , div [ class "description" ]
+                        [ div [ style "margin-top" "15px", style "white-space" "pre-wrap" ] []
+                        , ul [] (List.map (viewIngredient focusedRecipeId) r.ingredients)
+                        , p [ style "white-space" "pre-wrap" ] [ text r.instructions ]
+                        ]
+                    , div
+                        [ class "description"
+                        , style "display" "flex"
+                        , style "justify-content" "flex-start"
+                        , style "align-items" "center"
+                        , style "margin-top" "15px"
+                        ]
+                        [ i
+                            [ class <|
+                                "favorite big icon "
+                                    ++ (if r.youLike then
+                                            "teal"
+
+                                        else
+                                            "grey"
+                                       )
+                            , tabindex 0
                             , onClick (ToggleLike r.id)
                             ]
-                            [ i
-                                [ class <|
-                                    "favorite big icon "
-                                        ++ (if r.youLike then
-                                                "teal"
-                                            else
-                                                "grey"
-                                           )
-                                , tabindex 0
-                                ]
-                                []
-                            , span [] [ text (getDetailsLikesText (List.length r.likes) r.youLike) ]
-                            ]
+                            []
+                        , span [] [ text (getDetailsLikesText (List.length r.likes) r.youLike) ]
                         ]
                     ]
                 ]
-            , confirmDeleteModal showConfirmDelete r.id
             ]
+        , confirmDeleteModal showConfirmDelete r.id
+        ]
 
 
 formatIngredient : Ingredient -> String
@@ -292,11 +297,17 @@ viewIngredient focusedIngredientId ingredient =
                 Just id ->
                     ingredient.id == id
     in
-        li
-            [ style "margin-top" "5px"
-            , style "white-space", "pre-wrap" )
-            , style "background-color" (if isFocused then "#f9f9f9" else "initial")
-            , onClick (IngredientFocus ingredient.id)
-            ]
-            [ text (formatIngredient ingredient)
-            ]
+    li
+        [ style "margin-top" "5px"
+        , style "white-space" "pre-wrap"
+        , style "background-color"
+            (if isFocused then
+                "#f9f9f9"
+
+             else
+                "initial"
+            )
+        , onClick (IngredientFocus ingredient.id)
+        ]
+        [ text (formatIngredient ingredient)
+        ]

@@ -1,23 +1,22 @@
 module Page.Signup exposing (ExternalMsg(..), Model, Msg, initModel, update, view)
 
 -- ELM-LANG MODULES
-
-import Html exposing (Html, div, text, label, input, button, h1, form)
-import Html.Attributes exposing (disabled, type_, class, style, value, for, id)
-import Html.Events exposing (onWithOptions, onClick, onInput)
-import Http exposing (Error, send, post, stringBody)
-import Json.Decode as JD exposing (string, field, map4)
-import Json.Encode as JE exposing (object, string, encode)
-import Regex exposing (regex, caseInsensitive)
-
-
 -- THIRD PARTY MODULES --
 -- APPLICATION MODULES --
 
+import Browser.Navigation as Nav
 import Data.Session exposing (Session)
 import Data.User exposing (User, decoder)
+import Html exposing (Html, button, div, form, h1, input, label, text)
+import Html.Attributes exposing (class, disabled, for, id, style, type_, value)
+import Html.Events exposing (custom, onClick, onInput)
+import Http exposing (Error, post, send, stringBody)
+import Json.Decode as JD exposing (field, map4, string)
+import Json.Encode as JE exposing (encode, object, string)
+import Regex
 import Request.User exposing (storeSession)
-import Route exposing (Route)
+import Route exposing (Route, replaceUrl)
+
 
 
 -- TYPES
@@ -66,6 +65,7 @@ type alias Model =
     , serverFeedback : String
     , canSubmitForm : Bool
     , apiUrl : String
+    , navKey : Nav.Key
     }
 
 
@@ -85,8 +85,8 @@ type alias InputAttr =
     String
 
 
-initModel : String -> Model
-initModel apiUrl =
+initModel : String -> Nav.Key -> Model
+initModel apiUrl navKey =
     { formFields =
         { email = emptyUserData
         , firstName = emptyUserData
@@ -94,7 +94,10 @@ initModel apiUrl =
         , password = emptyUserData
         , passwordCheck = emptyUserData
         }
+
+    -- TODO What is the purpose of token?
     , token = "dsf"
+    , navKey = navKey
     , canSubmitForm = False
     , loggedIn = False
     , serverFeedback = ""
@@ -102,9 +105,14 @@ initModel apiUrl =
     }
 
 
+insensitiveRegexOptions =
+    { caseInsensitive = True, multiline = False }
+
+
 emailRegex : Regex.Regex
 emailRegex =
-    caseInsensitive (regex "^\\S+@\\S+\\.\\S+$")
+    Maybe.withDefault Regex.never <|
+        Regex.fromStringWith insensitiveRegexOptions "^\\S+@\\S+\\.\\S+$"
 
 
 validateEmail : String -> Bool
@@ -124,18 +132,20 @@ setEmail emailInput fields =
         message =
             if not hasInput then
                 "Enter an email address."
+
             else if not isValidEmail then
                 "Enter a valid email address."
+
             else
                 ""
     in
-        { fields
-            | email =
-                { userInput = emailInput
-                , message = message
-                , isValid = hasInput && isValidEmail
-                }
-        }
+    { fields
+        | email =
+            { userInput = emailInput
+            , message = message
+            , isValid = hasInput && isValidEmail
+            }
+    }
 
 
 setFirstName : String -> SignupFields -> SignupFields
@@ -144,17 +154,18 @@ setFirstName firstNameInput fields =
         hasInput =
             hasLength firstNameInput
     in
-        { fields
-            | firstName =
-                { userInput = firstNameInput
-                , message =
-                    if hasInput then
-                        ""
-                    else
-                        "Enter a first name."
-                , isValid = hasInput
-                }
-        }
+    { fields
+        | firstName =
+            { userInput = firstNameInput
+            , message =
+                if hasInput then
+                    ""
+
+                else
+                    "Enter a first name."
+            , isValid = hasInput
+            }
+    }
 
 
 setLastName : String -> SignupFields -> SignupFields
@@ -163,22 +174,24 @@ setLastName lastNameInput fields =
         hasInput =
             hasLength lastNameInput
     in
-        { fields
-            | lastName =
-                { userInput = lastNameInput
-                , message =
-                    if hasInput then
-                        ""
-                    else
-                        "Enter a last name."
-                , isValid = hasInput
-                }
-        }
+    { fields
+        | lastName =
+            { userInput = lastNameInput
+            , message =
+                if hasInput then
+                    ""
+
+                else
+                    "Enter a last name."
+            , isValid = hasInput
+            }
+    }
 
 
 createWordRegex : String -> Regex.Regex
 createWordRegex word =
-    caseInsensitive (regex ("^.*" ++ word ++ ".*$"))
+    Maybe.withDefault Regex.never <|
+        Regex.fromStringWith insensitiveRegexOptions ("^.*" ++ word ++ ".*$")
 
 
 passwordRegex : Regex.Regex
@@ -196,15 +209,14 @@ setPassword passwordInput fields =
             Regex.contains passwordRegex passwordInput
 
         passwordIsName =
-            ((String.length fields.firstName.userInput
+            (String.length fields.firstName.userInput
                 > 0
                 && Regex.contains (createWordRegex fields.firstName.userInput) passwordInput
-             )
+            )
                 || (String.length fields.lastName.userInput
                         > 0
                         && Regex.contains (createWordRegex fields.lastName.userInput) passwordInput
                    )
-            )
 
         minimum_password_length =
             6
@@ -224,30 +236,34 @@ setPassword passwordInput fields =
         message =
             if False then
                 "Enter a password."
+
             else if passwordIsPassword then
                 "You can do better than \"password\" for a password."
+
             else if passwordIsName then
                 "You can do better than using your name for a password."
+
             else if hasInput && not passwordIsLongEnough then
-                "Password must be at least " ++ (toString minimum_password_length) ++ " characters long."
+                "Password must be at least " ++ String.fromInt minimum_password_length ++ " characters long."
+
             else if bothPasswordsHaveInput && not passwordsMatch then
                 "Passwords must match."
+
             else
                 ""
     in
-        { fields
-            | password =
-                { userInput = passwordInput
-                , message = message
-                , isValid =
-                    (hasInput
-                        && (not passwordIsPassword)
-                        && passwordIsLongEnough
-                        && not passwordIsName
-                        && passwordsMatch
-                    )
-                }
-        }
+    { fields
+        | password =
+            { userInput = passwordInput
+            , message = message
+            , isValid =
+                hasInput
+                    && not passwordIsPassword
+                    && passwordIsLongEnough
+                    && not passwordIsName
+                    && passwordsMatch
+            }
+    }
 
 
 setPasswordCheck : String -> SignupFields -> SignupFields
@@ -284,85 +300,89 @@ update msg model =
                 newFields =
                     setEmail str model.formFields
             in
-                ( ( { model
-                        | formFields = newFields
-                        , canSubmitForm = getCanSubmitForm newFields
-                    }
-                  , Cmd.none
-                  )
-                , NoOp
-                )
+            ( ( { model
+                    | formFields = newFields
+                    , canSubmitForm = getCanSubmitForm newFields
+                }
+              , Cmd.none
+              )
+            , NoOp
+            )
 
         FirstName str ->
             let
                 newFields =
                     setFirstName str model.formFields
-                        |> (setPassword model.formFields.password.userInput)
-                        |> (setPasswordCheck model.formFields.passwordCheck.userInput)
+                        |> setPassword model.formFields.password.userInput
+                        |> setPasswordCheck model.formFields.passwordCheck.userInput
             in
-                ( ( { model
-                        | formFields = newFields
-                        , canSubmitForm = getCanSubmitForm newFields
-                    }
-                  , Cmd.none
-                  )
-                , NoOp
-                )
+            ( ( { model
+                    | formFields = newFields
+                    , canSubmitForm = getCanSubmitForm newFields
+                }
+              , Cmd.none
+              )
+            , NoOp
+            )
 
         LastName str ->
             let
                 newFields =
                     setLastName str model.formFields
-                        |> (setPassword model.formFields.password.userInput)
-                        |> (setPasswordCheck model.formFields.passwordCheck.userInput)
+                        |> setPassword model.formFields.password.userInput
+                        |> setPasswordCheck model.formFields.passwordCheck.userInput
             in
-                ( ( { model
-                        | formFields = newFields
-                        , canSubmitForm = getCanSubmitForm newFields
-                    }
-                  , Cmd.none
-                  )
-                , NoOp
-                )
+            ( ( { model
+                    | formFields = newFields
+                    , canSubmitForm = getCanSubmitForm newFields
+                }
+              , Cmd.none
+              )
+            , NoOp
+            )
 
         Password str ->
             let
                 newFields =
                     setPassword str model.formFields
-                        |> (setPasswordCheck model.formFields.passwordCheck.userInput)
+                        |> setPasswordCheck model.formFields.passwordCheck.userInput
             in
-                ( ( { model
-                        | formFields = newFields
-                        , canSubmitForm = getCanSubmitForm newFields
-                    }
-                  , Cmd.none
-                  )
-                , NoOp
-                )
+            ( ( { model
+                    | formFields = newFields
+                    , canSubmitForm = getCanSubmitForm newFields
+                }
+              , Cmd.none
+              )
+            , NoOp
+            )
 
         PasswordCheck str ->
             let
                 newFields =
                     setPasswordCheck str model.formFields
-                        |> (setPassword model.formFields.password.userInput)
+                        |> setPassword model.formFields.password.userInput
             in
-                ( ( { model
-                        | formFields = newFields
-                        , canSubmitForm = getCanSubmitForm newFields
-                    }
-                  , Cmd.none
-                  )
-                , NoOp
-                )
+            ( ( { model
+                    | formFields = newFields
+                    , canSubmitForm = getCanSubmitForm newFields
+                }
+              , Cmd.none
+              )
+            , NoOp
+            )
 
         RequestAccount ->
             ( ( model, requestAccount model ), NoOp )
 
         ReceiveResponse (Ok user) ->
-            ( ( { model | loggedIn = True }, Cmd.batch [ storeSession user, Route.modifyUrl Route.Recipes ] ), SetUser user )
+            ( ( { model | loggedIn = True }, Cmd.batch [ storeSession user, Route.replaceUrl model.navKey Route.Recipes ] ), SetUser user )
 
         ReceiveResponse (Err err) ->
-            ( ( { model | serverFeedback = toString err }, Cmd.none ), NoOp )
+            ( ( { model | serverFeedback = Debug.toString err }, Cmd.none ), NoOp )
+
+
+
+-- TODO: make a parser for the err
 
 
 requestAccount : Model -> Cmd Msg
@@ -375,18 +395,18 @@ requestAccount model =
             , ( "password", JE.string model.formFields.password.userInput )
             ]
     in
-        Http.send ReceiveResponse
-            (Http.post
-                (model.apiUrl ++ "/user")
-                (Http.stringBody
-                    "application/json; charset=utf-8"
-                 <|
-                    JE.encode 0 <|
-                        JE.object body
-                )
+    Http.send ReceiveResponse
+        (Http.post
+            (model.apiUrl ++ "/user")
+            (Http.stringBody
+                "application/json; charset=utf-8"
              <|
-                decoder
+                JE.encode 0 <|
+                    JE.object body
             )
+         <|
+            decoder
+        )
 
 
 view : Session -> Model -> Html Msg
@@ -395,30 +415,32 @@ view session model =
         f =
             model.formFields
     in
-        div [ class "ui container" ]
-            [ form [ class "ui form", style "max-width" "700px" , style "margin" "0 auto" ]
-                [ h1
-                    [ class "ui header", style "font-family" "fira-code" ]
-                    [ text "Signup!" ]
-                , viewInput f.email "Email" "text" Email
-                , viewInput f.firstName "First Name" "text" FirstName
-                , viewInput f.lastName "Last Name" "text" LastName
-                , viewInput f.password "Password" "password" Password
-                , viewInput f.passwordCheck "Re-Password" "password" PasswordCheck
-                , button
-                    [ type_ "submit"
-                    , class "ui primary button"
-                    , disabled <| not model.canSubmitForm
-                    , onWithOptions
-                        "click"
+    div [ class "ui container" ]
+        [ form [ class "ui form", style "max-width" "700px", style "margin" "0 auto" ]
+            [ h1
+                [ class "ui header", style "font-family" "fira-code" ]
+                [ text "Signup!" ]
+            , viewInput f.email "Email" "text" Email
+            , viewInput f.firstName "First Name" "text" FirstName
+            , viewInput f.lastName "Last Name" "text" LastName
+            , viewInput f.password "Password" "password" Password
+            , viewInput f.passwordCheck "Re-Password" "password" PasswordCheck
+            , button
+                [ type_ "submit"
+                , class "ui primary button"
+                , disabled <| not model.canSubmitForm
+                , custom
+                    "click"
+                    (JD.succeed
                         { stopPropagation = True
                         , preventDefault = True
+                        , message = RequestAccount
                         }
-                        (JD.succeed RequestAccount)
-                    ]
-                    [ text "Signup" ]
+                    )
                 ]
+                [ text "Signup" ]
             ]
+        ]
 
 
 notDash : Char -> Bool
@@ -440,21 +462,21 @@ viewInput : FormField -> LabelName -> InputAttr -> (String -> Msg) -> Html Msg
 viewInput formField labelName inputAttr inputType =
     let
         idName =
-            (String.filter isIdChar labelName)
+            String.filter isIdChar labelName
     in
-        div [ class "field" ]
-            [ label [ for idName ] [ text labelName ]
-            , div [ class "ui input" ]
-                [ input
-                    [ type_ inputAttr
-                    , onInput inputType
-                    , value formField.userInput
-                    , id idName
-                    ]
-                    []
+    div [ class "field" ]
+        [ label [ for idName ] [ text labelName ]
+        , div [ class "ui input" ]
+            [ input
+                [ type_ inputAttr
+                , onInput inputType
+                , value formField.userInput
+                , id idName
                 ]
-            , viewError formField
+                []
             ]
+        , viewError formField
+        ]
 
 
 viewError : FormField -> Html Msg
@@ -462,8 +484,9 @@ viewError field =
     div
         [ class <|
             "ui error message "
-                ++ (if hasLength field.message && (not field.isValid) then
+                ++ (if hasLength field.message && not field.isValid then
                         "visible"
+
                     else
                         "hidden"
                    )

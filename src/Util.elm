@@ -1,23 +1,26 @@
-module Util
-    exposing
-        ( appendErrors
-        , onClickStopPropagation
-        , viewIf
-        , getImageUrl
-        , getDetailsLikesText
-        , getSummaryLikesText
-        )
+module Util exposing
+    ( appendErrors
+    , getDetailsLikesText
+    , getImageUrl
+    , getSummaryLikesText
+    , onClickStopPropagation
+    , viewIf
+    )
 
 -- ELM-LANG MODULES --
 
 import Html exposing (Attribute, Html)
-import Html.Events exposing (custom, stopPropagationOn )
+import Html.Events exposing (custom, stopPropagationOn)
 import Json.Decode as Decode
 import String exposing (fromInt)
 
-defaultOptions = { stopPropagation = False
-  , preventDefault = False
-  }
+
+defaultOptions =
+    { stopPropagation = False
+    , preventDefault = False
+    }
+
+
 
 -- THIRD PARTY MODULES --
 -- APPLICATION MODULES --
@@ -27,15 +30,19 @@ viewIf : Bool -> Html msg -> Html msg
 viewIf condition content =
     if condition then
         content
+
     else
         Html.text ""
 
+
 onClickStopPropagation msg =
-  stopPropagationOn "click" (Decode.map alwaysStopPropagation (Decode.succeed msg))
+    stopPropagationOn "click" (Decode.map alwaysStopPropagation (Decode.succeed msg))
+
 
 alwaysStopPropagation : msg -> ( msg, Bool )
 alwaysStopPropagation msg =
-  ( msg, True )
+    ( msg, True )
+
 
 appendErrors : { model | errors : List error } -> List error -> { model | errors : List error }
 appendErrors model errors =
@@ -47,10 +54,11 @@ getImageUrl str =
         empty =
             String.isEmpty str
     in
-        if empty then
-            "/"
-        else
-            str
+    if empty then
+        "/"
+
+    else
+        str
 
 
 getLikesText : String -> Int -> Bool -> String
@@ -70,18 +78,19 @@ getLikesText noLikesText likes youLike =
                 otherLikes =
                     likes - 1
             in
-                "You and "
-                    ++ (fromInt otherLikes)
-                    ++ " other"
-                    ++ (if (otherLikes > 0) then
-                            "s"
-                        else
-                            ""
-                       )
-                    ++ " like this."
+            "You and "
+                ++ fromInt otherLikes
+                ++ " other"
+                ++ (if otherLikes > 0 then
+                        "s"
+
+                    else
+                        ""
+                   )
+                ++ " like this."
 
         ( _, False ) ->
-            (fromInt (likes - 1)) ++ " others like this."
+            fromInt (likes - 1) ++ " others like this."
 
 
 getDetailsLikesText : Int -> Bool -> String

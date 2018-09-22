@@ -1,20 +1,17 @@
-module Route exposing (Route(..), fromLocation, href, modifyUrl, routeToTitle)
+module Route exposing (Route(..), fromUrl, href, replaceUrl, routeToTitle)
 
+-- used to expose fromLocation, modifyUrl
 -- ELM-LANG MODULES --
+-- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
+-- import Browser exposing (Location)
 
+import Browser.Navigation as Nav
+import Data.Recipe as Recipe
 import Html exposing (Attribute)
 import Html.Attributes as Attr
-import Browser.Navigation exposing (Location, modifyUrl)
-
-
--- THIRD PARTY MODULES --
-
-import Url.Parser exposing ((</>), Parser, oneOf, parseHash, s, string)
-
-
--- APPLICATION MODULES --
-
-import Data.Recipe as Recipe
+import Url exposing (Url)
+import Url.Parser as Parser exposing ((</>), Parser, oneOf, s, string)
 
 
 type Route
@@ -29,17 +26,22 @@ type Route
     | EditRecipe Recipe.Slug
 
 
-route : Parser (Route -> a) a
-route =
+
+-- this was "route" in the elm 18 elm-spa-example
+-- this is "parser" in the elm 19 rework of elm-spa-example
+
+
+parser : Parser (Route -> a) a
+parser =
     oneOf
-        [ Url.map Login (s "login")
-        , Url.map Logout (s "logout")
-        , Url.map Signup (s "signup")
-        , Url.map Randomizer (s "random")
-        , Url.map Recipes (s "recipes")
-        , Url.map NewRecipe (s "recipe" </> s "new")
-        , Url.map RecipeDetail (s "recipe" </> Recipe.slugParser)
-        , Url.map EditRecipe (s "recipe" </> Recipe.slugParser </> s "edit")
+        [ Parser.map Login (s "login")
+        , Parser.map Logout (s "logout")
+        , Parser.map Signup (s "signup")
+        , Parser.map Randomizer (s "random")
+        , Parser.map Recipes (s "recipes")
+        , Parser.map NewRecipe (s "recipe" </> s "new")
+        , Parser.map RecipeDetail (s "recipe" </> Recipe.slugParser)
+        , Parser.map EditRecipe (s "recipe" </> Recipe.slugParser </> s "edit")
         ]
 
 
@@ -79,11 +81,11 @@ routeToString page =
                 EditRecipe slug ->
                     [ "recipe", Recipe.slugToString slug, "edit" ]
     in
-        "#/" ++ String.join "/" pieces
+    "#/" ++ String.join "/" pieces
 
 
 
--- PUBLIC HEADERS --
+-- PUBLIC HELPERS --
 
 
 href : Route -> Attribute msg
@@ -91,17 +93,35 @@ href route =
     Attr.href (routeToString route)
 
 
-modifyUrl : Route -> Cmd msg
-modifyUrl =
-    routeToString >> modifyUrl
+
+-- modifyUrl goes away?
+-- modifyUrl : Route -> Cmd msg
+-- modifyUrl =
+--     routeToString >> replaceUrl
 
 
-fromLocation : Location -> Maybe Route
-fromLocation location =
-    if String.isEmpty location.hash then
-        Just Root
-    else
-        parseHash route location
+replaceUrl : Nav.Key -> Route -> Cmd msg
+replaceUrl key route =
+    Nav.replaceUrl key (routeToString route)
+
+
+fromUrl : Url -> Maybe Route
+fromUrl url =
+    -- The RealWorld spec treats the fragment like a path.
+    -- This makes it *literally* the path, so we can proceed
+    -- with parsing as if it had been a normal path all along.
+    { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
+        |> Parser.parse parser
+
+
+
+-- fromLocation : Location -> Maybe Route
+-- fromLocation location =
+--     if String.isEmpty location.hash then
+--         Just Root
+--
+--     else
+--         parseHash route location
 
 
 routeToTitle : Route -> String
@@ -133,3 +153,7 @@ routeToTitle route =
 
         EditRecipe slug ->
             "Edit Recipe"
+
+
+
+-- fromUrl is the new fromLocation???

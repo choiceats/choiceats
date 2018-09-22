@@ -20,7 +20,7 @@ module Data.User
 
 import Html exposing (Html)
 import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (Value)
 
 
@@ -49,7 +49,7 @@ type alias User =
 
 decoder : Decoder User
 decoder =
-    decode User
+    Decode.succeed User
         |> required "email" Decode.string
         |> required "token" AuthToken.decoder
         |> required "name" nameDecoder
@@ -92,14 +92,14 @@ userIdToString (Name userId) =
     userId
 
 
-nameParser : Url.Parser (Name -> a) a
+nameParser : Url.Parser.Parser (Name -> a) a
 nameParser =
-    Url.custom "NAME" (Ok << Name)
+    Url.Parser.custom "NAME" (Just << Name)
 
 
-userIdParser : Url.Parser (UserId -> a) a
+userIdParser : Url.Parser.Parser (UserId -> a) a
 userIdParser =
-    Url.custom "USERID" (Ok << UserId)
+    Url.Parser.custom "USERID" (Just << UserId)
 
 
 nameDecoder : Decoder Name

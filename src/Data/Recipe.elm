@@ -223,7 +223,14 @@ convertRecipeArraysToList recipe =
             else
                 Just recipe.id
     in
-        { recipe | ingredients = Array.toList recipe.ingredients, id = recipeId }
+        { description = recipe.description
+        , id = recipeId
+        , imageUrl = recipe.imageUrl
+        , ingredients = Array.toList recipe.ingredients
+        , instructions = recipe.instructions
+        , name = recipe.name
+        , tags = recipe.tags
+        }
 
 
 submitRecipeMutation : AuthToken -> EditingRecipeFull -> (RecipeFullResponse -> a) -> ApiUrl -> Cmd a
@@ -396,7 +403,6 @@ gqlIngredient =
         |> GqlB.with (GqlB.field "id" [] GqlB.string)
         |> GqlB.with (GqlB.field "displayQuantity" [] GqlB.string)
         |> GqlB.with (GqlB.field "name" [] GqlB.string)
-        |> GqlB.with (GqlB.field "id" [] GqlB.string)
         |> GqlB.with (GqlB.field "unit" [] gqlUnit)
 
 
