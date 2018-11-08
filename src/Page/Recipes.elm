@@ -25,6 +25,7 @@ import GraphQL.Request.Builder.Variable as Var
 import Html exposing (Html, a, div, i, img, input, option, select, span, text)
 import Html.Attributes exposing (class, href, placeholder, src, style, value)
 import Html.Events exposing (onInput)
+import Http
 import List exposing (map)
 import Route as Route exposing (Route(..), href)
 import Task exposing (Task)
@@ -32,6 +33,7 @@ import Util
     exposing
         ( getImageUrl
         , getSummaryLikesText
+        , graphQlErrorToString
         )
 
 
@@ -122,37 +124,26 @@ update msg model =
 
 
 updateSearch msg model =
-    case msg of
-        SearchTextChange text ->
-            let
-                searchParams =
-                    model.search
+    let
+        oldSearch =
+            model.search
 
-                updatedSearchParms =
-                    { searchParams | text = text }
+        ( newParams, command ) =
+            case msg of
+                SearchTextChange text ->
+                    ( { oldSearch | text = text }
+                    , sendRecipesQuery model.token oldSearch.filter oldSearch.tags text model.apiUrl
+                    )
 
-                command =
-                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text model.apiUrl
-            in
-            ( { model | search = updatedSearchParms }, command )
+                SearchFilterChange filter ->
+                    ( { oldSearch | filter = filter }
+                    , sendRecipesQuery model.token filter oldSearch.tags oldSearch.text model.apiUrl
+                    )
 
-        SearchFilterChange filter ->
-            -- TODO: This is very simular to the SearchTextChange,
-            -- I wonder how we can best refactor this?
-            let
-                searchParams =
-                    model.search
-
-                updatedSearchParms =
-                    { searchParams | filter = filter }
-
-                command =
-                    sendRecipesQuery model.token updatedSearchParms.filter updatedSearchParms.tags updatedSearchParms.text model.apiUrl
-            in
-            ( { model | search = updatedSearchParms }, command )
-
-        _ ->
-            ( model, Cmd.none )
+                _ ->
+                    ( model.search, Cmd.none )
+    in
+    ( { model | search = newParams }, command )
 
 
 init : Session -> String -> ( Model, Cmd Msg )
@@ -241,10 +232,9 @@ recipeListView recipes =
                         Ok r ->
                             map recipeCard r
 
-                        Err r ->
-                            [ text ("ERROR: " ++ Debug.toString r) ]
+                        Err err ->
+                            [ text (graphQlErrorToString err) ]
 
-                -- TODO: Make or import a proper decoder
                 Nothing ->
                     [ text "no recipes" ]
     in

@@ -24,6 +24,7 @@ import Html.Events exposing (onClick, onInput)
 import Result exposing (withDefault)
 import Route exposing (Route, href)
 import Task exposing (Task)
+import Util exposing (graphQlErrorToString)
 
 
 type Msg
@@ -212,15 +213,11 @@ viewRecipeSummary mRecipeSummary =
                             ]
                         ]
 
-                Err r ->
-                    div [] [ text ("ruh rohr, you has err: " ++ Debug.toString r) ]
+                Err err ->
+                    div [] [ text ("ruh rohr, you has err: " ++ graphQlErrorToString err) ]
 
         Nothing ->
             viewLoading
-
-
-
--- TODO: Remove use of Debug.toString
 
 
 likesText : List a -> String
@@ -229,7 +226,7 @@ likesText l =
         likes =
             List.length l
     in
-    Debug.toString likes
+    String.fromInt likes
         ++ " like"
         ++ (if likes == 1 then
                 ""

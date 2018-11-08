@@ -3,14 +3,18 @@ module Util exposing
     , getDetailsLikesText
     , getImageUrl
     , getSummaryLikesText
+    , graphQlErrorToString
+    , httpErrorToString
     , onClickStopPropagation
     , viewIf
     )
 
 -- ELM-LANG MODULES --
 
+import GraphQL.Client.Http as GraphQLClient
 import Html exposing (Attribute, Html)
 import Html.Events exposing (custom, stopPropagationOn)
+import Http
 import Json.Decode as Decode
 import String exposing (fromInt)
 
@@ -101,3 +105,32 @@ getDetailsLikesText =
 getSummaryLikesText : Int -> Bool -> String
 getSummaryLikesText =
     getLikesText "0 likes"
+
+
+graphQlErrorToString : GraphQLClient.Error -> String
+graphQlErrorToString gqlError =
+    case gqlError of
+        GraphQLClient.GraphQLError errors ->
+            "ERROR: " ++ String.join " " (List.map (\requestError -> requestError.message) errors)
+
+        GraphQLClient.HttpError _ ->
+            "ERROR: " ++ "vauge http error"
+
+
+httpErrorToString : Http.Error -> String
+httpErrorToString error =
+    case error of
+        Http.BadUrl a ->
+            "Bad url " ++ a
+
+        Http.Timeout ->
+            "asdf"
+
+        Http.NetworkError ->
+            "Network error"
+
+        Http.BadStatus status ->
+            "Bad status: some_status_here"
+
+        Http.BadPayload a b ->
+            "Bad payload " ++ a ++ "b"

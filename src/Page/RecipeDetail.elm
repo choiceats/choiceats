@@ -27,7 +27,7 @@ import Json.Decode as Decode
 import Page.Errored exposing (PageLoadError(..), pageLoadError)
 import Route as Route exposing (Route(..), href)
 import Task exposing (Task)
-import Util exposing (getDetailsLikesText, getImageUrl)
+import Util exposing (getDetailsLikesText, getImageUrl, graphQlErrorToString)
 import Views.Page as Page
 
 
@@ -160,12 +160,8 @@ view session model =
         Ok r ->
             viewDetailSuccess r model.focusedIngredient model.session model.showConfirmDelete
 
-        Err r ->
-            text ("you has err: " ++ Debug.toString r)
-
-
-
--- TODO: Do not use Debug.toString
+        Err err ->
+            text (graphQlErrorToString err)
 
 
 adminLinks : Session -> String -> String -> Html Msg

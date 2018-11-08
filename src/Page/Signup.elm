@@ -16,6 +16,7 @@ import Json.Encode as JE exposing (encode, object, string)
 import Regex
 import Request.User exposing (storeSession)
 import Route exposing (Route, replaceUrl)
+import Util exposing (httpErrorToString)
 
 
 
@@ -378,11 +379,7 @@ update msg model =
             ( ( { model | loggedIn = True }, Cmd.batch [ storeSession user, Route.replaceUrl model.navKey Route.Recipes ] ), SetUser user )
 
         ReceiveResponse (Err err) ->
-            ( ( { model | serverFeedback = Debug.toString err }, Cmd.none ), NoOp )
-
-
-
--- TODO: make a parser for the err
+            ( ( { model | serverFeedback = httpErrorToString err }, Cmd.none ), NoOp )
 
 
 requestAccount : Model -> Cmd Msg
