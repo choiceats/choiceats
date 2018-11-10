@@ -7,12 +7,145 @@
         <title>ChoicEats</title>
         <link rel="//fonts.googleapis.com/css?family=Titillium+Web:700|Source+Serif+Pro:400,700|Merriweather+Sans:400,700|Source+Sans+Pro:400,300,600,700,300italic,400italic,600italic,700italic" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.min.css"><!---->
+        <link rel="manifest" href="/manifest.json">
+        <style>
+
+@-webkit-keyframes slideInLeft {
+  0% {
+    margin-left: 100%;
+  }
+
+  100% {
+    margin-left: 0%;
+  }
+}
+
+@-moz-keyframes slideInLeft {
+  0% {
+    margin-left: 100%;
+  }
+
+  100% {
+    margin-left: 0%;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    margin-left: 100%;
+  }
+
+  100% {
+    margin-left: 0%;
+  }
+}
+
+.slideInLeft {
+  -webkit-animation: slideInLeft 0.25s linear;
+  animation: slideInLeft 0.25s linear;
+}
+
+
+
+.recipe-card .description {
+  color: #333333; }
+
+.searchBar {
+  padding: 1em 0; }
+
+.searchBar__filter {
+  margin: 0 1em;
+  border-radius: 4px;
+  background-color: #ffffff; }
+
+select.ui.dropdown.searchBar__filter {
+  height: 42px;
+  bottom: 2px; }
+
+.autocomplete-menu {
+  position: absolute;
+  background: #ffffff;
+  border: 1px solid gainsboro;
+  width: 100%;
+  border-radius: 4px;
+  box-shadow: 2px 2px 4px 1px #eee;
+  z-index: 1; }
+
+.ingredient-typeahead {
+  position: relative; }
+  .ingredient-typeahead .autocomplete-menu .autocomplete-list {
+    list-style-type: none;
+    margin-left: 0; }
+
+div.ingredient-typeahead ul.autocomplete-list li.item:before {
+  content: none; }
+
+.ui.form .fields .field.ingredient-view {
+  margin-top: auto;
+  margin-bottom: auto; }
+
+.ui.secondary.menu .item.link {
+  color: #4183c4; }
+
+.recipe-editor-group .recipe-editor-group-error {
+  margin-left: 0.5em;
+  margin-right: 0.5em; }
+
+.recipe-editor-group .recipe-editor-group-error:last-child {
+  margin-left: 0.5em;
+  margin-right: 0.5em; }
+
+
+
+@media screen and (max-width: 360px) {
+  /* Breakpoint for semantic UI*/
+  .ui.secondary.menu .item.link {
+    padding-left: 5px;
+    padding-right: 5px; } }
+@media screen and (max-width: 767px) {
+  /* Breakpoint for semantic UI*/
+  .ui.form .fields .field.fields-recipe-quantity {
+    margin-bottom: 3px; }
+
+  .recipe-editor-group {
+    padding-bottom: 42px;
+    /* Allows swiping in mobile*/ }
+
+  .recipe-editor-group .recipe-editor-group-error,
+  .recipe-editor-group .recipe-editor-group-error:last-child {
+    margin-top: 3px; } }
+@media screen and (min-width: 768px) {
+  /* Breakpoint for semantic UI*/
+  .recipe-editor-group .recipe-editor-group-error {
+    margin-bottom: 25px; }
+    .recipe-editor-group .recipe-editor-group-error:last-child {
+      margin-bottom: 25px; } }
+.ui.card .meta.recipe-summary__likes {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 5px; }
+.ui.card .meta.recipe-summary__likes-count {
+  margin-top: 3px; }
+
+.recipe-detail__admin-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; }
+.recipe-detail .link.recipe-detail__delete-link {
+  color: #d95c5c; }
+.recipe-detail__confirm-delete {
+  background-color: #ffffff; }
+
+        </style>
     </head>
     <body id="page-body">
-        <noscript>
-            Enable Javascript to run this app.
-        </noscript>
-       <script>
-        </script>
+      <div id="mount-point">
+      </div>
+      <noscript>
+          Enable Javascript to run this app.
+      </noscript>
+      <script src="app.js" type="text/javascript"></script>
+      <script src="index.js" type="text/javascript"></script>
     </body>
 </html>

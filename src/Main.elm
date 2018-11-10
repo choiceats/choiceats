@@ -129,7 +129,7 @@ init val url navKey =
                     decodedApiUrl
 
                 _ ->
-                    "choiceats.com"
+                    "http://localhost:4000"
 
         session =
             case flagsDecoder stringifiedFlags of
@@ -355,8 +355,7 @@ setRoute maybeRoute model =
             in
             ( { model | pageState = Loaded (Randomizer newModel) }
             , Cmd.batch
-                [ Ports.setDocumentTitle (routeToTitle Route.Randomizer)
-                , Cmd.map RandomizerMsg newMsg
+                [ Cmd.map RandomizerMsg newMsg
                 ]
             )
 
@@ -367,8 +366,7 @@ setRoute maybeRoute model =
             in
             ( { model | pageState = Loaded (Recipes newModel) }
             , Cmd.batch
-                [ Ports.setDocumentTitle (routeToTitle Route.Recipes)
-                , Cmd.map RecipesMsg newMsg
+                [ Cmd.map RecipesMsg newMsg
                 ]
             )
 
