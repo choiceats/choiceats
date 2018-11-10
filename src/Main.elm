@@ -1,11 +1,6 @@
 module Main exposing (main)
 
--- ELM-LANG MODULES --
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
--- import Browser.Navigation exposing (Location, programWithFlags)
-
-import Browser
+import Browser exposing (..)
 import Browser.Navigation as Nav
 import Data.AuthToken as AuthToken exposing (AuthToken(..))
 import Data.Recipe exposing (Slug)
@@ -262,6 +257,7 @@ getPage pageState =
 
 type Msg
     = SetRoute (Maybe Route)
+    | InterceptUrlRequest Browser.UrlRequest
     | SetUser (Maybe User)
     | LoginMsg Login.Msg
     | SignupMsg Signup.Msg
@@ -393,7 +389,19 @@ updatePage page msg model =
     in
     case ( msg, page ) of
         ( SetRoute route, _ ) ->
+            let
+                trumm =
+                    Debug.log "trying to set route" route
+            in
             setRoute route model
+
+        ( InterceptUrlRequest urlRequest, _ ) ->
+            case urlRequest of
+                Internal url ->
+                    ( model, Nav.pushUrl model.navKey (Url.toString url) )
+
+                External externalLink ->
+                    ( model, Nav.load externalLink )
 
         ( EditRecipeLoaded slug (Ok subModel), _ ) ->
             ( { model | pageState = Loaded (RecipeEditor (Just slug) subModel) }
@@ -555,12 +563,12 @@ updatePage page msg model =
 
 onUrlChange : Url.Url -> Msg
 onUrlChange url =
-    SetRoute Nothing
+    SetRoute (Route.fromUrl url)
 
 
 onUrlRequest : Browser.UrlRequest -> Msg
-onUrlRequest _ =
-    SetRoute Nothing
+onUrlRequest route =
+    InterceptUrlRequest route
 
 
 main : Program Value Model Msg
@@ -573,10 +581,3 @@ main =
         , onUrlChange = onUrlChange
         , subscriptions = subscriptions
         }
-
-
-
--- programWithFlags (Route.fromLocation >> SetRoute)
--- need onUrlChange and onUrlRequest functions
--- And need to press that record to
--- What is the difference between Location and UrlRequest??

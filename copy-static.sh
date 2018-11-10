@@ -6,5 +6,5 @@ NUM_FILES=$(find $SRC -type f | wc -l)
 
 echo
 echo "Copying $NUM_FILES files from $SRC to $DIST..."
-cp -r $SRC $DIST
+cp $SRC/* $DIST
 echo "Successfully copied files."

@@ -26,6 +26,38 @@ type Route
     | EditRecipe Recipe.Slug
 
 
+checkRouteNeedsAuth : Route -> Bool
+checkRouteNeedsAuth route =
+    case route of
+        -- because root is recipe viewer
+        Root ->
+            True
+
+        Login ->
+            False
+
+        Logout ->
+            False
+
+        Signup ->
+            False
+
+        Randomizer ->
+            True
+
+        Recipes ->
+            True
+
+        NewRecipe ->
+            True
+
+        RecipeDetail _ ->
+            True
+
+        EditRecipe _ ->
+            True
+
+
 
 -- this was "route" in the elm 18 elm-spa-example
 -- this is "parser" in the elm 19 rework of elm-spa-example
@@ -93,15 +125,12 @@ href route =
     Attr.href (routeToString route)
 
 
-
--- modifyUrl goes away?
--- modifyUrl : Route -> Cmd msg
--- modifyUrl =
---     routeToString >> replaceUrl
-
-
 replaceUrl : Nav.Key -> Route -> Cmd msg
 replaceUrl key route =
+    let
+        trumm =
+            Debug.log "replacing route" route
+    in
     Nav.replaceUrl key (routeToString route)
 
 
@@ -112,16 +141,6 @@ fromUrl url =
     -- with parsing as if it had been a normal path all along.
     { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
         |> Parser.parse parser
-
-
-
--- fromLocation : Location -> Maybe Route
--- fromLocation location =
---     if String.isEmpty location.hash then
---         Just Root
---
---     else
---         parseHash route location
 
 
 routeToTitle : Route -> String

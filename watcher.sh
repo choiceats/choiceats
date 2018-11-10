@@ -10,7 +10,7 @@ inotifywait \
   --monitor \
   --recursive \
   src/ | \
-  ./burst.sh 1 './copy-static.sh && ./build-dev.sh'
+  ./burst.sh 1 "./copy-static.sh && ./build-dev.sh && echo && echo rebuilt at $(date)"
 
 # Can use this to do something on every event
 # while read event file; do
