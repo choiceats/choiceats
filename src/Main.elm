@@ -167,6 +167,10 @@ view model =
             viewPage model.session True page
 
 
+
+-- TODO: Do all title setting in this function as data is available rather than on route changes
+
+
 viewPage : Session -> Bool -> Page -> Browser.Document Msg
 viewPage session isLoading page =
     let
@@ -175,59 +179,38 @@ viewPage session isLoading page =
     in
     case page of
         NotFound ->
-            NotFound.view session
-                |> frame Page.Other
+            frame Page.Other "Page not found" (NotFound.view session)
 
         Blank ->
             -- for initial page load, while loading data via HTTP
-            Html.text ""
-                |> frame Page.Other
+            frame Page.Other "Loading..." (Html.text "")
 
         Errored subModel ->
-            Errored.view session subModel
-                |> frame Page.Other
+            frame Page.Other "Error" (Errored.view session subModel)
 
         Login subModel ->
-            { title = "Sign up"
-            , body = List.map (Html.map LoginMsg) [ Login.view session subModel ]
-            }
+            frame Page.Login "Sign in" (Html.map LoginMsg (Login.view session subModel))
 
-        --            Login.view session subModel
-        --                |> frame Page.Login
-        --                |> Html.map LoginMsg
         Signup subModel ->
-            { title = "Sign up"
-            , body = List.map (Html.map SignupMsg) [ Signup.view session subModel ]
-            }
+            frame Page.Signup "Sign up" (Html.map SignupMsg (Signup.view session subModel))
 
-        --            Signup.view session subModel
-        --                |> frame Page.Signup
-        --                |> Html.map SignupMsg
         Randomizer subModel ->
-            { title = "Recipe ideas"
-            , body = List.map (Html.map RandomizerMsg) [ Randomizer.view session subModel ]
-            }
+            frame Page.Randomizer "Recipe ideas" (Html.map RandomizerMsg (Randomizer.view session subModel))
 
-        -- Randomizer.view session subModel
-        --    |> frame Page.Randomizer
-        --    |> Html.map RandomizerMsg
         Recipes subModel ->
-            { title = "Recipes"
-            , body = List.map (Html.map RecipesMsg) [ Recipes.view session subModel ]
-
-            --            Recipes.view session subModel
-            --                |> frame Page.Recipes
-            --                |> Html.map RecipesMsg
-            }
+            let
+                mappedHtml =
+                    Html.map RecipesMsg (Recipes.view session subModel)
+            in
+            frame Page.Recipes "Recipes" mappedHtml
 
         RecipeDetail subModel ->
-            { title = "Recipe detail"
-            , body =
-                List.map (Html.map RecipeDetailMsg) [ RecipeDetail.view session subModel ]
-            }
+            let
+                mappedHtml =
+                    Html.map RecipeDetailMsg (RecipeDetail.view session subModel)
+            in
+            frame Page.Other "Recipe detail" mappedHtml
 
-        --                |> frame Page.Other
-        --                |> Html.map RecipeDetailMsg
         RecipeEditor maybeSlug subModel ->
             let
                 framePage =
@@ -236,14 +219,18 @@ viewPage session isLoading page =
 
                     else
                         Page.Other
-            in
-            { title = "Edit recipe"
-            , body =
-                List.map (Html.map RecipeEditorMsg) [ RecipeEditor.view subModel ]
 
-            --                    |> frame framePage
-            --                    |> List.map (Html.map RecipeEditorMsg)
-            }
+                title =
+                    if maybeSlug == Nothing then
+                        "Add recipe"
+
+                    else
+                        "Edit recipe"
+
+                mappedHtml =
+                    Html.map RecipeEditorMsg (RecipeEditor.view subModel)
+            in
+            frame framePage title mappedHtml
 
 
 subscriptions : a -> Sub Msg
@@ -328,7 +315,7 @@ setRoute maybeRoute model =
 
         Just Route.Login ->
             ( { model | pageState = Loaded (Login (Login.init model.apiUrl model.navKey)) }
-            , Ports.setDocumentTitle (routeToTitle Route.Login)
+            , Cmd.none
             )
 
         Just Route.Logout ->
@@ -345,7 +332,7 @@ setRoute maybeRoute model =
 
         Just Route.Signup ->
             ( { model | pageState = Loaded (Signup (Signup.initModel model.apiUrl model.navKey)) }
-            , Ports.setDocumentTitle (routeToTitle Route.Signup)
+            , Cmd.none
             )
 
         Just Route.Randomizer ->
@@ -354,9 +341,7 @@ setRoute maybeRoute model =
                     Randomizer.init model.session model.apiUrl
             in
             ( { model | pageState = Loaded (Randomizer newModel) }
-            , Cmd.batch
-                [ Cmd.map RandomizerMsg newMsg
-                ]
+            , Cmd.map RandomizerMsg newMsg
             )
 
         Just Route.Recipes ->
@@ -365,9 +350,7 @@ setRoute maybeRoute model =
                     Recipes.init model.session model.apiUrl
             in
             ( { model | pageState = Loaded (Recipes newModel) }
-            , Cmd.batch
-                [ Cmd.map RecipesMsg newMsg
-                ]
+            , Cmd.map RecipesMsg newMsg
             )
 
         Just (Route.RecipeDetail slug) ->

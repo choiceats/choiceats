@@ -37,9 +37,9 @@ The caller provides the current user, letting us show login or logout buttons an
 isLoading is for determining whether we should show a loading spinner in the header. (This comes up during slow page transitions.)
 
 -}
-frame : Bool -> Maybe User -> ActivePage -> Html msg -> Browser.Document msg
-frame isLoading user page content =
-    { title = "TODO: REPLACE ME AS TITLE"
+frame : Bool -> Maybe User -> ActivePage -> String -> Html msg -> Browser.Document msg
+frame isLoading user page title content =
+    { title = "ChoicEats - " ++ title
     , body =
         [ div [ class "page-frame" ]
             [ viewHeader page user isLoading
