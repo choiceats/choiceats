@@ -576,7 +576,7 @@ main =
 
 
 
---  programWithFlags (Route.fromLocation >> SetRoute)
+-- programWithFlags (Route.fromLocation >> SetRoute)
 -- need onUrlChange and onUrlRequest functions
 -- And need to press that record to
 -- What is the difference between Location and UrlRequest??

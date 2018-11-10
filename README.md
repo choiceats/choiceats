@@ -10,6 +10,9 @@ To build a production version of the project, change to the root repo of the dir
 
 To start the backend, clone the [choiceats-server](https://github.com/choiceats/choiceats-server) repo. Then run `cd <CHOICEATS_SERVER_DIRECTORY> && yarn build && yarn start`.
 
+`uglifyjs` and `brotli` executables (available from npm) are needed for building.
+
+A `watcher.sh` is provided that will watch rebuild the project. It depends on the availability of `inotify-tools`.
 
 ## Minimum Viable Product
 TODO
