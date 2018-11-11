@@ -29,8 +29,8 @@ mv $min_tmp_gzipped $min_gzip
 echo "Successfully optimized bundle:"
 echo "------------------------------"
 echo "Compiled: $(cat $js | wc -c) bytes"
-echo "Minified: $(cat $min | wc -c) bytes)"
-echo "Gzipped:  $(cat $min | gzip -c | wc -c)"
+echo "Minified: $(cat $min | wc -c) bytes"
+echo "Gzipped:  $(cat $min | gzip -c | wc -c) bytes"
 echo
 echo "Bundle written to $min, $min.br, and $min_gzip."
 echo

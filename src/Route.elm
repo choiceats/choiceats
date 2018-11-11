@@ -1,4 +1,12 @@
-module Route exposing (Route(..), fromUrl, href, replaceUrl, routeToTitle)
+module Route exposing
+    ( Route(..)
+    , fromUrl
+    , href
+    , needsAuth
+    , replaceUrl
+    , routeToString
+    , routeToTitle
+    )
 
 -- used to expose fromLocation, modifyUrl
 -- ELM-LANG MODULES --
@@ -26,8 +34,8 @@ type Route
     | EditRecipe Recipe.Slug
 
 
-checkRouteNeedsAuth : Route -> Bool
-checkRouteNeedsAuth route =
+needsAuth : Route -> Bool
+needsAuth route =
     case route of
         -- because root is recipe viewer
         Root ->
@@ -56,11 +64,6 @@ checkRouteNeedsAuth route =
 
         EditRecipe _ ->
             True
-
-
-
--- this was "route" in the elm 18 elm-spa-example
--- this is "parser" in the elm 19 rework of elm-spa-example
 
 
 parser : Parser (Route -> a) a
@@ -127,10 +130,6 @@ href route =
 
 replaceUrl : Nav.Key -> Route -> Cmd msg
 replaceUrl key route =
-    let
-        trumm =
-            Debug.log "replacing route" route
-    in
     Nav.replaceUrl key (routeToString route)
 
 

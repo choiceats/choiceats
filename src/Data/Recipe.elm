@@ -1,64 +1,61 @@
-module Data.Recipe
-    exposing
-        ( -- QUERIES --
-          createIngredientsQueryTask
-        , createRecipeQueryTask
-        , createUnitsQueryTask
-        , sendIngredientsQuery
-        , sendRecipeQuery
-        , sendUnitsQuery
-        , submitRecipeMutation
-        , submitLikeMutation
-        , submitDeleteMutation
-          -- TYPES --
-        , EditingIngredient
-        , EditingRecipeFull
-        , Flags
-        , Ingredient
-        , IngredientRaw
-        , IngredientUnit
-        , DeleteResponseBody
-        , RecipeFull
-        , RecipeFullResponse
-        , DeleteRecipeResponse
-        , RecipeId
-        , RecipeMsg
-        , RecipeQueryMsg(..)
-        , RecipeSummary
-        , RecipeTag
-        , RecipesResponse
-        , SearchFilter(..)
-        , Slug(..)
-        , TagsResponse
-        , Unit
-          -- HELPER FUNCTIONS
-        , mapFilterTypeToString
-        , requestOptions
-        , slugToString
-        , slugParser
-          -- OTHER
-        , gqlRecipeSummary
-        )
+module Data.Recipe exposing
+    ( DeleteRecipeResponse
+    , DeleteResponseBody
+    , EditingIngredient
+    , EditingRecipeFull
+    , Flags
+    , Ingredient
+    , IngredientRaw
+    , IngredientUnit
+    , RecipeFull
+    , RecipeFullResponse
+    , RecipeId
+    , RecipeMsg
+    , RecipeQueryMsg(..)
+    , RecipeSummary
+    , RecipeTag
+    , RecipesResponse
+    , SearchFilter(..)
+    , Slug(..)
+    , TagsResponse
+    ,  Unit
+       -- HELPER FUNCTIONS
+
+    ,  -- QUERIES --
+       createIngredientsQueryTask
+
+    , createRecipeQueryTask
+    , createUnitsQueryTask
+    , gqlRecipeSummary
+    , mapFilterTypeToString
+    , requestOptions
+    , sendIngredientsQuery
+    , sendRecipeQuery
+    , sendUnitsQuery
+    ,  slugParser
+       -- OTHER
+
+    , slugToString
+    ,  submitDeleteMutation
+       -- TYPES --
+
+    , submitLikeMutation
+    , submitRecipeMutation
+    )
 
 -- ELM-LANG MODULES --
-
-import Http
-import Array exposing (Array)
-import Task exposing (Task)
-import Url.Parser exposing (Parser, custom)
-
-
 -- THIRD PARTY MODULES --
+-- APPLICATION MODULES --
 
+import Array exposing (Array)
+import Data.AuthToken as AuthToken exposing (AuthToken, blankToken, getTokenString)
 import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-
-
--- APPLICATION MODULES --
-
-import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankToken)
+import Http
+import Task exposing (Task)
+import Url.Parser exposing (Parser, custom)
 
 
 type alias RecipeId =
@@ -82,7 +79,7 @@ type alias RequestOptions a =
 requestOptions : AuthToken -> String -> RequestOptions a
 requestOptions token apiUrl =
     { method = "POST"
-    , headers = [ (Http.header "Authorization" ("Bearer " ++ (getTokenString token))) ]
+    , headers = [ Http.header "Authorization" ("Bearer " ++ getTokenString token) ]
     , url = apiUrl ++ "/graphql/"
     , timeout = Nothing
     , withCredentials = False -- value of True makes CORS active, breaking the request
@@ -144,10 +141,9 @@ type alias ApiUrl =
 
 createUnitsQueryTask : AuthToken -> ApiUrl -> Task GraphQLClient.Error (List Unit)
 createUnitsQueryTask authToken apiUrl =
-    (GraphQLClient.customSendQuery
+    GraphQLClient.customSendQuery
         (requestOptions authToken apiUrl)
         (GqlB.request {} unitsRequest)
-    )
 
 
 sendUnitsQuery : AuthToken -> (UnitsResponse -> a) -> ApiUrl -> Cmd a
@@ -172,10 +168,9 @@ sendIngredientsQuery authToken msg apiUrl =
 
 createIngredientsQueryTask : AuthToken -> ApiUrl -> Task GraphQLClient.Error (List IngredientRaw)
 createIngredientsQueryTask authToken apiUrl =
-    (GraphQLClient.customSendQuery
+    GraphQLClient.customSendQuery
         (requestOptions authToken apiUrl)
         (GqlB.request {} ingredientsRequest)
-    )
 
 
 sendRecipeQuery : AuthToken -> RecipeId -> (RecipeFullResponse -> a) -> ApiUrl -> Cmd a
@@ -190,10 +185,9 @@ sendRecipeQuery authToken recipeId msg apiUrl =
 
 createRecipeQueryTask : AuthToken -> RecipeId -> ApiUrl -> Task GraphQLClient.Error RecipeFull
 createRecipeQueryTask authToken recipeId apiUrl =
-    (GraphQLClient.customSendQuery
+    GraphQLClient.customSendQuery
         (requestOptions authToken apiUrl)
         (GqlB.request { recipeId = recipeId } recipeRequest)
-    )
 
 
 type alias RecipeMutationInput =
@@ -220,17 +214,18 @@ convertRecipeArraysToList recipe =
         recipeId =
             if recipe.id == "" then
                 Nothing
+
             else
                 Just recipe.id
     in
-        { description = recipe.description
-        , id = recipeId
-        , imageUrl = recipe.imageUrl
-        , ingredients = Array.toList recipe.ingredients
-        , instructions = recipe.instructions
-        , name = recipe.name
-        , tags = recipe.tags
-        }
+    { description = recipe.description
+    , id = recipeId
+    , imageUrl = recipe.imageUrl
+    , ingredients = Array.toList recipe.ingredients
+    , instructions = recipe.instructions
+    , name = recipe.name
+    , tags = recipe.tags
+    }
 
 
 submitRecipeMutation : AuthToken -> EditingRecipeFull -> (RecipeFullResponse -> a) -> ApiUrl -> Cmd a
@@ -239,7 +234,7 @@ submitRecipeMutation authToken recipe msg apiUrl =
         msg
         (GraphQLClient.customSendMutation
             (requestOptions authToken apiUrl)
-            (GqlB.request { recipe = (convertRecipeArraysToList recipe) } saveRecipeMutation)
+            (GqlB.request { recipe = convertRecipeArraysToList recipe } saveRecipeMutation)
         )
 
 
@@ -584,6 +579,7 @@ type RecipeMsg
 type alias EditingRecipeFull =
     { description : String
     , id : String
+    , authorId : String
     , imageUrl : String
     , ingredients : Array EditingIngredient
     , instructions : String

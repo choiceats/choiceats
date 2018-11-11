@@ -24,16 +24,6 @@ app.ports.storeSession.subscribe(function(session) {
   localStorage.session = session
 })
 
-app.ports.setDocumentTitle.subscribe(function(title) {
-  const appName = "ChoicEats"
-
-  if (title.length > 0) {
-    document.title = appName + " - " + title
-  } else {
-    document.title = appName
-  }
-})
-
 app.ports.selectText.subscribe(selector => {
   setTimeout(() => {
     window.selectText(selector)

@@ -209,13 +209,13 @@ searchBar searchParams =
 
 onFilterChange filter =
     case filter of
-        "My" ->
+        "my" ->
             SearchFilterChange My
 
-        "All" ->
+        "all" ->
             SearchFilterChange All
 
-        "Fav" ->
+        "fav" ->
             SearchFilterChange Fav
 
         _ ->

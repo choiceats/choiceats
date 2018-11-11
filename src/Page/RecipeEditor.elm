@@ -107,6 +107,7 @@ emptyRecipe : EditingRecipeFull
 emptyRecipe =
     { description = ""
     , id = ""
+    , authorId = ""
     , imageUrl = ""
     , ingredients = Array.empty
     , instructions = ""
@@ -600,6 +601,7 @@ recipeFullToEditingRecipe model recipeFull =
         Just recipe ->
             { description = recipe.description
             , id = recipe.id
+            , authorId = recipe.authorId
             , imageUrl = recipe.imageUrl
             , instructions = recipe.instructions
             , name = recipe.name
@@ -636,14 +638,6 @@ getIngredientName maybeIngredients ingredientId =
 
         Nothing ->
             ""
-
-
-
--- view : Model -> Browser.Document Msg
--- view model =
---     { title = "TODO: REPLACE ME RECIPE EDITOR"
---     , body = [ recipeFormView model model.editingRecipe ]
---     }
 
 
 view : Model -> Html Msg

@@ -10,7 +10,7 @@ import Html exposing (..)
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
 import Menu
-import Page.Errored as Errored exposing (PageLoadError)
+import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
 import Page.Login as Login
 import Page.NotFound as NotFound
 import Page.Randomizer as Randomizer
@@ -22,7 +22,7 @@ import Ports
 import Route exposing (Route, routeToTitle)
 import Task
 import Url
-import Views.Page as Page exposing (ActivePage)
+import Views.Page as Page exposing (ActivePage(..))
 
 
 type Page
@@ -203,8 +203,11 @@ viewPage session isLoading page =
             let
                 mappedHtml =
                     Html.map RecipeDetailMsg (RecipeDetail.view session subModel)
+
+                title =
+                    RecipeDetail.getRecipeTitle subModel
             in
-            frame Page.Other "Recipe detail" mappedHtml
+            frame Page.Other title mappedHtml
 
         RecipeEditor maybeSlug subModel ->
             let
@@ -302,12 +305,15 @@ setRoute maybeRoute model =
                     errored Page.Other "You must be signed in to edit a recipe."
 
         Just Route.Root ->
-            case model.session.user of
-                Just user ->
-                    ( model, Route.replaceUrl model.navKey Route.Recipes )
+            let
+                rootRoute =
+                    if model.session.user == Nothing then
+                        Route.Login
 
-                Nothing ->
-                    ( model, Route.replaceUrl model.navKey Route.Login )
+                    else
+                        Route.Recipes
+            in
+            ( model, Route.replaceUrl model.navKey rootRoute )
 
         Just Route.Login ->
             ( { model | pageState = Loaded (Login (Login.init model.apiUrl model.navKey)) }
@@ -389,39 +395,74 @@ updatePage page msg model =
     in
     case ( msg, page ) of
         ( SetRoute route, _ ) ->
-            let
-                trumm =
-                    Debug.log "trying to set route" route
-            in
             setRoute route model
 
         ( InterceptUrlRequest urlRequest, _ ) ->
             case urlRequest of
                 Internal url ->
-                    ( model, Nav.pushUrl model.navKey (Url.toString url) )
+                    case Route.fromUrl url of
+                        Just route ->
+                            case model.session.user of
+                                Nothing ->
+                                    if Route.needsAuth route then
+                                        ( model, Nav.replaceUrl model.navKey (Route.routeToString Route.Login) )
+
+                                    else
+                                        ( model, Nav.pushUrl model.navKey (Url.toString url) )
+
+                                -- So far, the only special auth route is edit recipe
+                                -- but until the data is loaded it isn't known for sure
+                                -- whether the user owns that recipe, so handle it in EditRecipeLoaded
+                                Just user ->
+                                    ( model, Nav.pushUrl model.navKey (Url.toString url) )
+
+                        Nothing ->
+                            ( model, Cmd.none )
 
                 External externalLink ->
                     ( model, Nav.load externalLink )
 
-        ( EditRecipeLoaded slug (Ok subModel), _ ) ->
-            ( { model | pageState = Loaded (RecipeEditor (Just slug) subModel) }
-            , Ports.setDocumentTitle (routeToTitle (Route.EditRecipe slug))
-            )
+        ( EditRecipeLoaded slug res, _ ) ->
+            let
+                thingLoaded =
+                    case res of
+                        Ok subModel ->
+                            case model.session.user of
+                                Nothing ->
+                                    Errored (pageLoadError Page.Other "Must be logged in as recipe owner to edit recipe.")
 
-        ( EditRecipeLoaded slug (Err error), _ ) ->
-            ( { model | pageState = Loaded (Errored error) }
-            , Ports.setDocumentTitle (routeToTitle (Route.EditRecipe slug) ++ " Error")
-            )
+                                Just user ->
+                                    let
+                                        userId =
+                                            case user.userId of
+                                                UserId id ->
+                                                    id
 
-        ( NewRecipeLoaded (Ok subModel), _ ) ->
-            ( { model | pageState = Loaded (RecipeEditor Nothing subModel) }
-            , Ports.setDocumentTitle (routeToTitle Route.NewRecipe)
-            )
+                                        recipeOwnerId =
+                                            subModel.editingRecipe.authorId
+                                    in
+                                    if userId == recipeOwnerId then
+                                        RecipeEditor (Just slug) subModel
 
-        ( NewRecipeLoaded (Err error), _ ) ->
-            ( { model | pageState = Loaded (Errored error) }
-            , Ports.setDocumentTitle (routeToTitle Route.NewRecipe ++ " Error")
-            )
+                                    else
+                                        Errored (pageLoadError Page.Other "Must be logged in as recipe owner to edit recipe.")
+
+                        Err error ->
+                            Errored error
+            in
+            ( { model | pageState = Loaded thingLoaded }, Cmd.none )
+
+        ( NewRecipeLoaded res, _ ) ->
+            let
+                thingLoaded =
+                    case res of
+                        Ok subModel ->
+                            RecipeEditor Nothing subModel
+
+                        Err error ->
+                            Errored error
+            in
+            ( { model | pageState = Loaded thingLoaded }, Cmd.none )
 
         ( SetUser user, _ ) ->
             let
@@ -506,24 +547,17 @@ updatePage page msg model =
                     in
                     ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
 
-        ( RecipeDetailLoaded (Ok subModel), _ ) ->
+        ( RecipeDetailLoaded result, _ ) ->
             let
-                title =
-                    case subModel.mRecipe of
-                        Ok r ->
-                            r.name
+                thingLoaded =
+                    case result of
+                        Ok subModel ->
+                            RecipeDetail subModel
 
-                        Err trumm ->
-                            routeToTitle (Route.RecipeDetail (Data.Recipe.Slug ""))
+                        Err error ->
+                            Errored error
             in
-            ( { model | pageState = Loaded (RecipeDetail subModel) }
-            , Ports.setDocumentTitle title
-            )
-
-        ( RecipeDetailLoaded (Err error), _ ) ->
-            ( { model | pageState = Loaded (Errored error) }
-            , Ports.setDocumentTitle (routeToTitle (Route.RecipeDetail (Data.Recipe.Slug "")) ++ " Error")
-            )
+            ( { model | pageState = Loaded thingLoaded }, Cmd.none )
 
         ( RecipeEditorMsg subMsg, RecipeEditor slug subModel ) ->
             case model.session.user of
@@ -536,7 +570,7 @@ updatePage page msg model =
                         errored Page.Other
                             "You must be signed in to edit recipes."
 
-                Just user ->
+                Just _ ->
                     case subMsg of
                         RecipeEditor.RecipeSubmitted recipeSubmitResult ->
                             case recipeSubmitResult of

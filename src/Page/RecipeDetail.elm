@@ -1,4 +1,12 @@
-module Page.RecipeDetail exposing (ExternalMsg(..), Model, Msg(..), init, update, view)
+module Page.RecipeDetail exposing
+    ( ExternalMsg(..)
+    , Model
+    , Msg(..)
+    , getRecipeTitle
+    , init
+    , update
+    , view
+    )
 
 -- ELM-LANG MODULES --
 -- APPLICATION MODULES --
@@ -45,6 +53,16 @@ type alias Model =
     , isChangingLike : Bool
     , apiUrl : String
     }
+
+
+getRecipeTitle : Model -> String
+getRecipeTitle model =
+    case model.mRecipe of
+        Ok recipe ->
+            recipe.name
+
+        Err _ ->
+            "Recipe Detail"
 
 
 toggleLike : AuthToken -> String -> RecipeId -> String -> Cmd RecipeQueryMsg
