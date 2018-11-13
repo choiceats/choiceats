@@ -28,6 +28,17 @@ import Route exposing (Route)
 -- MODEL --
 
 
+words =
+    { email = "Email"
+    , password = "Password"
+    , login = "Login"
+    , signup = "Sign up"
+    , failLogin = "Unable to log in."
+    , blankEmail = "Email can't be blank."
+    , blankPassword = "Password can't be blank."
+    }
+
+
 type alias Model =
     { errors : List Error
     , email : String
@@ -57,9 +68,9 @@ view session model =
             , style "margin" "0 auto"
             , onSubmit SubmitForm
             ]
-            [ h1 [ class "ui header", style "font-family" "fira-code" ] [ text "Login" ]
-            , viewInput model.email "Email" "text" SetEmail
-            , viewInput model.password "Password" "password" SetPassword
+            [ h1 [ class "ui header", style "font-family" "fira-code" ] [ text words.login ]
+            , viewInput model.email words.email "text" SetEmail
+            , viewInput model.password words.password "password" SetPassword
             , br [] []
             , div []
                 [ button
@@ -67,7 +78,7 @@ view session model =
                     , class "ui primary button"
                     , disabled (not (hasLength model.email) || not (hasLength model.password))
                     ]
-                    [ text "Login" ]
+                    [ text words.login ]
                 ]
             , br [] []
             , br [] []
@@ -76,7 +87,7 @@ view session model =
                     [ type_ "button"
                     , class "ui button"
                     ]
-                    [ text "Sign up" ]
+                    [ text words.signup ]
                 ]
             ]
         ]
@@ -131,14 +142,14 @@ checkLoginInputs model =
                 []
 
             else
-                [ ( Email, "Email can't be blank." ) ]
+                [ ( Email, words.blankEmail ) ]
 
         afterCheckPassword =
             if hasLength model.email then
                 afterCheckEmail
 
             else
-                ( Password, "Password can't be blank." ) :: afterCheckEmail
+                ( Password, words.blankPassword ) :: afterCheckEmail
     in
     afterCheckPassword
 
@@ -172,7 +183,7 @@ update msg model navKey =
                                 |> Result.withDefault []
 
                         _ ->
-                            [ "unable to perform login" ]
+                            [ words.failLogin ]
             in
             ( ( { model | errors = List.map (\err -> ( Form, err )) errorMessages }, Cmd.none )
             , NoOp

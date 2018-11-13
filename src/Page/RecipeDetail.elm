@@ -36,7 +36,18 @@ import Page.Errored exposing (PageLoadError(..), pageLoadError)
 import Route as Route exposing (Route(..), href)
 import Task exposing (Task)
 import Util exposing (getDetailsLikesText, getImageUrl, graphQlErrorToString)
+import Verbiages exposing (errors, titles)
 import Views.Page as Page
+
+
+words =
+    { blank = ""
+    , y = "Yes"
+    , n = "No"
+    , edit = "Edit recipe"
+    , delete = "Delete Recipe"
+    , confirmDelete = "Are you sure you want to delete this recipe?"
+    }
 
 
 type ExternalMsg
@@ -62,7 +73,7 @@ getRecipeTitle model =
             recipe.name
 
         Err _ ->
-            "Recipe Detail"
+            titles.defaultRecipeDetail
 
 
 toggleLike : AuthToken -> String -> RecipeId -> String -> Cmd RecipeQueryMsg
@@ -85,7 +96,7 @@ init session slug apiUrl =
             slugToString slug
     in
     createRecipeQueryTask token recipeId apiUrl
-        |> Task.mapError (\_ -> pageLoadError Page.Other "Unable to load recipe")
+        |> Task.mapError (\_ -> pageLoadError Page.Other errors.recipeLoad)
         |> Task.map (initResultMap apiUrl session token recipeId)
 
 
@@ -197,13 +208,13 @@ adminLinks session authorId recipeId =
     in
     if userId == authorId then
         div [ class "recipe-detail__admin-links" ]
-            [ a [ class "link", Route.href (EditRecipe (Slug recipeId)) ] [ text "Edit recipe" ]
+            [ a [ class "link", Route.href (EditRecipe (Slug recipeId)) ] [ text words.edit ]
             , a
                 [ class "link recipe-detail__delete-link"
                 , Html.Attributes.href "/"
                 , custom "click" (Decode.succeed { message = ShowConfirmDelete, stopPropagation = False, preventDefault = True })
                 ]
-                [ text "Delete recipe" ]
+                [ text words.delete ]
             ]
 
     else
@@ -218,11 +229,11 @@ confirmDeleteModal showConfirmDelete recipeId =
                 [ class "ui fullscreen modal visible active recipe-detail__confirm-delete" ]
                 [ div
                     [ class "content" ]
-                    [ div [] [ text "Are you sure you want to delete this recipe?" ]
+                    [ div [] [ text words.confirmDelete ]
                     ]
                 , div [ class "actions" ]
-                    [ button [ class "ui button", onClick CancelDelete ] [ text "No" ]
-                    , button [ class "ui button danger", onClick (DeleteRecipe recipeId) ] [ text "Yes" ]
+                    [ button [ class "ui button", onClick CancelDelete ] [ text words.n ]
+                    , button [ class "ui button danger", onClick (DeleteRecipe recipeId) ] [ text words.y ]
                     ]
                 ]
             ]

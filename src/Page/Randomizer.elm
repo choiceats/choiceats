@@ -27,6 +27,14 @@ import Task exposing (Task)
 import Util exposing (graphQlErrorToString)
 
 
+words =
+    { new = "NEW IDEA!"
+    , errorPrefix = "ruh rohr, you has err: "
+    , like = "like"
+    , likes = "likes"
+    }
+
+
 type Msg
     = RequestRecipe
     | SetFilterType SearchFilter
@@ -180,7 +188,7 @@ viewGetNewRecipe model =
             , class "ui primary button"
             , onClick RequestRecipe
             ]
-            [ text "NEW IDEA!" ]
+            [ text words.new ]
         ]
 
 
@@ -214,7 +222,7 @@ viewRecipeSummary mRecipeSummary =
                         ]
 
                 Err err ->
-                    div [] [ text ("ruh rohr, you has err: " ++ graphQlErrorToString err) ]
+                    div [] [ text (words.errorPrefix ++ graphQlErrorToString err) ]
 
         Nothing ->
             viewLoading
@@ -227,12 +235,12 @@ likesText l =
             List.length l
     in
     String.fromInt likes
-        ++ " like"
+        ++ " "
         ++ (if likes == 1 then
-                ""
+                words.like
 
             else
-                "s"
+                words.likes
            )
 
 

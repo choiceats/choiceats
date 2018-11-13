@@ -22,6 +22,7 @@ import Ports
 import Route exposing (Route, routeToTitle)
 import Task
 import Url
+import Verbiages exposing (errors, titles)
 import Views.Page as Page exposing (ActivePage(..))
 
 
@@ -174,30 +175,30 @@ viewPage session isLoading page =
     in
     case page of
         NotFound ->
-            frame Page.Other "Page not found" (NotFound.view session)
+            frame Page.Other titles.notFound (NotFound.view session)
 
         Blank ->
             -- for initial page load, while loading data via HTTP
-            frame Page.Other "Loading..." (Html.text "")
+            frame Page.Other titles.loading (Html.text "")
 
         Errored subModel ->
-            frame Page.Other "Error" (Errored.view session subModel)
+            frame Page.Other titles.error (Errored.view session subModel)
 
         Login subModel ->
-            frame Page.Login "Sign in" (Html.map LoginMsg (Login.view session subModel))
+            frame Page.Login titles.signIn (Html.map LoginMsg (Login.view session subModel))
 
         Signup subModel ->
-            frame Page.Signup "Sign up" (Html.map SignupMsg (Signup.view session subModel))
+            frame Page.Signup titles.signUp (Html.map SignupMsg (Signup.view session subModel))
 
         Randomizer subModel ->
-            frame Page.Randomizer "Recipe ideas" (Html.map RandomizerMsg (Randomizer.view session subModel))
+            frame Page.Randomizer titles.ideas (Html.map RandomizerMsg (Randomizer.view session subModel))
 
         Recipes subModel ->
             let
                 mappedHtml =
                     Html.map RecipesMsg (Recipes.view session subModel)
             in
-            frame Page.Recipes "Recipes" mappedHtml
+            frame Page.Recipes titles.recipes mappedHtml
 
         RecipeDetail subModel ->
             let
@@ -211,7 +212,7 @@ viewPage session isLoading page =
 
         RecipeEditor maybeSlug subModel ->
             let
-                framePage =
+                activePage =
                     if maybeSlug == Nothing then
                         Page.NewRecipe
 
@@ -220,15 +221,15 @@ viewPage session isLoading page =
 
                 title =
                     if maybeSlug == Nothing then
-                        "Add recipe"
+                        titles.addRecipe
 
                     else
-                        "Edit recipe"
+                        titles.editRecipe
 
                 mappedHtml =
                     Html.map RecipeEditorMsg (RecipeEditor.view subModel)
             in
-            frame framePage title mappedHtml
+            frame activePage title mappedHtml
 
 
 subscriptions : a -> Sub Msg
@@ -294,7 +295,7 @@ setRoute maybeRoute model =
                     transition NewRecipeLoaded (RecipeEditor.initNew model.session model.apiUrl)
 
                 Nothing ->
-                    errored Page.NewRecipe "You must be signed in to add a recipe."
+                    errored Page.NewRecipe errors.signInAdd
 
         Just (Route.EditRecipe slug) ->
             case model.session.user of
@@ -302,7 +303,7 @@ setRoute maybeRoute model =
                     transition (EditRecipeLoaded slug) (RecipeEditor.initEdit model.session slug model.apiUrl)
 
                 Nothing ->
-                    errored Page.Other "You must be signed in to edit a recipe."
+                    errored Page.Other errors.signInEdit
 
         Just Route.Root ->
             let
@@ -429,7 +430,7 @@ updatePage page msg model =
                         Ok subModel ->
                             case model.session.user of
                                 Nothing ->
-                                    Errored (pageLoadError Page.Other "Must be logged in as recipe owner to edit recipe.")
+                                    Errored (pageLoadError Page.Other errors.signInEdit)
 
                                 Just user ->
                                     let
@@ -445,7 +446,7 @@ updatePage page msg model =
                                         RecipeEditor (Just slug) subModel
 
                                     else
-                                        Errored (pageLoadError Page.Other "Must be logged in as recipe owner to edit recipe.")
+                                        Errored (pageLoadError Page.Other errors.signInEdit)
 
                         Err error ->
                             Errored error
@@ -564,11 +565,11 @@ updatePage page msg model =
                 Nothing ->
                     if slug == Nothing then
                         errored Page.NewRecipe
-                            "You must be signed in to add recipes."
+                            errors.signInAdd
 
                     else
                         errored Page.Other
-                            "You must be signed in to edit recipes."
+                            errors.signInEdit
 
                 Just _ ->
                     case subMsg of

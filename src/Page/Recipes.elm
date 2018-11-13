@@ -49,6 +49,12 @@ type Msg
     | SearchFilterChange SearchFilter
 
 
+words =
+    { searchHelp = "Search Title or Ingredents"
+    , noRecipes = "no recipes"
+    }
+
+
 recipeCard : RecipeSummary -> Html Msg
 recipeCard recipe =
     a [ class "recipe-card", Route.href (RecipeDetail (Slug recipe.id)) ]
@@ -195,7 +201,7 @@ searchBar : SearchParams -> Html Msg
 searchBar searchParams =
     div [ class "searchBar" ]
         [ div [ class "ui input" ]
-            [ input [ placeholder "Search Title or Ingredents", onInput SearchTextChange ]
+            [ input [ placeholder words.searchHelp, onInput SearchTextChange ]
                 []
             ]
         , select
@@ -236,7 +242,7 @@ recipeListView recipes =
                             [ text (graphQlErrorToString err) ]
 
                 Nothing ->
-                    [ text "no recipes" ]
+                    [ text words.noRecipes ]
     in
     div [ class "list" ]
         recipeCards

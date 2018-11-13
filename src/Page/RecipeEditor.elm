@@ -41,6 +41,7 @@ import Page.Errored as Errored exposing (PageLoadError(..), pageLoadError)
 import Ports
 import Regex
 import Task exposing (Task)
+import Verbiages
 import Views.Page as Page
 
 
@@ -101,6 +102,22 @@ type Msg
     | ResetAutocomplete Bool
     | IngredientFocused Int
     | RecipeSubmitted Recipe.RecipeFullResponse
+
+
+words =
+    { add = "Add Ingredient"
+    , blank = ""
+    , chooseIngredient = "Choose an ingredient."
+    , chooseQuantity = "Ingredient needs quantity."
+    , chooseType = "Ingredient needs unit type."
+    , header = "Recipe Editor"
+    , ingredients = "Ingredients"
+    , labelDescription = "Description"
+    , labelInstructions = "Instructions"
+    , labelName = "Recipe Name"
+    , noUnits = "no display units..."
+    , save = "Save"
+    }
 
 
 emptyRecipe : EditingRecipeFull
@@ -539,7 +556,7 @@ initNew session apiUrl =
             , selectedIngredientIndex = Nothing
             }
     in
-    Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
+    Task.mapError (\_ -> pageLoadError Page.Other Verbiages.errors.recipeLoadParts) <|
         Task.map2
             mapResponses
             (createIngredientsQueryTask token apiUrl)
@@ -587,7 +604,7 @@ initEdit session slug apiUrl =
             , selectedIngredientIndex = Nothing
             }
     in
-    Task.mapError (\_ -> pageLoadError Page.Other "Failed to load some needed pieces of recipe editor") <|
+    Task.mapError (\_ -> pageLoadError Page.Other Verbiages.errors.recipeLoadParts) <|
         Task.map3
             mapResponses
             (createRecipeQueryTask token recipeId apiUrl)
@@ -634,10 +651,10 @@ getIngredientName maybeIngredients ingredientId =
                     foundIT.name
 
                 Nothing ->
-                    ""
+                    words.blank
 
         Nothing ->
-            ""
+            words.blank
 
 
 view : Model -> Html Msg
@@ -657,7 +674,7 @@ recipeFormView model r =
         , onClick BodyClick
         ]
         [ div [ class "ui form recipe-editor-form" ]
-            [ h1 [ class "ui header" ] [ text "Recipe Editor" ]
+            [ h1 [ class "ui header" ] [ text words.header ]
             , textInput r.name RecipeName False
             , textInput r.description RecipeDescription True
             , viewIngredientList model r
@@ -666,9 +683,9 @@ recipeFormView model r =
                 []
             , div
                 [ class "field" ]
-                [ button [ class "ui primary button", {- role "button", -} onClick AddIngredient ] [ text "Add Ingredient" ] ]
+                [ button [ class "ui primary button", {- role "button", -} onClick AddIngredient ] [ text words.add ] ]
             , textInput r.instructions RecipeInstructions True
-            , button [ disabled (not (formIsSubmittable r)), class "ui button", onClick Submit ] [ text "Save" ]
+            , button [ disabled (not (formIsSubmittable r)), class "ui button", onClick Submit ] [ text words.save ]
             ]
         ]
 
@@ -689,13 +706,13 @@ textFieldToLabel : TextField -> String
 textFieldToLabel field =
     case field of
         RecipeName ->
-            "Recipe Name"
+            words.labelName
 
         RecipeDescription ->
-            "Description"
+            words.labelDescription
 
         RecipeInstructions ->
-            "Instructions"
+            words.labelInstructions
 
 
 textFieldToInputId : TextField -> String
@@ -745,7 +762,7 @@ viewIngredientList : Model -> EditingRecipeFull -> Html Msg
 viewIngredientList model r =
     let
         ingredientForms =
-            label [] [ text "Ingredients" ]
+            label [] [ text words.ingredients ]
                 :: Array.toList
                     (Array.indexedMap
                         (ingredientRow model)
@@ -808,21 +825,21 @@ validationElements ingredient =
 
         unitsValidation =
             if ingredient.unitId == "" then
-                Just (error "Ingredient needs unit type.")
+                Just (error words.chooseType)
 
             else
                 Nothing
 
         quantityValidation =
             if ingredient.quantity == "" then
-                Just (error "Ingredient needs quantity.")
+                Just (error words.chooseQuantity)
 
             else
                 Nothing
 
         ingredientValidation =
             if ingredient.ingredientId == "" then
-                Just (error "Choose an ingredient.")
+                Just (error words.chooseIngredient)
 
             else
                 Nothing
@@ -900,7 +917,7 @@ unitsDropdown units ingredientIndex ingredientUnitId openDropdown =
             ]
             (case units of
                 Nothing ->
-                    [ div [] [ text "no display units..." ] ]
+                    [ div [] [ text words.noUnits ] ]
 
                 Just res ->
                     List.map (measuringUnit ingredientIndex) res
@@ -925,7 +942,7 @@ ingredientView model ingredientIndex ingredient =
 
                 innerElement =
                     if inactiveText == "" then
-                        span [ style "opacity" "0.5" ] [ text "Choose an ingredient" ]
+                        span [ style "opacity" "0.5" ] [ text words.chooseIngredient ]
 
                     else
                         text inactiveText

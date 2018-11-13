@@ -38,6 +38,27 @@ type ExternalMsg
     | SetUser User
 
 
+words =
+    { badEmail = "Enter a valid email address."
+    , blank = ""
+    , blankEmail = "Enter an email address."
+    , blankLast = "Enter a last name."
+    , blankName = "Enter a first name."
+    , header = "Signup!"
+    , labelEmail = "Email"
+    , labelFirst = "First Name"
+    , labelLast = "Last Name"
+    , labelPass = "Password"
+    , labelRePass = "Re-Password"
+    , passBlank = "Enter a password."
+    , passLength = \x -> "Password must be at least " ++ String.fromInt x ++ " characters long."
+    , passMatch = "Passwords must match."
+    , passName = "You can do better than using your name for a password."
+    , passPass = "You can do better than \"password\" for a password."
+    , primary = "Signup"
+    }
+
+
 
 -- type UserInput = Int | String | Number
 -- had problems getting union types to play nicely with things that expected a String. TODO: Make this type work as it generalizes better to different form field types
@@ -132,13 +153,13 @@ setEmail emailInput fields =
 
         message =
             if not hasInput then
-                "Enter an email address."
+                words.blankEmail
 
             else if not isValidEmail then
-                "Enter a valid email address."
+                words.badEmail
 
             else
-                ""
+                words.blank
     in
     { fields
         | email =
@@ -160,10 +181,10 @@ setFirstName firstNameInput fields =
             { userInput = firstNameInput
             , message =
                 if hasInput then
-                    ""
+                    words.blank
 
                 else
-                    "Enter a first name."
+                    words.blankName
             , isValid = hasInput
             }
     }
@@ -180,10 +201,10 @@ setLastName lastNameInput fields =
             { userInput = lastNameInput
             , message =
                 if hasInput then
-                    ""
+                    words.blank
 
                 else
-                    "Enter a last name."
+                    words.blankLast
             , isValid = hasInput
             }
     }
@@ -236,22 +257,22 @@ setPassword passwordInput fields =
 
         message =
             if False then
-                "Enter a password."
+                words.passBlank
 
             else if passwordIsPassword then
-                "You can do better than \"password\" for a password."
+                words.passPass
 
             else if passwordIsName then
-                "You can do better than using your name for a password."
+                words.passName
 
             else if hasInput && not passwordIsLongEnough then
-                "Password must be at least " ++ String.fromInt minimum_password_length ++ " characters long."
+                words.passLength minimum_password_length
 
             else if bothPasswordsHaveInput && not passwordsMatch then
-                "Passwords must match."
+                words.passMatch
 
             else
-                ""
+                words.blank
     in
     { fields
         | password =
@@ -416,12 +437,12 @@ view session model =
         [ form [ class "ui form", style "max-width" "700px", style "margin" "0 auto" ]
             [ h1
                 [ class "ui header", style "font-family" "fira-code" ]
-                [ text "Signup!" ]
-            , viewInput f.email "Email" "text" Email
-            , viewInput f.firstName "First Name" "text" FirstName
-            , viewInput f.lastName "Last Name" "text" LastName
-            , viewInput f.password "Password" "password" Password
-            , viewInput f.passwordCheck "Re-Password" "password" PasswordCheck
+                [ text words.header ]
+            , viewInput f.email words.labelEmail "text" Email
+            , viewInput f.firstName words.labelFirst "text" FirstName
+            , viewInput f.lastName words.labelLast "text" LastName
+            , viewInput f.password words.labelPass "password" Password
+            , viewInput f.passwordCheck words.labelRePass "password" PasswordCheck
             , button
                 [ type_ "submit"
                 , class "ui primary button"
@@ -435,7 +456,7 @@ view session model =
                         }
                     )
                 ]
-                [ text "Signup" ]
+                [ text words.primary ]
             ]
         ]
 

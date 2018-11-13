@@ -37,10 +37,15 @@ pageLoadError activePage errorMessage =
 -- VIEW --
 
 
+words =
+    { title = "Angry hedgie says"
+    }
+
+
 view : Session -> PageLoadError -> Html msg
 view session (PageLoadError model) =
     main_ [ id "content", class "container", tabindex -1 ]
-        [ h1 [ class "ui header" ] [ text "Angry hedgie says" ]
+        [ h1 [ class "ui header" ] [ text words.title ]
         , div [ class "row" ]
             [ p [] [ text model.errorMessage ]
             , br [] []

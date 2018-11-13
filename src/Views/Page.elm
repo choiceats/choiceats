@@ -30,6 +30,17 @@ type ActivePage
     | NewRecipe
 
 
+words =
+    { brand = "ChoicEats"
+    , ideas = "Ideas"
+    , login = "Login"
+    , logout = "Logout"
+    , recipes = "Recipes"
+    , signup = "Sign up"
+    , title = \x -> "ChoicEats - " ++ x
+    }
+
+
 {-| Take a page's Html and add a header
 
 The caller provides the current user, letting us show login or logout buttons and user's name.
@@ -39,7 +50,7 @@ isLoading is for determining whether we should show a loading spinner in the hea
 -}
 frame : Bool -> Maybe User -> ActivePage -> String -> Html msg -> Browser.Document msg
 frame isLoading user page title content =
-    { title = "ChoicEats - " ++ title
+    { title = words.title title
     , body =
         [ div [ class "page-frame" ]
             [ viewHeader page user isLoading
@@ -74,20 +85,20 @@ viewHeader page maybeUser isLoading =
         sessionLinkText =
             case maybeUser of
                 Just user ->
-                    "Logout"
+                    words.logout
 
                 Nothing ->
                     case page of
                         Login ->
-                            "Sign up"
+                            words.signup
 
                         _ ->
-                            "Login"
+                            words.login
     in
     div [ class "ui secondary menu" ]
-        [ div [ class "header item" ] [ text "ChoicEats" ]
-        , linkTo Route.Recipes [ text "Recipes" ]
-        , linkTo Route.Randomizer [ text "Ideas" ]
+        [ div [ class "header item" ] [ text words.brand ]
+        , linkTo Route.Recipes [ text words.recipes ]
+        , linkTo Route.Randomizer [ text words.ideas ]
         , sessionLinkTo sessionLinkRoute [ text sessionLinkText ]
         ]
 
