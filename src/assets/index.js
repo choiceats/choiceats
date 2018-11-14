@@ -1,41 +1,32 @@
 "use strict"
 
-// require('./index.html');
-// require('./favicon.ico');
-// require('./keyframes.css');
-// require('./manifest.json');
-// require('./reset.css');
-// require('./style.scss');
-// require('./semantic.min.css');
-
-// const Elm = require('../Main.elm');
-
-const sessionString = localStorage.session
-const flags = {
-  api_url: window.api_url || "http://localhost:4000", // set by webpack // http://choiceats.com
+var sessionString = localStorage.session
+var api_url = window.api_url || window.location.href.indexOf('localhost') > -1 ? "http://localhost:4000" : "http://choiceats.com";
+var flags = {
+  api_url: api_url,
   session: sessionString ? JSON.parse(localStorage.session) : null
-}
-const app = Elm.Main.init({
+};
+var app = Elm.Main.init({
   node: document.getElementById("mount-point"),
   flags: JSON.stringify(flags)
-})
+});
 
 app.ports.storeSession.subscribe(function(session) {
   localStorage.session = session
-})
+});
 
 app.ports.selectText.subscribe(selector => {
   setTimeout(() => {
-    window.selectText(selector)
+    window.selectText(selector);
   }, 50)
-})
+});
 
 window.selectText = function(selector) {
-  const element = document.querySelector(selector)
+  var element = document.querySelector(selector);
   if (element) {
-    element.select()
+    element.select();
   }
-}
+};
 
 window.addEventListener(
   "storage",
@@ -45,4 +36,4 @@ window.addEventListener(
     }
   },
   false
-)
+);

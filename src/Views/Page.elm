@@ -3,15 +3,10 @@ module Views.Page exposing (ActivePage(..), frame)
 {-| Add header to page
 -}
 
--- ELM-LANG MODULES --
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
-
 import Browser
 import Data.User as User exposing (User)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Lazy exposing (lazy2)
 import Route exposing (Route)
 import Views.Spinner exposing (spinner)
 
