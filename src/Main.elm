@@ -134,8 +134,22 @@ init val url navKey =
 
                 _ ->
                     { user = Nothing }
+
+        urlRoute =
+            Route.fromUrl url
+
+        effectiveRoute =
+            if urlRoute == Nothing then
+                if session.user == Nothing then
+                    Just Route.Login
+
+                else
+                    Just Route.Root
+
+            else
+                urlRoute
     in
-    setRoute (Route.fromUrl url)
+    setRoute effectiveRoute
         { pageState = Loaded initialPage
         , session = session
         , apiUrl = apiUrl
