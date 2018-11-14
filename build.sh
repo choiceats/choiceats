@@ -11,6 +11,7 @@ min_gzip="dist/app.js.gz"
 SRC="src/assets/"
 DIST="dist/"
 
+mkdir -p $DIST
 
 echo
 echo "Copying from $SRC to $DIST..."

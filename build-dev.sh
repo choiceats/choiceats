@@ -6,6 +6,8 @@ dest="dist/app.js"
 SRC="src/assets/"
 DIST="dist/"
 
+mkdir -p $DIST
+
 echo
 echo "Copying from $SRC to $DIST..."
 cp $SRC/* $DIST
