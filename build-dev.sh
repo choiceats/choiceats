@@ -3,12 +3,21 @@
 set -e
 
 dest="dist/app.js"
+SRC="src/assets/"
+DIST="dist/"
+
+echo
+echo "Copying from $SRC to $DIST..."
+cp $SRC/* $DIST
+echo
 
 echo "Making elm distribution file..."
 echo
 
-elm make --output=$dest src/Main.elm $@
+./node_modules/.bin/elm make --output=$dest src/Main.elm $@
 
 echo
 echo "Bundle written to $dest"
+echo
+echo rebuilt at $(date)
 echo

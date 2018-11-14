@@ -8,31 +8,33 @@ min_tmp_gzip="dist/app_tmp_for_gzip.js"
 min_tmp_gzipped="dist/app_tmp_for_gzip.js.gz"
 min_gzip="dist/app.js.gz"
 
+SRC="src/assets/"
+DIST="dist/"
+
+
+echo
+echo "Copying from $SRC to $DIST..."
+cp $SRC/* $DIST
+echo
 echo "Making elm distribution file..."
 echo
 
-elm make --optimize --output=$js src/Main.elm $@
+./node_modules/.bin/elm make --optimize --output=$js src/Main.elm $@
 
 echo
-echo "Minifying, uglifying, and removeng dead code from bundle..."
+echo "Optimizing bundle..."
 echo
 
-uglifyjs $js --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' | uglifyjs --mangle --output=$min
+./node_modules/.bin/uglifyjs $js --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' | ./node_modules/.bin/uglifyjs --mangle --output=$min
 
-brotli --force $min
+./node_modules/.bin/brotli-cli $min
 
 cp $min $min_tmp_gzip
-gzip $min_tmp_gzip
+./node_modules/gzipme/bin/gzipme $min_tmp_gzip
 mv $min_tmp_gzipped $min_gzip
 
 
-echo "Successfully optimized bundle:"
-echo "------------------------------"
-echo "Compiled: $(cat $js | wc -c) bytes"
-echo "Minified: $(cat $min | wc -c) bytes"
-echo "Gzipped:  $(cat $min | gzip -c | wc -c) bytes"
-echo
-echo "Bundle written to $min, $min.br, and $min_gzip."
+echo "Optimized bundle written to $min, $min.br, and $min_gzip."
 echo
 
-rm $js
+rm $min_tmp_gzip $js

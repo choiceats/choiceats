@@ -1,18 +1,2 @@
 #!/bin/sh
-
-inotifywait \
-  --event create \
-  --event delete \
-  --event modify \
-  --event move \
-  --exclude "\.sw[a-z]$" \
-  --format '%:e %f' \
-  --monitor \
-  --recursive \
-  src/ | \
-  ./burst.sh 1 "./copy-static.sh && ./build-dev.sh && echo && echo rebuilt at $(date)"
-
-# Can use this to do something on every event
-# while read event file; do
-#    echo "$event:$file"
-# done
+./node_modules/.bin/chokidar 'src/**' -c './build-dev.sh'

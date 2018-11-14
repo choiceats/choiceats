@@ -2,17 +2,23 @@
 App for adding and sharing recipes.
 
 ## Getting Started
-This repo is an Elm project. You can install `elm 0.19` with `npm install -g elm` if `npm` is installed.
+`yarn` installs all dependencies. Elm installs Elm dependencies on its own.
 
-To run the reactor for type debugging, run `elm reactor` and open a browser tab to `localhost:8000/src/Main.elm`. The request takes care of installing needed dependencies and compiling. Reloading the tab recompiles the file. If the file is the app, the app will show. If not, it will appear to hang without any type errors if there are no type errors.
+`./build.sh` creates a production bundle.
 
-To build a production version of the project, change to the root repo of the directory and run `./copy-changes.sh && ./build.sh`. This presupposes a UNIX like shell. Production frontend code can be run with any static file server, for example the python3 simple http server: `python3 -m http.server`
+`./watcher.sh` runs dev mode (use `server.sh` to serve output files).
 
-To start the backend, clone the [choiceats-server](https://github.com/choiceats/choiceats-server) repo. Then run `cd <CHOICEATS_SERVER_DIRECTORY> && yarn build && yarn start`.
+`./server.sh` serves static files for both production and development bundles.
 
-`uglifyjs` and `brotli` executables (available from npm) are needed for building.
+`./reactor.sh` allows type debugging by file.
+Browser requests install dependencies (when needed) and (re)compile code.
+Any type errors will show after about one second.
+Navigating to `localhost:8000/src/Main.elm` type checks the whole project.
+`localhost:8000` exposes a file explorer for type checking single files.
 
-A `watcher.sh` is provided that will watch rebuild the project. It depends on the availability of `inotify-tools`.
+
+Run the backend by cloning [choiceats-server](https://github.com/choiceats/choiceats-server) and running `cd choiceats-server && yarn && yarn build && yarn start`.
+
 
 ## Minimum Viable Product
 TODO
