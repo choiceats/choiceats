@@ -10,6 +10,8 @@ App for adding and sharing recipes.
 
 `./server.sh` serves static files for both production and development bundles.
 
+`./tests.sh` runs unit tests.
+
 `./reactor.sh` allows type debugging by file.
 Browser requests install dependencies (when needed) and (re)compile code.
 Any type errors will show after about one second.
