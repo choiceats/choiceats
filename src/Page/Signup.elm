@@ -1,9 +1,5 @@
 module Page.Signup exposing (ExternalMsg(..), Model, Msg, initModel, update, view)
 
--- ELM-LANG MODULES
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
-
 import Browser.Navigation as Nav
 import Data.Session exposing (Session)
 import Data.User exposing (User, decoder)

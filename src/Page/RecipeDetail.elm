@@ -8,9 +8,6 @@ module Page.RecipeDetail exposing
     , view
     )
 
--- ELM-LANG MODULES --
--- APPLICATION MODULES --
-
 import Data.AuthToken exposing (AuthToken, blankToken, getTokenString)
 import Data.Recipe
     exposing

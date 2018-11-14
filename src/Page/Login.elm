@@ -3,14 +3,6 @@ module Page.Login exposing (ExternalMsg(..), Model, Msg, init, update, view)
 {-| The login page.
 -}
 
--- ELM-LANG MODULES --
--- removed Json.Decode.Pipeline decode in favor of Decode.succeed ?
--- https://github.com/NoRedInk/elm-json-decode-pipeline/commits/master
--- https://github.com/NoRedInk/elm-json-decode-pipeline/commit/67245fb75a2f138b914e12a9f74ba0a3fed2fd44
--- https://github.com/NoRedInk/elm-json-decode-pipeline/commit/d9c10a2b388176569fe3e88ef0e2b6fc19d9beeb
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
-
 import Browser.Navigation as Nav
 import Data.Session exposing (Session)
 import Data.User exposing (User)

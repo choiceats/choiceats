@@ -8,12 +8,6 @@ module Route exposing
     , routeToTitle
     )
 
--- used to expose fromLocation, modifyUrl
--- ELM-LANG MODULES --
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
--- import Browser exposing (Location)
-
 import Browser.Navigation as Nav
 import Data.Recipe as Recipe
 import Html exposing (Attribute)
@@ -171,7 +165,3 @@ routeToTitle route =
 
         EditRecipe slug ->
             "Edit Recipe"
-
-
-
--- fromUrl is the new fromLocation???

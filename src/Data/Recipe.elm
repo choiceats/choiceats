@@ -43,10 +43,6 @@ module Data.Recipe exposing
     , submitRecipeMutation
     )
 
--- ELM-LANG MODULES --
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
-
 import Array exposing (Array)
 import Data.AuthToken as AuthToken exposing (AuthToken, blankToken, getTokenString)
 import GraphQL.Client.Http as GraphQLClient

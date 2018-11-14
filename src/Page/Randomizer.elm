@@ -1,9 +1,5 @@
 module Page.Randomizer exposing (ExternalMsg(..), Model, Msg, init, update, view)
 
--- ELM-LANG MODULES --
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
-
 import Data.AuthToken as AuthToken exposing (AuthToken, blankToken, getTokenString)
 import Data.Recipe
     exposing

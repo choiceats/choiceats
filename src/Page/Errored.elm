@@ -4,10 +4,6 @@ module Page.Errored exposing (PageLoadError(..), pageLoadError, view)
 Page Not Found error.
 -}
 
--- ELM-LANG MODULES --
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
-
 import Data.Session exposing (Session)
 import Html exposing (Html, br, div, h1, img, main_, p, text)
 import Html.Attributes exposing (alt, class, id, src, style, tabindex)

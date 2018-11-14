@@ -1,10 +1,7 @@
 module Page.RecipeEditor exposing (Model, Msg(..), initEdit, initNew, update, view)
 
--- ELM-LANG MODULES --
 -- TODO: Add back in when this package is upgraded
 -- import Html.Attributes.Aria exposing (role)
--- THIRD PARTY MODULES --
--- APPLICATION MODULES --
 
 import Array exposing (Array, fromList, toList)
 import Browser
