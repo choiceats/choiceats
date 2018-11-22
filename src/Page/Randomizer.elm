@@ -1,36 +1,34 @@
-module Page.Randomizer exposing (ExternalMsg(..), Model, Msg, update, view, init)
+module Page.Randomizer exposing (ExternalMsg(..), Model, Msg, init, update, view)
 
--- ELM-LANG MODULES --
-
-import Html exposing (Html, div, a, text, label, input, button, h1, form, img, i)
-import Html.Attributes exposing (disabled, type_, class, style, value, for, id, href, src)
-import Html.Events exposing (onWithOptions, onClick, onInput)
-import Task exposing (Task)
-import Result exposing (withDefault)
-
-
--- THIRD PARTY MODULES --
-
+import Data.AuthToken as AuthToken exposing (AuthToken, blankToken, getTokenString)
+import Data.Recipe
+    exposing
+        ( RecipeSummary
+        , SearchFilter(..)
+        , gqlRecipeSummary
+        , mapFilterTypeToString
+        , requestOptions
+        )
+import Data.Session exposing (Session)
 import GraphQL.Client.Http as GraphQLClient
 import GraphQL.Request.Builder as GqlB
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import GraphQL.Client.Http as GraphQLClient
-
-
--- APPLICATION MODULES --
-
-import Data.AuthToken as AuthToken exposing (AuthToken, getTokenString, blankToken)
-import Data.Session exposing (Session)
-import Data.Recipe
-    exposing
-        ( mapFilterTypeToString
-        , requestOptions
-        , RecipeSummary
-        , SearchFilter(..)
-        , gqlRecipeSummary
-        )
+import Html exposing (Html, a, button, div, form, h1, i, img, input, label, text)
+import Html.Attributes exposing (class, disabled, for, href, id, src, style, type_, value)
+import Html.Events exposing (onClick, onInput)
+import Result exposing (withDefault)
 import Route exposing (Route, href)
+import Task exposing (Task)
+import Util exposing (graphQlErrorToString)
+
+
+words =
+    { new = "NEW IDEA!"
+    , errorPrefix = "ruh rohr, you has err: "
+    , like = "like"
+    , likes = "likes"
+    }
 
 
 type Msg
@@ -70,13 +68,13 @@ init session apiUrl =
                 Just user ->
                     user.token
     in
-        ( { currentFilter = All
-          , mRecipeSummary = Nothing
-          , apiUrl = apiUrl
-          , token = authToken
-          }
-        , sendRecipeQuery authToken All apiUrl
-        )
+    ( { currentFilter = All
+      , mRecipeSummary = Nothing
+      , apiUrl = apiUrl
+      , token = authToken
+      }
+    , sendRecipeQuery authToken All apiUrl
+    )
 
 
 update : Msg -> Model -> ( ( Model, Cmd Msg ), ExternalMsg )
@@ -85,8 +83,8 @@ update msg model =
         RequestRecipe ->
             ( ( model, sendRecipeQuery model.token model.currentFilter model.apiUrl ), NoOp )
 
-        SetFilterType msg ->
-            ( ( { model | currentFilter = msg }, Cmd.none ), NoOp )
+        SetFilterType filter ->
+            ( ( { model | currentFilter = filter }, Cmd.none ), NoOp )
 
         ReceiveQueryResponse res ->
             ( ( { model | mRecipeSummary = Just res }, Cmd.none ), NoOp )
@@ -118,13 +116,13 @@ recipeRequest =
                     gqlRecipeSummary
                 )
     in
-        GqlB.queryDocument queryRoot
+    GqlB.queryDocument queryRoot
 
 
 recipeQueryRequest : SearchFilter -> GqlB.Request GqlB.Query RecipeSummary
 recipeQueryRequest buttonFilter =
     recipeRequest
-        |> GqlB.request { searchFilter = (mapFilterTypeToString buttonFilter) }
+        |> GqlB.request { searchFilter = mapFilterTypeToString buttonFilter }
 
 
 sendQueryRequest : AuthToken -> GqlB.Request GqlB.Query a -> String -> Task GraphQLClient.Error a
@@ -157,8 +155,9 @@ filterButton : SearchFilter -> SearchFilter -> Html Msg
 filterButton choice currentFilter =
     button
         [ class
-            (if (choice == currentFilter) then
+            (if choice == currentFilter then
                 "ui active button"
+
              else
                 "ui button"
             )
@@ -176,18 +175,16 @@ filterButton choice currentFilter =
 viewGetNewRecipe : Model -> Html Msg
 viewGetNewRecipe model =
     div
-        [ style
-            [ ( "width", "100%" )
-            , ( "text-align", "center" )
-            , ( "margin-top", "15px" )
-            ]
+        [ style "width" "100%"
+        , style "text-align" "center"
+        , style "margin-top" "15px"
         ]
         [ button
             [ type_ "submit"
             , class "ui primary button"
             , onClick RequestRecipe
             ]
-            [ text "NEW IDEA!" ]
+            [ text words.new ]
         ]
 
 
@@ -198,7 +195,7 @@ viewRecipeSummary mRecipeSummary =
             case res of
                 Ok r ->
                     a [ Route.href (Route.RecipeDetail (Data.Recipe.Slug r.id)) ]
-                        [ div [ class "ui fluid card", style [ ( "margin-bottom", "15px" ) ] ]
+                        [ div [ class "ui fluid card", style "margin-bottom" "15px" ]
                             [ img [ class "ui image", src r.imageUrl ] []
                             , div [ class "content" ]
                                 [ div [ class "header" ] [ text r.name ]
@@ -208,6 +205,7 @@ viewRecipeSummary mRecipeSummary =
                                         [ class <|
                                             if r.youLike then
                                                 "green"
+
                                             else
                                                 "grey" ++ " favorite large icon"
                                         ]
@@ -219,8 +217,8 @@ viewRecipeSummary mRecipeSummary =
                             ]
                         ]
 
-                Err r ->
-                    div [] [ text ("ruh rohr, you has err: " ++ (toString r)) ]
+                Err err ->
+                    div [] [ text (words.errorPrefix ++ graphQlErrorToString err) ]
 
         Nothing ->
             viewLoading
@@ -232,12 +230,14 @@ likesText l =
         likes =
             List.length l
     in
-        (toString likes)
-            ++ " like"
-            ++ if likes == 1 then
-                ""
-               else
-                "s"
+    String.fromInt likes
+        ++ " "
+        ++ (if likes == 1 then
+                words.like
+
+            else
+                words.likes
+           )
 
 
 viewLoading : Html Msg

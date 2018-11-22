@@ -1,20 +1,19 @@
-module Route exposing (Route(..), fromLocation, href, modifyUrl, routeToTitle)
+module Route exposing
+    ( Route(..)
+    , fromUrl
+    , href
+    , needsAuth
+    , replaceUrl
+    , routeToString
+    , routeToTitle
+    )
 
--- ELM-LANG MODULES --
-
+import Browser.Navigation as Nav
+import Data.Recipe as Recipe
 import Html exposing (Attribute)
 import Html.Attributes as Attr
-import Navigation exposing (Location)
-
-
--- THIRD PARTY MODULES --
-
-import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, string)
-
-
--- APPLICATION MODULES --
-
-import Data.Recipe as Recipe
+import Url exposing (Url)
+import Url.Parser as Parser exposing ((</>), Parser, oneOf, s, string)
 
 
 type Route
@@ -29,17 +28,49 @@ type Route
     | EditRecipe Recipe.Slug
 
 
-route : Parser (Route -> a) a
-route =
+needsAuth : Route -> Bool
+needsAuth route =
+    case route of
+        -- because root is recipe viewer
+        Root ->
+            True
+
+        Login ->
+            False
+
+        Logout ->
+            False
+
+        Signup ->
+            False
+
+        Randomizer ->
+            True
+
+        Recipes ->
+            True
+
+        NewRecipe ->
+            True
+
+        RecipeDetail _ ->
+            True
+
+        EditRecipe _ ->
+            True
+
+
+parser : Parser (Route -> a) a
+parser =
     oneOf
-        [ Url.map Login (s "login")
-        , Url.map Logout (s "logout")
-        , Url.map Signup (s "signup")
-        , Url.map Randomizer (s "random")
-        , Url.map Recipes (s "recipes")
-        , Url.map NewRecipe (s "recipe" </> s "new")
-        , Url.map RecipeDetail (s "recipe" </> Recipe.slugParser)
-        , Url.map EditRecipe (s "recipe" </> Recipe.slugParser </> s "edit")
+        [ Parser.map Login (s "login")
+        , Parser.map Logout (s "logout")
+        , Parser.map Signup (s "signup")
+        , Parser.map Randomizer (s "random")
+        , Parser.map Recipes (s "recipes")
+        , Parser.map NewRecipe (s "recipe" </> s "new")
+        , Parser.map RecipeDetail (s "recipe" </> Recipe.slugParser)
+        , Parser.map EditRecipe (s "recipe" </> Recipe.slugParser </> s "edit")
         ]
 
 
@@ -79,11 +110,11 @@ routeToString page =
                 EditRecipe slug ->
                     [ "recipe", Recipe.slugToString slug, "edit" ]
     in
-        "#/" ++ String.join "/" pieces
+    "#/" ++ String.join "/" pieces
 
 
 
--- PUBLIC HEADERS --
+-- PUBLIC HELPERS --
 
 
 href : Route -> Attribute msg
@@ -91,17 +122,18 @@ href route =
     Attr.href (routeToString route)
 
 
-modifyUrl : Route -> Cmd msg
-modifyUrl =
-    routeToString >> Navigation.modifyUrl
+replaceUrl : Nav.Key -> Route -> Cmd msg
+replaceUrl key route =
+    Nav.replaceUrl key (routeToString route)
 
 
-fromLocation : Location -> Maybe Route
-fromLocation location =
-    if String.isEmpty location.hash then
-        Just Root
-    else
-        parseHash route location
+fromUrl : Url -> Maybe Route
+fromUrl url =
+    -- The RealWorld spec treats the fragment like a path.
+    -- This makes it *literally* the path, so we can proceed
+    -- with parsing as if it had been a normal path all along.
+    { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
+        |> Parser.parse parser
 
 
 routeToTitle : Route -> String

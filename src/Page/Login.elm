@@ -3,30 +3,32 @@ module Page.Login exposing (ExternalMsg(..), Model, Msg, init, update, view)
 {-| The login page.
 -}
 
--- ELM-LANG MODULES --
-
+import Browser.Navigation as Nav
+import Data.Session exposing (Session)
+import Data.User exposing (User)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Decode as Decode exposing (Decoder, decodeString, field, string)
-import Json.Decode.Pipeline exposing (decode, optional)
-
-
--- THIRD PARTY MODULES --
-
-import Validate exposing (Validator, ifBlank, validate)
-
-
--- APPLICATION MODULES --
-
-import Data.Session exposing (Session)
-import Data.User exposing (User)
+import Json.Decode.Pipeline exposing (optional)
 import Request.User exposing (storeSession)
 import Route exposing (Route)
 
 
+
 -- MODEL --
+
+
+words =
+    { email = "Email"
+    , password = "Password"
+    , login = "Login"
+    , signup = "Sign up"
+    , failLogin = "Unable to log in."
+    , blankEmail = "Email can't be blank."
+    , blankPassword = "Password can't be blank."
+    }
 
 
 type alias Model =
@@ -34,15 +36,17 @@ type alias Model =
     , email : String
     , password : String
     , apiUrl : String
+    , navKey : Nav.Key
     }
 
 
-init : String -> Model
-init apiUrl =
+init : String -> Nav.Key -> Model
+init apiUrl navKey =
     { errors = []
     , email = ""
     , password = ""
     , apiUrl = apiUrl
+    , navKey = navKey
     }
 
 
@@ -52,12 +56,13 @@ view session model =
         [ class "ui container" ]
         [ Html.form
             [ class "ui form"
-            , style [ ( "max-width", "700px" ), ( "margin", "0 auto" ) ]
+            , style "max-width" "700px"
+            , style "margin" "0 auto"
             , onSubmit SubmitForm
             ]
-            [ h1 [ class "ui header", style [ ( "font-family", "fira-code" ) ] ] [ text "Login" ]
-            , viewInput model.email "Email" "text" SetEmail
-            , viewInput model.password "Password" "password" SetPassword
+            [ h1 [ class "ui header", style "font-family" "fira-code" ] [ text words.login ]
+            , viewInput model.email words.email "text" SetEmail
+            , viewInput model.password words.password "password" SetPassword
             , br [] []
             , div []
                 [ button
@@ -65,7 +70,7 @@ view session model =
                     , class "ui primary button"
                     , disabled (not (hasLength model.email) || not (hasLength model.password))
                     ]
-                    [ text "Login" ]
+                    [ text words.login ]
                 ]
             , br [] []
             , br [] []
@@ -74,7 +79,7 @@ view session model =
                     [ type_ "button"
                     , class "ui button"
                     ]
-                    [ text "Sign up" ]
+                    [ text words.signup ]
                 ]
             ]
         ]
@@ -84,20 +89,20 @@ viewInput : String -> LabelName -> InputAttr -> (String -> Msg) -> Html Msg
 viewInput userInput labelName inputAttr inputType =
     let
         idName =
-            (String.filter isIdChar labelName)
+            String.filter isIdChar labelName
     in
-        div [ class "field" ]
-            [ label [ for idName ] [ text labelName ]
-            , div [ class "ui input" ]
-                [ input
-                    [ type_ inputAttr
-                    , onInput inputType
-                    , value userInput
-                    , id idName
-                    ]
-                    []
+    div [ class "field" ]
+        [ label [ for idName ] [ text labelName ]
+        , div [ class "ui input" ]
+            [ input
+                [ type_ inputAttr
+                , onInput inputType
+                , value userInput
+                , id idName
                 ]
+                []
             ]
+        ]
 
 
 
@@ -116,11 +121,36 @@ type ExternalMsg
     | SetUser User
 
 
-update : Msg -> Model -> ( ( Model, Cmd Msg ), ExternalMsg )
-update msg model =
+hasLength : String -> Bool
+hasLength str =
+    not <| String.isEmpty str
+
+
+checkLoginInputs : Model -> List Error
+checkLoginInputs model =
+    let
+        afterCheckEmail =
+            if hasLength model.email then
+                []
+
+            else
+                [ ( Email, words.blankEmail ) ]
+
+        afterCheckPassword =
+            if hasLength model.email then
+                afterCheckEmail
+
+            else
+                ( Password, words.blankPassword ) :: afterCheckEmail
+    in
+    afterCheckPassword
+
+
+update : Msg -> Model -> Nav.Key -> ( ( Model, Cmd Msg ), ExternalMsg )
+update msg model navKey =
     case msg of
         SubmitForm ->
-            case validate modelValidator model of
+            case checkLoginInputs model of
                 [] ->
                     ( ( { model | errors = [] }, Http.send LoginCompleted (Request.User.login model) )
                     , NoOp
@@ -145,14 +175,14 @@ update msg model =
                                 |> Result.withDefault []
 
                         _ ->
-                            [ "unable to perform login" ]
+                            [ words.failLogin ]
             in
-                ( ( { model | errors = List.map (\err -> ( Form, err )) errorMessages }, Cmd.none )
-                , NoOp
-                )
+            ( ( { model | errors = List.map (\err -> ( Form, err )) errorMessages }, Cmd.none )
+            , NoOp
+            )
 
         LoginCompleted (Ok user) ->
-            ( ( model, Cmd.batch [ storeSession user, Route.modifyUrl Route.Recipes ] )
+            ( ( model, Cmd.batch [ storeSession user, Route.replaceUrl model.navKey Route.Recipes ] )
             , SetUser user
             )
 
@@ -186,17 +216,9 @@ type alias Error =
     ( Field, String )
 
 
-modelValidator : Validator Error Model
-modelValidator =
-    Validate.all
-        [ ifBlank .email ( Email, "email can't be blank." )
-        , ifBlank .password ( Password, "password can't be blank." )
-        ]
-
-
 errorsDecoder : Decoder (List String)
 errorsDecoder =
-    decode (\emailOrPassword email username password -> List.concat [ emailOrPassword, email, username, password ])
+    Decode.succeed (\emailOrPassword email username password -> List.concat [ emailOrPassword, email, username, password ])
         |> optionalError "email or password"
         |> optionalError "email"
         |> optionalError "username"
@@ -209,7 +231,7 @@ optionalError fieldName =
         errorToString errorMessage =
             String.join " " [ fieldName, errorMessage ]
     in
-        optional fieldName (Decode.list (Decode.map errorToString string)) []
+    optional fieldName (Decode.list (Decode.map errorToString string)) []
 
 
 isIdChar : Char -> Bool
@@ -225,11 +247,6 @@ notDash char =
 notSpace : Char -> Bool
 notSpace char =
     char /= ' '
-
-
-hasLength : String -> Bool
-hasLength str =
-    not <| String.isEmpty str
 
 
 type alias LabelName =

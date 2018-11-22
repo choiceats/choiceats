@@ -1,26 +1,16 @@
 module Main exposing (main)
 
--- ELM-LANG MODULES --
-
-import Html exposing (..)
-import Json.Decode as Decode exposing (Value, Decoder)
-import Json.Encode as Encode
-import Navigation exposing (Location)
-import Task
-
-
--- THIRD PARTY MODULES --
-
-import Autocomplete
-
-
--- APPLICATION MODULES --
-
+import Browser exposing (..)
+import Browser.Navigation as Nav
 import Data.AuthToken as AuthToken exposing (AuthToken(..))
 import Data.Recipe exposing (Slug)
 import Data.Session exposing (Session)
-import Data.User as User exposing (User, UserId(..), Name(..))
-import Page.Errored as Errored exposing (PageLoadError)
+import Data.User as User exposing (Name(..), User, UserId(..))
+import Html exposing (..)
+import Json.Decode as Decode exposing (Decoder, Value)
+import Json.Encode as Encode
+import Menu
+import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
 import Page.Login as Login
 import Page.NotFound as NotFound
 import Page.Randomizer as Randomizer
@@ -30,7 +20,10 @@ import Page.Recipes as Recipes
 import Page.Signup as Signup
 import Ports
 import Route exposing (Route, routeToTitle)
-import Views.Page as Page exposing (ActivePage)
+import Task
+import Url
+import Verbiages exposing (errors, titles)
+import Views.Page as Page exposing (ActivePage(..))
 
 
 type Page
@@ -58,6 +51,8 @@ type alias Model =
     { session : Session
     , pageState : PageState
     , apiUrl : String
+    , navKey : Nav.Key
+    , url : Url.Url
     }
 
 
@@ -90,7 +85,7 @@ decodeUserId =
         |> Decode.map User.UserId
 
 
-flagsDecoder : String -> Result String User
+flagsDecoder : String -> Result Decode.Error User
 flagsDecoder =
     Decode.decodeString
         (Decode.field "session"
@@ -105,16 +100,16 @@ flagsDecoder =
 
 apiUrlDecoder :
     String
-    -> Result String String -- Success string is apiUrl
+    -> Result Decode.Error String -- Success string is apiUrl
 apiUrlDecoder =
     Decode.decodeString (Decode.field "api_url" Decode.string)
 
 
-init : Value -> Location -> ( Model, Cmd Msg )
-init val location =
+init : Value -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init val url navKey =
     let
         resultStringFlags =
-            (Decode.decodeValue Decode.string val)
+            Decode.decodeValue Decode.string val
 
         stringifiedFlags =
             case resultStringFlags of
@@ -125,26 +120,42 @@ init val location =
                     """{"bad": "deal dewd"}"""
 
         apiUrl =
-            case (apiUrlDecoder stringifiedFlags) of
-                Ok url ->
-                    url
+            case apiUrlDecoder stringifiedFlags of
+                Ok decodedApiUrl ->
+                    decodedApiUrl
 
                 _ ->
-                    "choiceats.com"
+                    "http://localhost:4000"
 
         session =
-            case (flagsDecoder stringifiedFlags) of
+            case flagsDecoder stringifiedFlags of
                 Ok flags ->
                     { user = Just flags }
 
                 _ ->
                     { user = Nothing }
+
+        urlRoute =
+            Route.fromUrl url
+
+        effectiveRoute =
+            if urlRoute == Nothing then
+                if session.user == Nothing then
+                    Just Route.Login
+
+                else
+                    Just Route.Root
+
+            else
+                urlRoute
     in
-        setRoute (Route.fromLocation location)
-            { pageState = Loaded initialPage
-            , session = session
-            , apiUrl = apiUrl
-            }
+    setRoute effectiveRoute
+        { pageState = Loaded initialPage
+        , session = session
+        , apiUrl = apiUrl
+        , url = url
+        , navKey = navKey
+        }
 
 
 initialPage : Page
@@ -156,7 +167,7 @@ initialPage =
 -- VIEW --
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
     case model.pageState of
         Loaded page ->
@@ -166,69 +177,80 @@ view model =
             viewPage model.session True page
 
 
-viewPage : Session -> Bool -> Page -> Html Msg
+
+-- TODO: Do all title setting in this function as data is available rather than on route changes
+
+
+viewPage : Session -> Bool -> Page -> Browser.Document Msg
 viewPage session isLoading page =
     let
         frame =
             Page.frame isLoading session.user
     in
-        case page of
-            NotFound ->
-                NotFound.view session
-                    |> frame Page.Other
+    case page of
+        NotFound ->
+            frame Page.Other titles.notFound (NotFound.view session)
 
-            Blank ->
-                -- for initial page load, while loading data via HTTP
-                Html.text ""
-                    |> frame Page.Other
+        Blank ->
+            -- for initial page load, while loading data via HTTP
+            frame Page.Other titles.loading (Html.text "")
 
-            Errored subModel ->
-                Errored.view session subModel
-                    |> frame Page.Other
+        Errored subModel ->
+            frame Page.Other titles.error (Errored.view session subModel)
 
-            Login subModel ->
-                Login.view session subModel
-                    |> frame Page.Login
-                    |> Html.map LoginMsg
+        Login subModel ->
+            frame Page.Login titles.signIn (Html.map LoginMsg (Login.view session subModel))
 
-            Signup subModel ->
-                Signup.view session subModel
-                    |> frame Page.Signup
-                    |> Html.map SignupMsg
+        Signup subModel ->
+            frame Page.Signup titles.signUp (Html.map SignupMsg (Signup.view session subModel))
 
-            Randomizer subModel ->
-                Randomizer.view session subModel
-                    |> frame Page.Randomizer
-                    |> Html.map RandomizerMsg
+        Randomizer subModel ->
+            frame Page.Randomizer titles.ideas (Html.map RandomizerMsg (Randomizer.view session subModel))
 
-            Recipes subModel ->
-                Recipes.view session subModel
-                    |> frame Page.Recipes
-                    |> Html.map RecipesMsg
+        Recipes subModel ->
+            let
+                mappedHtml =
+                    Html.map RecipesMsg (Recipes.view session subModel)
+            in
+            frame Page.Recipes titles.recipes mappedHtml
 
-            RecipeDetail subModel ->
-                RecipeDetail.view session subModel
-                    |> frame Page.Other
-                    |> Html.map RecipeDetailMsg
+        RecipeDetail subModel ->
+            let
+                mappedHtml =
+                    Html.map RecipeDetailMsg (RecipeDetail.view session subModel)
 
-            RecipeEditor maybeSlug subModel ->
-                let
-                    framePage =
-                        if maybeSlug == Nothing then
-                            Page.NewRecipe
-                        else
-                            Page.Other
-                in
-                    RecipeEditor.view subModel
-                        |> frame framePage
-                        |> Html.map RecipeEditorMsg
+                title =
+                    RecipeDetail.getRecipeTitle subModel
+            in
+            frame Page.Other title mappedHtml
+
+        RecipeEditor maybeSlug subModel ->
+            let
+                activePage =
+                    if maybeSlug == Nothing then
+                        Page.NewRecipe
+
+                    else
+                        Page.Other
+
+                title =
+                    if maybeSlug == Nothing then
+                        titles.addRecipe
+
+                    else
+                        titles.editRecipe
+
+                mappedHtml =
+                    Html.map RecipeEditorMsg (RecipeEditor.view subModel)
+            in
+            frame activePage title mappedHtml
 
 
 subscriptions : a -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map SetUser sessionChange
-        , Sub.map RecipeEditorMsg (Sub.map RecipeEditor.SetAutocompleteState Autocomplete.subscription)
+        , Sub.map RecipeEditorMsg (Sub.map RecipeEditor.SetAutocompleteState Menu.subscription)
         ]
 
 
@@ -253,6 +275,7 @@ getPage pageState =
 
 type Msg
     = SetRoute (Maybe Route)
+    | InterceptUrlRequest Browser.UrlRequest
     | SetUser (Maybe User)
     | LoginMsg Login.Msg
     | SignupMsg Signup.Msg
@@ -270,92 +293,89 @@ setRoute maybeRoute model =
     let
         transition toMsg task =
             ( { model | pageState = TransitioningFrom (getPage model.pageState) }
-            , (Task.attempt toMsg task)
+            , Task.attempt toMsg task
             )
 
         errored =
             pageErrored model
     in
-        case maybeRoute of
-            Nothing ->
-                ( { model | pageState = Loaded NotFound }, Cmd.none )
+    case maybeRoute of
+        Nothing ->
+            ( { model | pageState = Loaded NotFound }, Cmd.none )
 
-            Just Route.NewRecipe ->
-                case model.session.user of
-                    Just user ->
-                        transition NewRecipeLoaded (RecipeEditor.initNew model.session model.apiUrl)
+        Just Route.NewRecipe ->
+            case model.session.user of
+                Just user ->
+                    transition NewRecipeLoaded (RecipeEditor.initNew model.session model.apiUrl)
 
-                    Nothing ->
-                        errored Page.NewRecipe "You must be signed in to add a recipe."
+                Nothing ->
+                    errored Page.NewRecipe errors.signInAdd
 
-            Just (Route.EditRecipe slug) ->
-                case model.session.user of
-                    Just user ->
-                        transition (EditRecipeLoaded slug) (RecipeEditor.initEdit model.session slug model.apiUrl)
+        Just (Route.EditRecipe slug) ->
+            case model.session.user of
+                Just user ->
+                    transition (EditRecipeLoaded slug) (RecipeEditor.initEdit model.session slug model.apiUrl)
 
-                    Nothing ->
-                        errored Page.Other "You must be signed in to edit a recipe."
+                Nothing ->
+                    errored Page.Other errors.signInEdit
 
-            Just Route.Root ->
-                case model.session.user of
-                    Just user ->
-                        ( model, Route.modifyUrl Route.Recipes )
+        Just Route.Root ->
+            let
+                rootRoute =
+                    if model.session.user == Nothing then
+                        Route.Login
 
-                    Nothing ->
-                        ( model, Route.modifyUrl Route.Login )
+                    else
+                        Route.Recipes
+            in
+            ( model, Route.replaceUrl model.navKey rootRoute )
 
-            Just Route.Login ->
-                ( { model | pageState = Loaded (Login (Login.init model.apiUrl)) }
-                , Ports.setDocumentTitle (routeToTitle Route.Login)
-                )
+        Just Route.Login ->
+            ( { model | pageState = Loaded (Login (Login.init model.apiUrl model.navKey)) }
+            , Cmd.none
+            )
 
-            Just Route.Logout ->
-                let
-                    session =
-                        model.session
-                in
-                    ( { model | session = { session | user = Nothing } }
-                    , Cmd.batch
-                        [ Ports.storeSession Nothing
-                        , Route.modifyUrl Route.Login
-                        ]
-                    )
+        Just Route.Logout ->
+            let
+                session =
+                    model.session
+            in
+            ( { model | session = { session | user = Nothing } }
+            , Cmd.batch
+                [ Ports.storeSession Nothing
+                , Route.replaceUrl model.navKey Route.Login
+                ]
+            )
 
-            Just Route.Signup ->
-                ( { model | pageState = Loaded (Signup (Signup.initModel model.apiUrl)) }
-                , Ports.setDocumentTitle (routeToTitle Route.Signup)
-                )
+        Just Route.Signup ->
+            ( { model | pageState = Loaded (Signup (Signup.initModel model.apiUrl model.navKey)) }
+            , Cmd.none
+            )
 
-            Just Route.Randomizer ->
-                let
-                    ( newModel, newMsg ) =
-                        (Randomizer.init model.session model.apiUrl)
-                in
-                    ( { model | pageState = Loaded (Randomizer newModel) }
-                    , Cmd.batch
-                        [ Ports.setDocumentTitle (routeToTitle Route.Randomizer)
-                        , Cmd.map RandomizerMsg newMsg
-                        ]
-                    )
+        Just Route.Randomizer ->
+            let
+                ( newModel, newMsg ) =
+                    Randomizer.init model.session model.apiUrl
+            in
+            ( { model | pageState = Loaded (Randomizer newModel) }
+            , Cmd.map RandomizerMsg newMsg
+            )
 
-            Just Route.Recipes ->
-                let
-                    ( newModel, newMsg ) =
-                        (Recipes.init model.session model.apiUrl)
-                in
-                    ( { model | pageState = Loaded (Recipes newModel) }
-                    , Cmd.batch
-                        [ Ports.setDocumentTitle (routeToTitle Route.Recipes)
-                        , Cmd.map RecipesMsg newMsg
-                        ]
-                    )
+        Just Route.Recipes ->
+            let
+                ( newModel, newMsg ) =
+                    Recipes.init model.session model.apiUrl
+            in
+            ( { model | pageState = Loaded (Recipes newModel) }
+            , Cmd.map RecipesMsg newMsg
+            )
 
-            Just (Route.RecipeDetail slug) ->
-                let
-                    init =
-                        (RecipeDetail.init model.session slug model.apiUrl)
-                in
-                    transition RecipeDetailLoaded init
+        Just (Route.RecipeDetail slug) ->
+            let
+                initRecipeDetail =
+                    RecipeDetail.init model.session slug model.apiUrl
+            in
+            transition RecipeDetailLoaded initRecipeDetail
 
 
 pageErrored : Model -> ActivePage -> String -> ( Model, Cmd msg )
@@ -364,7 +384,7 @@ pageErrored model activePage errorMessage =
         error =
             Errored.pageLoadError activePage errorMessage
     in
-        ( { model | pageState = Loaded (Errored error) }, Cmd.none )
+    ( { model | pageState = Loaded (Errored error) }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -383,176 +403,230 @@ updatePage page msg model =
                 ( newModel, newCmd ) =
                     subUpdate subMsg subModel
             in
-                ( { model | pageState = Loaded (toModel newModel) }, Cmd.map toMsg newCmd )
+            ( { model | pageState = Loaded (toModel newModel) }, Cmd.map toMsg newCmd )
 
         errored =
             pageErrored model
     in
-        case ( msg, page ) of
-            ( SetRoute route, _ ) ->
-                setRoute route model
+    case ( msg, page ) of
+        ( SetRoute route, _ ) ->
+            setRoute route model
 
-            ( EditRecipeLoaded slug (Ok subModel), _ ) ->
-                ( { model | pageState = Loaded (RecipeEditor (Just slug) subModel) }
-                , Ports.setDocumentTitle (routeToTitle (Route.EditRecipe slug))
-                )
+        ( InterceptUrlRequest urlRequest, _ ) ->
+            case urlRequest of
+                Internal url ->
+                    case Route.fromUrl url of
+                        Just route ->
+                            case model.session.user of
+                                Nothing ->
+                                    if Route.needsAuth route then
+                                        ( model, Nav.replaceUrl model.navKey (Route.routeToString Route.Login) )
 
-            ( EditRecipeLoaded slug (Err error), _ ) ->
-                ( { model | pageState = Loaded (Errored error) }
-                , Ports.setDocumentTitle (routeToTitle (Route.EditRecipe slug) ++ " Error")
-                )
+                                    else
+                                        ( model, Nav.pushUrl model.navKey (Url.toString url) )
 
-            ( NewRecipeLoaded (Ok subModel), _ ) ->
-                ( { model | pageState = Loaded (RecipeEditor Nothing subModel) }
-                , Ports.setDocumentTitle (routeToTitle (Route.NewRecipe))
-                )
+                                -- So far, the only special auth route is edit recipe
+                                -- but until the data is loaded it isn't known for sure
+                                -- whether the user owns that recipe, so handle it in EditRecipeLoaded
+                                Just user ->
+                                    ( model, Nav.pushUrl model.navKey (Url.toString url) )
 
-            ( NewRecipeLoaded (Err error), _ ) ->
-                ( { model | pageState = Loaded (Errored error) }
-                , Ports.setDocumentTitle (routeToTitle (Route.NewRecipe) ++ " Error")
-                )
+                        Nothing ->
+                            ( model, Cmd.none )
 
-            ( SetUser user, _ ) ->
-                let
-                    cmd =
-                        -- If just signed out, then redirect to Login
-                        if session.user /= Nothing && user == Nothing then
-                            Route.modifyUrl Route.Login
-                        else
-                            Cmd.none
-                in
-                    ( { model | session = { session | user = user } }, cmd )
+                External externalLink ->
+                    ( model, Nav.load externalLink )
 
-            ( LoginMsg subMsg, Login subModel ) ->
-                let
-                    ( ( pageModel, cmd ), msgFromPage ) =
-                        Login.update subMsg subModel
+        ( EditRecipeLoaded slug res, _ ) ->
+            let
+                thingLoaded =
+                    case res of
+                        Ok subModel ->
+                            case model.session.user of
+                                Nothing ->
+                                    Errored (pageLoadError Page.Other errors.signInEdit)
 
-                    newModel =
-                        case msgFromPage of
-                            Login.NoOp ->
-                                model
+                                Just user ->
+                                    let
+                                        userId =
+                                            case user.userId of
+                                                UserId id ->
+                                                    id
 
-                            Login.SetUser user ->
-                                { model | session = { user = Just user } }
-                in
-                    ( { newModel | pageState = Loaded (Login pageModel) }, Cmd.map LoginMsg cmd )
+                                        recipeOwnerId =
+                                            subModel.editingRecipe.authorId
+                                    in
+                                    if userId == recipeOwnerId then
+                                        RecipeEditor (Just slug) subModel
 
-            ( SignupMsg subMsg, Signup subModel ) ->
-                let
-                    ( ( pageModel, cmd ), msgFromPage ) =
-                        Signup.update subMsg subModel
+                                    else
+                                        Errored (pageLoadError Page.Other errors.signInEdit)
 
-                    newModel =
-                        case msgFromPage of
-                            Signup.NoOp ->
-                                model
+                        Err error ->
+                            Errored error
+            in
+            ( { model | pageState = Loaded thingLoaded }, Cmd.none )
 
-                            Signup.SetUser user ->
-                                { model | session = { user = Just user } }
-                in
-                    ( { newModel | pageState = Loaded (Signup pageModel) }, Cmd.map SignupMsg cmd )
+        ( NewRecipeLoaded res, _ ) ->
+            let
+                thingLoaded =
+                    case res of
+                        Ok subModel ->
+                            RecipeEditor Nothing subModel
 
-            ( RandomizerMsg subMsg, Randomizer subModel ) ->
-                let
-                    ( ( pageModel, cmd ), msgFromPage ) =
-                        Randomizer.update subMsg subModel
+                        Err error ->
+                            Errored error
+            in
+            ( { model | pageState = Loaded thingLoaded }, Cmd.none )
 
-                    newModel =
-                        case msgFromPage of
-                            Randomizer.NoOp ->
-                                model
-                in
-                    ( { newModel | pageState = Loaded (Randomizer pageModel) }, Cmd.map RandomizerMsg cmd )
+        ( SetUser user, _ ) ->
+            let
+                cmd =
+                    -- If just signed out, then redirect to Login
+                    if session.user /= Nothing && user == Nothing then
+                        Route.replaceUrl model.navKey Route.Login
 
-            ( RecipesMsg subMsg, Recipes subModel ) ->
-                let
-                    ( ( pageModel, cmd ), msgFromPage ) =
-                        Recipes.update subMsg subModel
+                    else
+                        Cmd.none
+            in
+            ( { model | session = { session | user = user } }, cmd )
 
-                    newModel =
-                        case msgFromPage of
-                            Recipes.NoOp ->
-                                model
-                in
-                    ( { newModel | pageState = Loaded (Recipes pageModel) }, Cmd.map RecipesMsg cmd )
+        ( LoginMsg subMsg, Login subModel ) ->
+            let
+                ( ( pageModel, cmd ), msgFromPage ) =
+                    Login.update subMsg subModel model.navKey
 
-            ( RecipeDetailMsg subMsg, RecipeDetail subModel ) ->
-                case subMsg of
-                    RecipeDetail.ReceiveDeleteRecipe res ->
-                        ( model, Route.modifyUrl Route.Recipes )
+                newModel =
+                    case msgFromPage of
+                        Login.NoOp ->
+                            model
 
-                    _ ->
-                        let
-                            ( ( pageModel, cmd ), msgFromPage ) =
-                                RecipeDetail.update subMsg subModel
+                        Login.SetUser user ->
+                            { model | session = { user = Just user } }
+            in
+            ( { newModel | pageState = Loaded (Login pageModel) }, Cmd.map LoginMsg cmd )
 
-                            newModel =
-                                case msgFromPage of
-                                    RecipeDetail.NoOp ->
-                                        model
-                        in
-                            ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
+        ( SignupMsg subMsg, Signup subModel ) ->
+            let
+                ( ( pageModel, cmd ), msgFromPage ) =
+                    Signup.update subMsg subModel
 
-            ( RecipeDetailLoaded (Ok subModel), _ ) ->
-                let
-                    title =
-                        case subModel.mRecipe of
-                            Ok r ->
-                                r.name
+                newModel =
+                    case msgFromPage of
+                        Signup.NoOp ->
+                            model
 
-                            Err trumm ->
-                                routeToTitle (Route.RecipeDetail (Data.Recipe.Slug ""))
-                in
-                    ( { model | pageState = Loaded (RecipeDetail subModel) }
-                    , Ports.setDocumentTitle title
-                    )
+                        Signup.SetUser user ->
+                            { model | session = { user = Just user } }
+            in
+            ( { newModel | pageState = Loaded (Signup pageModel) }, Cmd.map SignupMsg cmd )
 
-            ( RecipeDetailLoaded (Err error), _ ) ->
-                ( { model | pageState = Loaded (Errored error) }
-                , Ports.setDocumentTitle (routeToTitle (Route.RecipeDetail (Data.Recipe.Slug "")) ++ " Error")
-                )
+        ( RandomizerMsg subMsg, Randomizer subModel ) ->
+            let
+                ( ( pageModel, cmd ), msgFromPage ) =
+                    Randomizer.update subMsg subModel
 
-            ( RecipeEditorMsg subMsg, RecipeEditor slug subModel ) ->
-                case model.session.user of
-                    Nothing ->
-                        if slug == Nothing then
-                            errored Page.NewRecipe
-                                "You must be signed in to add recipes."
-                        else
-                            errored Page.Other
-                                "You must be signed in to edit recipes."
+                newModel =
+                    case msgFromPage of
+                        Randomizer.NoOp ->
+                            model
+            in
+            ( { newModel | pageState = Loaded (Randomizer pageModel) }, Cmd.map RandomizerMsg cmd )
 
-                    Just user ->
-                        case subMsg of
-                            RecipeEditor.RecipeSubmitted recipeSubmitResult ->
-                                case recipeSubmitResult of
-                                    Ok recipe ->
-                                        ( model, Route.modifyUrl (Route.RecipeDetail (Data.Recipe.Slug recipe.id)) )
+        ( RecipesMsg subMsg, Recipes subModel ) ->
+            let
+                ( ( pageModel, cmd ), msgFromPage ) =
+                    Recipes.update subMsg subModel
 
-                                    _ ->
-                                        toPage (RecipeEditor slug) RecipeEditorMsg RecipeEditor.update subMsg subModel
+                newModel =
+                    case msgFromPage of
+                        Recipes.NoOp ->
+                            model
+            in
+            ( { newModel | pageState = Loaded (Recipes pageModel) }, Cmd.map RecipesMsg cmd )
 
-                            _ ->
-                                toPage (RecipeEditor slug) RecipeEditorMsg RecipeEditor.update subMsg subModel
+        ( RecipeDetailMsg subMsg, RecipeDetail subModel ) ->
+            case subMsg of
+                RecipeDetail.ReceiveDeleteRecipe res ->
+                    ( model, Route.replaceUrl model.navKey Route.Recipes )
 
-            ( _, NotFound ) ->
-                -- Disregard incoming messages when on the NotFound page.
-                ( model, Cmd.none )
+                _ ->
+                    let
+                        ( ( pageModel, cmd ), msgFromPage ) =
+                            RecipeDetail.update subMsg subModel
 
-            ( _, _ ) ->
-                ( model, Cmd.none )
+                        newModel =
+                            case msgFromPage of
+                                RecipeDetail.NoOp ->
+                                    model
+                    in
+                    ( { newModel | pageState = Loaded (RecipeDetail pageModel) }, Cmd.map RecipeDetailMsg cmd )
+
+        ( RecipeDetailLoaded result, _ ) ->
+            let
+                thingLoaded =
+                    case result of
+                        Ok subModel ->
+                            RecipeDetail subModel
+
+                        Err error ->
+                            Errored error
+            in
+            ( { model | pageState = Loaded thingLoaded }, Cmd.none )
+
+        ( RecipeEditorMsg subMsg, RecipeEditor slug subModel ) ->
+            case model.session.user of
+                Nothing ->
+                    if slug == Nothing then
+                        errored Page.NewRecipe
+                            errors.signInAdd
+
+                    else
+                        errored Page.Other
+                            errors.signInEdit
+
+                Just _ ->
+                    case subMsg of
+                        RecipeEditor.RecipeSubmitted recipeSubmitResult ->
+                            case recipeSubmitResult of
+                                Ok recipe ->
+                                    ( model, Route.replaceUrl model.navKey (Route.RecipeDetail (Data.Recipe.Slug recipe.id)) )
+
+                                _ ->
+                                    toPage (RecipeEditor slug) RecipeEditorMsg RecipeEditor.update subMsg subModel
+
+                        _ ->
+                            toPage (RecipeEditor slug) RecipeEditorMsg RecipeEditor.update subMsg subModel
+
+        ( _, NotFound ) ->
+            -- Disregard incoming messages when on the NotFound page.
+            ( model, Cmd.none )
+
+        ( _, _ ) ->
+            ( model, Cmd.none )
 
 
 
 -- MAIN --
 
 
+onUrlChange : Url.Url -> Msg
+onUrlChange url =
+    SetRoute (Route.fromUrl url)
+
+
+onUrlRequest : Browser.UrlRequest -> Msg
+onUrlRequest route =
+    InterceptUrlRequest route
+
+
 main : Program Value Model Msg
 main =
-    Navigation.programWithFlags (Route.fromLocation >> SetRoute)
+    Browser.application
         { init = init
         , view = view
         , update = update
+        , onUrlRequest = onUrlRequest
+        , onUrlChange = onUrlChange
         , subscriptions = subscriptions
         }

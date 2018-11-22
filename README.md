@@ -1,19 +1,25 @@
-ChoicEats
-===============
+#ChoicEats
+App for adding and sharing recipes.
 
-This app is in transition from React to Elm. Both rely on the same backend. to start the backend, clone the backend project from [github](https://github.com/choiceats/choiceats-server). Then run `cd CHOICEATS_SERVER_DIRECTORY && yarn build && yarn start`.
+## Getting Started
+`yarn` installs all dependencies. Elm installs Elm dependencies on its own.
 
-To start the React version of the client, run `yarn start`
+`./build.sh` creates a production bundle.
 
-To start the Elm version of the client, navigate to the project root and run
-```
-elm-live --output=public/elm.js src/Main.elm --dir=public/ --before-build=clear --pushstate --open --debug
-```
+`./watcher.sh` runs dev mode (use `server.sh` to serve output files).
 
-Note that you will need `elm` and `elm-live` installed. They can be installed by running
-```
-npm install -g elm elm-live
-```
+`./server.sh` serves static files for both production and development bundles.
+
+`./tests.sh` runs unit tests.
+
+`./reactor.sh` allows type debugging by file.
+Browser requests install dependencies (when needed) and (re)compile code.
+Any type errors will show after about one second.
+Navigating to `localhost:8000/src/Main.elm` type checks the whole project.
+`localhost:8000` exposes a file explorer for type checking single files.
+
+
+Run the backend by cloning [choiceats-server](https://github.com/choiceats/choiceats-server) and running `cd choiceats-server && yarn && yarn build && yarn start`.
 
 
 ## Minimum Viable Product

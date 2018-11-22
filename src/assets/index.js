@@ -1,52 +1,39 @@
-'use strict';
+"use strict"
 
-require('./index.html');
-require('./favicon.ico');
-require('./keyframes.css');
-require('./manifest.json');
-require('./reset.css');
-require('./style.scss');
-// require('./semantic.min.css');
-
-const Elm = require('../Main.elm');
-
-const sessionString = localStorage.session
-const flags = {
-    api_url: api_url, // set by webpack
-    session: sessionString ? JSON.parse(localStorage.session) : null
-}
-const app = Elm.Main.fullscreen(JSON.stringify(flags));
-
-app.ports.storeSession.subscribe(function(session) {
-    localStorage.session = session;
+var sessionString = localStorage.session
+var api_url = window.api_url || window.location.href.indexOf('localhost') > -1 ? "http://localhost:4000" : "http://choiceats.com";
+var flags = {
+  api_url: api_url,
+  session: sessionString ? JSON.parse(localStorage.session) : null
+};
+var app = Elm.Main.init({
+  node: document.getElementById("mount-point"),
+  flags: JSON.stringify(flags)
 });
 
-app.ports.setDocumentTitle.subscribe(function(title) {
-    const appName = "ChoicEats";
-
-    if (title.length > 0) {
-        document.title = appName + ' - ' + title;
-    } else {
-
-        document.title = appName;
-    }
+app.ports.storeSession.subscribe(function(session) {
+  localStorage.session = session
 });
 
 app.ports.selectText.subscribe(selector => {
-    setTimeout(() => {
-        window.selectText(selector);
-    }, 50)
+  setTimeout(() => {
+    window.selectText(selector);
+  }, 50)
 });
 
-window.selectText = function (selector) {
-    const element = document.querySelector(selector);
-    if (element) {
-            element.select();
-    }
+window.selectText = function(selector) {
+  var element = document.querySelector(selector);
+  if (element) {
+    element.select();
+  }
 };
 
-window.addEventListener("storage", function(event) {
+window.addEventListener(
+  "storage",
+  function(event) {
     if (event.storageArea === localStorage && event.key === "session") {
-        app.ports.onSessionChange.send(event.newValue);
+      app.ports.onSessionChange.send(event.newValue)
     }
-}, false);
+  },
+  false
+);
